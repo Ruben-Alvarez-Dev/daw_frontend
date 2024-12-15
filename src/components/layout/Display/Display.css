@@ -1,0 +1,8 @@
+/* src/components/layout/Display/Display.css */
+.display {
+    background-color: rgba(255, 255, 255, 0.2);
+    border: 1px solid antiquewhite;
+    color: antiquewhite;
+    padding: 1rem;
+    flex: 5;
+}

@@ -1,14 +1,19 @@
+// src/App.jsx
 import './App.css'
+import Navbar from './components/layout/Navbar/Navbar'
+import Aside from './components/layout/Aside/Aside'
+import Display from './components/layout/Display/Display'
+import Footer from './components/layout/Footer/Footer'
 
 function App() {
   return (
     <div className="app">
-      <nav className="navbar">Navbar</nav>
+      <Navbar />
       <main className="main">
-        <aside className="aside">Aside</aside>
-        <section className="display">Display</section>
+        <Aside />
+        <Display />
       </main>
-      <footer className="footer">Footer</footer>
+      <Footer />
     </div>
   )
 }
