@@ -54,6 +54,7 @@ const SessionManager = ({ children }) => {
             inactivityTimer = setTimeout(() => {
                 setIsInactive(true)
                 setShowModal(true)
+                setTimeLeft(MODAL_COUNTDOWN) // Añadido para consistencia
             }, INACTIVITY_TIME)
         }
 
@@ -85,6 +86,9 @@ const SessionManager = ({ children }) => {
                     return prev - 1
                 })
             }, 1000)
+        } else {
+            // Reset timeLeft cuando el modal se cierra
+            setTimeLeft(MODAL_COUNTDOWN)
         }
 
         return () => {

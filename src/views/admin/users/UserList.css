@@ -1,0 +1,64 @@
+.user-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.user-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: var(--background-light);
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.user-info {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.user-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.user-email {
+  color: var(--text-secondary);
+}
+
+.user-role {
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.role-admin {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.role-supervisor {
+  background-color: var(--color-secondary-light);
+  color: var(--color-secondary);
+}
+
+.role-customer {
+  background-color: var(--color-success-light);
+  color: var(--color-success);
+}
+
+.user-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.error-message {
+  color: var(--color-danger);
+  text-align: center;
+  padding: 1rem;
+}

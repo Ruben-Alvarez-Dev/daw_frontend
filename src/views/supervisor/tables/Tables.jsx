@@ -1,9 +1,12 @@
+import TableList from './TableList'
+import TableForm from './TableForm'
+
 const Tables = () => {
   return (
-    <div className="view">
-      <h2>Supervisor Tables</h2>
-      <p>Role: Supervisor</p>
-    </div>
+    <>
+      <TableList />
+      <TableForm />
+    </>
   )
 }
 

@@ -1,0 +1,73 @@
+.restaurant-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.restaurant-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: var(--background-light);
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.restaurant-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.restaurant-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 1.1rem;
+}
+
+.restaurant-type {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.restaurant-location {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+.restaurant-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.restaurant-status[data-status="active"] {
+  background-color: var(--color-success-light);
+  color: var(--color-success);
+}
+
+.restaurant-status[data-status="inactive"] {
+  background-color: var(--color-danger-light);
+  color: var(--color-danger);
+}
+
+.restaurant-status[data-status="pending"] {
+  background-color: var(--color-warning-light);
+  color: var(--color-warning);
+}
+
+.restaurant-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.error-message {
+  color: var(--color-danger);
+  text-align: center;
+  padding: 1rem;
+}

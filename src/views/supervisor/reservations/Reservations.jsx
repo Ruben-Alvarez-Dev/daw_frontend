@@ -1,9 +1,12 @@
+import ReservationList from './ReservationList'
+import ReservationForm from './ReservationForm'
+
 const Reservations = () => {
   return (
-    <div className="view">
-      <h2>Supervisor Reservations</h2>
-      <p>Role: Supervisor</p>
-    </div>
+    <>
+      <ReservationList />
+      <ReservationForm />
+    </>
   )
 }
 

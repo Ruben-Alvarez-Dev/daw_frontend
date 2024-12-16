@@ -1,9 +1,12 @@
+import UserList from './UserList'
+import UserForm from './UserForm'
+
 const Users = () => {
   return (
-    <div className="view">
-      <h2>Supervisor Users</h2>
-      <p>Role: Supervisor</p>
-    </div>
+    <>
+      <UserList />
+      <UserForm />
+    </>
   )
 }
 
