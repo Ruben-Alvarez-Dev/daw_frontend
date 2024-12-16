@@ -4,4 +4,7 @@
     border: 1px solid antiquewhite;
     color: antiquewhite;
     padding: 1rem;
+    display: flex;
+    justify-content: end;
+    gap: 1rem;
 }
