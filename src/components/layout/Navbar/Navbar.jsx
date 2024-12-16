@@ -5,10 +5,12 @@ import Label from '../../ui/Label/Label'
 import { FiInfo, FiUser } from 'react-icons/fi'
 import { useAuth } from '../../../context/AuthContext/AuthContext'
 import Login from '../../auth/Login/Login'
+import Register from '../../auth/Register/Register'
 
 const Navbar = () => {
     const { isAuthenticated, logout, user } = useAuth()
     const [showLogin, setShowLogin] = useState(false)
+    const [showRegister, setShowRegister] = useState(false)
 
     console.log('Auth State:', { isAuthenticated, user }) // Para depuración
 
@@ -49,7 +51,7 @@ const Navbar = () => {
                 <Button 
                   title="Register" 
                   variant="success" 
-                  onClick={() => console.log('register')} 
+                  onClick={() => setShowRegister(true)} 
                 />
               </>
             )}
@@ -57,6 +59,7 @@ const Navbar = () => {
         </nav>
 
         {showLogin && <Login onClose={() => setShowLogin(false)} />}
+        {showRegister && <Register onClose={() => setShowRegister(false)} />}
       </>
     )
 }
