@@ -24,12 +24,12 @@ const Navbar = () => {
           />
           <Button 
             title="Register" 
-            variant="secondary" 
+            variant="success" 
             onClick={() => console.log('register')} 
           />
           <Button 
             title="Logout" 
-            variant="delete" 
+            variant="danger" 
             onClick={() => console.log('logout')} 
           />
         </div>

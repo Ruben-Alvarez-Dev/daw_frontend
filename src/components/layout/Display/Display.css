@@ -5,4 +5,9 @@
     color: antiquewhite;
     padding: 1rem;
     flex: 5;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 1rem;
+    
 }

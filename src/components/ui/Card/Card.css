@@ -1,0 +1,32 @@
+.card {
+  max-width: 50%;
+  height: calc(100% - 2rem);
+  background-color: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(250, 235, 215, 0.2);
+  border-radius: 0.5rem;
+  box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s ease;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  flex:1;
+}
+
+.card:hover {
+  border: 1px solid rgba(250, 235, 215, 0.5);
+}
+
+.card-header {
+  padding: 1rem;
+  border-bottom: 1px solid rgba(250, 235, 215, 0.5);
+}
+
+.card-body {
+  padding: 1rem;
+  flex: 1;
+}
+
+.card-footer {
+  padding: 1rem;
+  border-top: 1px solid rgba(250, 235, 215, 0.5);
+}
