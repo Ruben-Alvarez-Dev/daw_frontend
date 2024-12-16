@@ -1,18 +1,49 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './Navbar.css'
 import Button from '../../ui/Button/Button'
 import Label from '../../ui/Label/Label'
-import { FiInfo, FiUser } from 'react-icons/fi'
+import { FiInfo, FiUser, FiClock } from 'react-icons/fi'
 import { useAuth } from '../../../context/AuthContext/AuthContext'
 import Login from '../../auth/Login/Login'
 import Register from '../../auth/Register/Register'
 
 const Navbar = () => {
-    const { isAuthenticated, logout, user } = useAuth()
+    const { isAuthenticated, logout, user, token } = useAuth()
     const [showLogin, setShowLogin] = useState(false)
     const [showRegister, setShowRegister] = useState(false)
+    const [timeLeft, setTimeLeft] = useState('')
 
-    console.log('Auth State:', { isAuthenticated, user }) // Para depuración
+    useEffect(() => {
+        if (token) {
+            const updateTimeLeft = () => {
+                const tokenData = JSON.parse(atob(token.split('.')[1]))
+                const expirationTime = tokenData.exp * 1000
+                const currentTime = new Date().getTime()
+                const timeLeftMs = expirationTime - currentTime
+                
+                if (timeLeftMs <= 0) {
+                    setTimeLeft('Expirado')
+                    return false
+                } else {
+                    const minutesLeft = Math.floor(timeLeftMs / 60000)
+                    const secondsLeft = Math.floor((timeLeftMs % 60000) / 1000)
+                    setTimeLeft(`${minutesLeft}:${secondsLeft.toString().padStart(2, '0')}`)
+                    return true
+                }
+            }
+
+            // Primera actualización
+            updateTimeLeft()
+
+            // Actualizar cada segundo
+            const timer = setInterval(() => {
+                const shouldContinue = updateTimeLeft()
+                if (!shouldContinue) clearInterval(timer)
+            }, 1000)
+
+            return () => clearInterval(timer)
+        }
+    }, [token])
 
     return (
       <>
@@ -23,17 +54,26 @@ const Navbar = () => {
           <div className="navbar-menu">Navbar Menu</div>
           <div className="navbar-menu">Navbar Context</div>
           <div className="navbar-auth">
-            <Label 
-              text={isAuthenticated && user ? user.email : "Info"} 
-              variant="label-info" 
-              icon={<FiInfo />} 
-            />
-            {isAuthenticated && user && (
+            {isAuthenticated && token && timeLeft && (
               <Label 
-                text={user.role} 
-                variant="label-info" 
-                icon={<FiUser />} 
+                text={timeLeft} 
+                variant="label-warning" 
+                icon={<FiClock />} 
               />
+            )}
+            {isAuthenticated && user && (
+              <>
+                <Label 
+                  text={user.email} 
+                  variant="label-info" 
+                  icon={<FiInfo />} 
+                />
+                <Label 
+                  text={user.role} 
+                  variant="label-info" 
+                  icon={<FiUser />} 
+                />
+              </>
             )}
             {isAuthenticated ? (
               <Button 
@@ -58,8 +98,13 @@ const Navbar = () => {
           </div>
         </nav>
 
-        {showLogin && <Login onClose={() => setShowLogin(false)} />}
-        {showRegister && <Register onClose={() => setShowRegister(false)} />}
+        {showLogin && (
+          <Login onClose={() => setShowLogin(false)} />
+        )}
+        
+        {showRegister && (
+          <Register onClose={() => setShowRegister(false)} />
+        )}
       </>
     )
 }

@@ -1,10 +1,37 @@
-import { createContext, useState, useContext } from 'react'
+import { createContext, useState, useContext, useEffect } from 'react'
 
 const AuthContext = createContext(null)
 
+const getStoredAuth = () => {
+  const token = localStorage.getItem('token')
+  const user = JSON.parse(localStorage.getItem('user'))
+  return {
+    token,
+    user,
+    isAuthenticated: !!token
+  }
+}
+
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [token, setToken] = useState(getStoredAuth().token)
+  const [user, setUser] = useState(getStoredAuth().user)
+  const [isAuthenticated, setIsAuthenticated] = useState(getStoredAuth().isAuthenticated)
+
+  useEffect(() => {
+    if (token) {
+      localStorage.setItem('token', token)
+    } else {
+      localStorage.removeItem('token')
+    }
+  }, [token])
+
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user))
+    } else {
+      localStorage.removeItem('user')
+    }
+  }, [user])
 
   const register = async (userData) => {
     try {
@@ -90,6 +117,7 @@ export const AuthProvider = ({ children }) => {
         throw new Error(data.message || 'Credenciales inválidas');
       }
 
+      setToken(data.token);
       setUser(data.user);
       setIsAuthenticated(true);
       return { success: true };
@@ -102,13 +130,30 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    setIsAuthenticated(false);
+  const logout = async () => {
+    try {
+      if (token) {
+        await fetch('http://127.0.0.1:8000/api/logout', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+    } finally {
+      setToken(null);
+      setUser(null);
+      setIsAuthenticated(false);
+    }
   };
 
   const value = {
     user,
+    token,
     isAuthenticated,
     register,
     login,
@@ -121,7 +166,7 @@ export const AuthProvider = ({ children }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth debe ser usado dentro de un AuthProvider');
+    throw new Error('useAuth debe usarse dentro de un AuthProvider');
   }
   return context;
 };
