@@ -1,81 +1,66 @@
+import { Routes, Route } from 'react-router-dom'
 import { useAuth } from '../../../contexts/AuthContext/AuthContext'
-import Home from '../../Home/Home'
-import Card from '../../ui/Card/Card'
-import Button from '../../ui/Button/Button'
 import './Display.css'
 
-const Display = () => {
-  const { isAuthenticated } = useAuth()
+// Admin Views
+import AdminDashboard from '../../../views/admin/dashboard/Dashboard'
+import AdminReservations from '../../../views/admin/reservations/Reservations'
+import AdminRestaurants from '../../../views/admin/restaurants/Restaurants'
+import AdminTables from '../../../views/admin/tables/Tables'
+import AdminUsers from '../../../views/admin/users/Users'
+import AdminSettings from '../../../views/admin/settings/Settings'
 
-  if (!isAuthenticated) {
-    return <Home />
-  }
+// Supervisor Views
+import SupervisorDashboard from '../../../views/supervisor/dashboard/Dashboard'
+import SupervisorReservations from '../../../views/supervisor/reservations/Reservations'
+import SupervisorTables from '../../../views/supervisor/tables/Tables'
+import SupervisorUsers from '../../../views/supervisor/users/Users'
+import SupervisorSettings from '../../../views/supervisor/settings/Settings'
+
+// Customer Views
+import CustomerDashboard from '../../../views/customer/dashboard/Dashboard'
+import CustomerReservations from '../../../views/customer/reservations/Reservations'
+import CustomerSettings from '../../../views/customer/settings/Settings'
+
+const Display = () => {
+  const { user } = useAuth()
+  const role = user?.role?.toLowerCase()
 
   return (
     <div className="display">
-      <Card 
-        card-header={<h3>Resumen de Pedidos</h3>}
-        card-body={
+      <Routes>
+        {/* Admin Routes */}
+        {role === 'admin' && (
           <>
-            <h4>Pedidos Pendientes</h4>
-            <ul>
-              <li>Mesa 3: Paella Mixta (2) - En preparación</li>
-              <li>Mesa 7: Sushi Variado (1) - Pendiente</li>
-              <li>Mesa 12: Pasta Carbonara (3) - En preparación</li>
-            </ul>
-            <p>Tiempo medio de espera: 15 minutos</p>
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/reservations" element={<AdminReservations />} />
+            <Route path="/admin/restaurants" element={<AdminRestaurants />} />
+            <Route path="/admin/tables" element={<AdminTables />} />
+            <Route path="/admin/users" element={<AdminUsers />} />
+            <Route path="/admin/settings" element={<AdminSettings />} />
           </>
-        }
-        card-footer={
-          <>
-            <span>Actualizado hace 5 min</span>
-            <Button title="Actualizar" variant="secondary" />
-          </>
-        }
-      />
+        )}
 
-      <Card 
-        card-header={<h3>Estado de Mesas</h3>}
-        card-body={
+        {/* Supervisor Routes */}
+        {role === 'supervisor' && (
           <>
-            <div className="stats">
-              <p>Mesas Ocupadas: 8/15</p>
-              <p>Reservas Pendientes: 3</p>
-              <p>Tiempo medio de ocupación: 45 min</p>
-            </div>
-            <div className="alerts">
-              <p>⚠️ Mesa 5: Más de 1 hora sin pedir</p>
-              <p>🔔 Mesa 9: Solicita la cuenta</p>
-            </div>
+            <Route path="/supervisor/dashboard" element={<SupervisorDashboard />} />
+            <Route path="/supervisor/reservations" element={<SupervisorReservations />} />
+            <Route path="/supervisor/tables" element={<SupervisorTables />} />
+            <Route path="/supervisor/users" element={<SupervisorUsers />} />
+            <Route path="/supervisor/settings" element={<SupervisorSettings />} />
           </>
-        }
-        card-footer={
+        )}
+
+        {/* Customer Routes */}
+        {role === 'customer' && (
           <>
-            <Button title="Ver Detalles" variant="secondary" />
-            <Button title="Gestionar Reservas" variant="primary" />
+            <Route path="/customer/dashboard" element={<CustomerDashboard />} />
+            <Route path="/customer/reservations" element={<CustomerReservations />} />
+            <Route path="/customer/settings" element={<CustomerSettings />} />
           </>
-        }
-      />
-      <Card 
-        card-header={<h3>Resumen de Pedidos</h3>}
-        card-body={
-          <>
-            <h4>Pedidos Pendientes</h4>
-            <ul>
-              <li>Mesa 3: Paella Mixta (2) - En preparación</li>
-              <li>Mesa 7: Sushi Variado (1) - Pendiente</li>
-              <li>Mesa 12: Pasta Carbonara (3) - En preparación</li>
-            </ul>
-            <p>Tiempo medio de espera: 15 minutos</p>
-          </>
-        }
-        card-footer={
-          <>
-            <span>Actualizado hace 5 min</span>
-            <Button title="Actualizar" variant="secondary" />
-          </>
-        }
-      />
+        )}
+      </Routes>
     </div>
   )
 }

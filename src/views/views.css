@@ -1,0 +1,16 @@
+.view {
+  padding: 2rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  color: antiquewhite;
+}
+
+.view h2 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: antiquewhite;
+}
+
+.view p {
+  color: rgba(255, 255, 255, 0.8);
+}

@@ -1,3 +1,4 @@
+import { BrowserRouter as Router } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext/AuthContext'
 import SessionManager from './components/session/SessionManager/SessionManager'
 import { useAuth } from './contexts/AuthContext/AuthContext'
@@ -31,11 +32,13 @@ const AppContent = () => {
 
 const App = () => {
   return (
-    <AuthProvider>
-      <SessionManager>
-        <AppContent />
-      </SessionManager>
-    </AuthProvider>
+    <Router>
+      <AuthProvider>
+        <SessionManager>
+          <AppContent />
+        </SessionManager>
+      </AuthProvider>
+    </Router>
   )
 }
 
