@@ -1,13 +1,17 @@
 import { useState } from 'react'
 import './Login.css'
-import Card from '../../ui/Card/Card'
 import Button from '../../ui/Button/Button'
+import Modal from '../../ui/Modal/Modal'
+import { useAuth } from '../../../context/AuthContext/AuthContext'
 
-const Login = () => {
+
+const Login = ({ onClose }) => {
+  const { login } = useAuth()
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   })
+  const [error, setError] = useState(null)
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -15,19 +19,26 @@ const Login = () => {
       ...prev,
       [name]: value
     }))
+    setError(null)
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // Aquí irá la lógica de login cuando implementemos el backend
-    console.log('Login attempt:', formData)
+    const result = await login(formData)
+    
+    if (!result.success) {
+      setError(result.error)
+    } else {
+      onClose?.()
+    }
   }
 
   return (
-    <Card
-      card-header={<h3>Iniciar Sesión</h3>}
-      card-body={
+    <Modal
+      modal-header={<h3>Iniciar Sesión</h3>}
+      modal-body={
         <form onSubmit={handleSubmit} className="login-form">
+          {error && <div className="error-message">{error}</div>}
           <div className="form-group">
             <label htmlFor="email">Email</label>
             <input
@@ -52,22 +63,17 @@ const Login = () => {
           </div>
         </form>
       }
-      card-footer={
-        <>
-          <Button 
-            title="Iniciar Sesión" 
-            variant="primary"
-            onClick={handleSubmit}
-          />
-          <Button 
-            title="¿No tienes cuenta?" 
-            variant="secondary"
-            // Aquí irá la navegación al registro
-          />
-        </>
+      modal-footer={
+        <Button 
+          title="Iniciar Sesión" 
+          variant="primary"
+          onClick={handleSubmit}
+        />
       }
+      onClose={onClose}
     />
   )
 }
+
 
 export default Login

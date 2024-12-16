@@ -1,5 +1,6 @@
 .restaurants {
     display: grid;
+    background-color: #94a3b8;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 2rem;
     padding: 2rem;
@@ -8,7 +9,7 @@
   }
   
   .restaurants article {
-    background-color: #1a1a1a;
+    background-color: #1a1a1a8e;
     border-radius: 0.5rem;
     padding: 1rem;
   }
