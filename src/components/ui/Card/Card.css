@@ -3,10 +3,10 @@
   height: calc(100% - 2rem);
   background-color: rgba(0, 0, 0, 0.5);
   border: 1px solid rgba(250, 235, 215, 0.2);
-  border-radius: 0.5rem;
+  border-radius: 1rem;
   box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5);
   transition: all 0.3s ease;
-  padding: 1rem;
+  padding: 0.2rem 1rem;
   display: flex;
   flex-direction: column;
   flex:1;
@@ -17,8 +17,13 @@
 }
 
 .card-header {
-  padding: 1rem;
+  flex: 0.15;
+  align-items: center;
   border-bottom: 1px solid rgba(250, 235, 215, 0.5);
+}
+.card-header h2 {
+  margin: 0;
+  padding: 0;
 }
 
 .card-body {
@@ -27,6 +32,11 @@
 }
 
 .card-footer {
-  padding: 1rem;
+  flex: 0.15;
+  margin: 0;
+  padding: 0;
   border-top: 1px solid rgba(250, 235, 215, 0.5);
+  display: flex;
+  align-items: center;
+  
 }

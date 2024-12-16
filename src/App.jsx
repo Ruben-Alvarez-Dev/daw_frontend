@@ -1,4 +1,6 @@
-import { AuthProvider, useAuth } from './context/AuthContext/AuthContext'
+import { AuthProvider } from './contexts/AuthContext/AuthContext'
+import SessionManager from './components/session/SessionManager/SessionManager'
+import { useAuth } from './contexts/AuthContext/AuthContext'
 import Navbar from './components/layout/Navbar/Navbar'
 import Aside from './components/layout/Aside/Aside'
 import Display from './components/layout/Display/Display'
@@ -12,23 +14,27 @@ const AppContent = () => {
   return (
     <div className="app">
       <Navbar />
-      {isAuthenticated ? (
-        <main className="main">
-          <Aside />
-          <Display />
-        </main>
-      ) : (
-        <Home />
-      )}
+      <main className="main">
+        {isAuthenticated ? (
+          <>
+            <Aside />
+            <Display />
+          </>
+        ) : (
+          <Home />
+        )}
+      </main>
       <Footer />
     </div>
   )
 }
 
-function App() {
+const App = () => {
   return (
     <AuthProvider>
-      <AppContent />
+      <SessionManager>
+        <AppContent />
+      </SessionManager>
     </AuthProvider>
   )
 }

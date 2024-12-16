@@ -1,8 +1,16 @@
-import './Display.css'
+import { useAuth } from '../../../contexts/AuthContext/AuthContext'
+import Home from '../../Home/Home'
 import Card from '../../ui/Card/Card'
 import Button from '../../ui/Button/Button'
+import './Display.css'
 
 const Display = () => {
+  const { isAuthenticated } = useAuth()
+
+  if (!isAuthenticated) {
+    return <Home />
+  }
+
   return (
     <div className="display">
       <Card 
@@ -48,7 +56,7 @@ const Display = () => {
           </>
         }
       />
-            <Card 
+      <Card 
         card-header={<h3>Resumen de Pedidos</h3>}
         card-body={
           <>

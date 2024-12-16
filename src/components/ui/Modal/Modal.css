@@ -4,23 +4,24 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(3px);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 9999;
     padding: 1rem;
   }
   
   .modal {
-    /* background-color: var(--background-color); */
     background-color: rgb(50, 50, 50);
     border-radius: 0.5rem;
     box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
     width: 100%;
     max-width: 400px;
     min-width: 300px;
+    position: relative;
+    z-index: 10000;
     animation: modalFadeIn 0.3s ease;
     border: 1px solid rgba(250, 235, 215, 0.1);
   }
@@ -53,6 +54,7 @@
     padding: 1rem;
     max-height: 70vh;
     overflow-y: auto;
+    color: antiquewhite;
   }
   
   .modal-footer {

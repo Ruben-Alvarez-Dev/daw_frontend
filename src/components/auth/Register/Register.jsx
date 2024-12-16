@@ -2,7 +2,7 @@ import { useState } from 'react'
 import './Register.css'
 import Button from '../../ui/Button/Button'
 import Modal from '../../ui/Modal/Modal'
-import { useAuth } from '../../../context/AuthContext/AuthContext'
+import { useAuth } from '../../../contexts/AuthContext/AuthContext'
 
 const Register = ({ onClose }) => {
   const { register } = useAuth()
