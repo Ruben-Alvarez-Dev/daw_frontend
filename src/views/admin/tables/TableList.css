@@ -1,0 +1,54 @@
+.table-primary,
+.table-secondary,
+.table-tertiary {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 1rem;
+}
+
+.table-primary {
+  justify-content: flex-start;
+}
+
+.table-secondary {
+  color: var(--text-muted);
+  justify-content: space-between;
+}
+
+.table-tertiary {
+  justify-content: space-between;
+}
+
+.table-number {
+  font-weight: bold;
+  font-size: 1.1em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.table-restaurant,
+.table-capacity {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.table-status {
+  font-size: 0.875rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  background-color: var(--background-light);
+  white-space: nowrap;
+}
+
+.table-status[data-status="available"] {
+  background-color: var(--color-success-light);
+  color: var(--color-success);
+}
+
+.table-status[data-status="unavailable"] {
+  background-color: var(--color-danger-light);
+  color: var(--color-danger);
+}

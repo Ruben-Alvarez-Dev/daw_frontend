@@ -21,29 +21,67 @@
   gap: 0.5rem;
 }
 
+.restaurant-primary,
+.restaurant-secondary,
+.restaurant-tertiary {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 1rem;
+}
+
+.restaurant-primary {
+  justify-content: flex-start;
+}
+
+.restaurant-secondary {
+  color: var(--text-muted);
+  justify-content: space-between;
+}
+
+.restaurant-tertiary {
+  justify-content: space-between;
+}
+
 .restaurant-name {
-  font-weight: 600;
-  color: var(--text-primary);
-  font-size: 1.1rem;
+  font-weight: bold;
+  font-size: 1.1em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.restaurant-type {
-  color: var(--text-secondary);
-  font-size: 0.9rem;
+.restaurant-capacity,
+.restaurant-active,
+.restaurant-zones {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
+.restaurant-type,
 .restaurant-location {
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .restaurant-status {
-  padding: 0.25rem 0.75rem;
-  border-radius: 1rem;
   font-size: 0.875rem;
-  font-weight: 500;
-  text-transform: capitalize;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  background-color: var(--background-light);
+  white-space: nowrap;
+}
+
+.restaurant-status[data-status="tables available"] {
+  background-color: var(--color-success-light);
+  color: var(--color-success);
+}
+
+.restaurant-status[data-status="fully booked"] {
+  background-color: var(--color-danger-light);
+  color: var(--color-danger);
 }
 
 .restaurant-status[data-status="active"] {

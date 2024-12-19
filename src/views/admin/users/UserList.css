@@ -1,15 +1,17 @@
-.user-list {
+.users {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 1rem;
+  height: 100%;
+  width: 100%;
   padding: 1rem;
+  box-sizing: border-box;
 }
 
 .user-item {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 1rem;
+  padding: 0.5rem;
   background-color: var(--background-light);
   border-radius: 0.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -17,48 +19,102 @@
 
 .user-info {
   display: flex;
-  gap: 1rem;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.user-primary,
+.user-secondary,
+.user-tertiary {
+  display: flex;
   align-items: center;
+  width: 100%;
+}
+
+.user-primary {
+  justify-content: flex-start;
+}
+
+.user-secondary {
+  color: var(--text-muted);
+}
+
+.user-tertiary {
+  justify-content: space-between;
 }
 
 .user-name {
-  font-weight: 600;
-  color: var(--text-primary);
+  font-weight: bold;
+  font-size: 1.1em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .user-email {
-  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .user-role {
-  padding: 0.25rem 0.75rem;
-  border-radius: 1rem;
   font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.role-admin {
-  background-color: var(--color-primary-light);
-  color: var(--color-primary);
-}
-
-.role-supervisor {
-  background-color: var(--color-secondary-light);
-  color: var(--color-secondary);
-}
-
-.role-customer {
-  background-color: var(--color-success-light);
-  color: var(--color-success);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  background-color: var(--background-light);
+  white-space: nowrap;
 }
 
 .user-actions {
   display: flex;
   gap: 0.5rem;
+  justify-content: flex-end;
+  min-width: 100px;
+}
+
+.role-admin {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.role-supervisor {
+  background-color: var(--secondary-color);
+  color: white;
+}
+
+.role-customer {
+  background-color: var(--success-color);
+  color: white;
+}
+
+.loading-message,
+.error-message,
+.empty-message {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-secondary);
 }
 
 .error-message {
-  color: var(--color-danger);
-  text-align: center;
-  padding: 1rem;
+  color: var(--error-color);
+}
+
+@media (max-width: 768px) {
+  .user-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .user-name,
+  .user-email {
+    width: 100%;
+  }
+
+  .user-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
 }

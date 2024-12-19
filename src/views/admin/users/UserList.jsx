@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../../../contexts/AuthContext/AuthContext'
 import Card from '../../../components/ui/Card/Card'
 import Button from '../../../components/ui/Button/Button'
+import List from '../../../components/ui/List/List'
 import './UserList.css'
 
 const UserList = ({ onEdit }) => {
@@ -12,7 +13,7 @@ const UserList = ({ onEdit }) => {
 
   useEffect(() => {
     fetchUsers()
-  }, [token]) // Añadido token como dependencia
+  }, [token])
 
   const fetchUsers = async () => {
     try {
@@ -29,14 +30,13 @@ const UserList = ({ onEdit }) => {
       }
 
       const data = await response.json()
-      // Asegurarse de que data.data existe y es un array
       const usersArray = Array.isArray(data.data) ? data.data : []
       setUsers(usersArray)
       setError(null)
     } catch (err) {
       setError('Error al cargar la lista de usuarios')
       console.error('Error:', err)
-      setUsers([]) // Resetear a array vacío en caso de error
+      setUsers([])
     } finally {
       setLoading(false)
     }
@@ -51,51 +51,44 @@ const UserList = ({ onEdit }) => {
     fetchUsers()
   }
 
+  const renderUserItem = (user) => (
+    <>
+      <div className="user-primary">
+        <span className="user-name">{user.name}</span>
+      </div>
+      <div className="user-secondary">
+        <span className="user-email">{user.email}</span>
+      </div>
+      <div className="user-tertiary">
+        <span className={`user-role role-${user.role}`}>{user.role}</span>
+      </div>
+    </>
+  )
+
   const renderUserList = () => {
     if (loading) return <p className="loading-message">Cargando usuarios...</p>
     if (error) return <p className="error-message">{error}</p>
     if (!users || users.length === 0) return <p className="empty-message">No hay usuarios registrados</p>
 
     return (
-      <div className="user-list">
-        {users.map(user => (
-          <div key={user.id} className="user-item">
-            <div className="user-info">
-              <span className="user-name">{user.name}</span>
-              <span className="user-email">{user.email}</span>
-              <span className={`user-role role-${user.role}`}>{user.role}</span>
-            </div>
-            <div className="user-actions">
-              <Button 
-                title="Editar" 
-                variant="secondary" 
-                onClick={() => handleEdit(user)}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
+      <List
+        items={users}
+        renderItem={renderUserItem}
+        threeLines={true}
+      />
     )
   }
 
   return (
     <Card
-      card-header={<h3>Lista de Usuarios</h3>}
+      card-header={<h2>Lista de Usuarios</h2>}
       card-body={renderUserList()}
       card-footer={
-        <>
-          <Button 
-            title="Actualizar" 
-            variant="secondary" 
-            onClick={handleRefresh}
-            disabled={loading}
-          />
-          <Button 
-            title="Añadir Usuario" 
-            variant="primary" 
-            onClick={() => handleEdit(null)}
-          />
-        </>
+        <Button 
+          title="Nuevo" 
+          variant="primary" 
+          onClick={() => handleEdit(null)}
+        />
       }
     />
   )

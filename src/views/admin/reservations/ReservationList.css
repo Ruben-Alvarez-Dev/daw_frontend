@@ -1,0 +1,70 @@
+.reservation-primary,
+.reservation-secondary,
+.reservation-tertiary {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 1rem;
+}
+
+.reservation-primary {
+  justify-content: flex-start;
+}
+
+.reservation-secondary {
+  color: var(--text-muted);
+  justify-content: space-between;
+}
+
+.reservation-tertiary {
+  justify-content: space-between;
+}
+
+.reservation-restaurant {
+  font-weight: bold;
+  font-size: 1.1em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reservation-datetime,
+.reservation-tables,
+.reservation-user {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reservation-status {
+  font-size: 0.875rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  background-color: var(--background-light);
+  white-space: nowrap;
+}
+
+.reservation-status[data-status="pending"] {
+  background-color: var(--color-warning-light);
+  color: var(--color-warning);
+}
+
+.reservation-status[data-status="confirmed"] {
+  background-color: var(--color-info-light);
+  color: var(--color-info);
+}
+
+.reservation-status[data-status="seated"] {
+  background-color: var(--color-success-light);
+  color: var(--color-success);
+}
+
+.reservation-status[data-status="canceled"] {
+  background-color: var(--color-danger-light);
+  color: var(--color-danger);
+}
+
+.reservation-status[data-status="closed"] {
+  background-color: var(--color-muted-light);
+  color: var(--color-muted);
+}

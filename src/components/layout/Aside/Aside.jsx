@@ -10,17 +10,17 @@ const Aside = () => {
   const menuItems = {
     admin: [
       { to: '/admin/dashboard', icon: RiDashboardLine, text: 'Dashboard' },
-      { to: '/admin/reservations', icon: RiCalendarLine, text: 'Reservations' },
+      { to: '/admin/users', icon: RiUserLine, text: 'Users' },
       { to: '/admin/restaurants', icon: RiStore2Line, text: 'Restaurants' },
       { to: '/admin/tables', icon: RiTableLine, text: 'Tables' },
-      { to: '/admin/users', icon: RiUserLine, text: 'Users' },
+      { to: '/admin/reservations', icon: RiCalendarLine, text: 'Reservations' },
       { to: '/admin/settings', icon: RiSettings4Line, text: 'Settings' }
     ],
     supervisor: [
       { to: '/supervisor/dashboard', icon: RiDashboardLine, text: 'Dashboard' },
-      { to: '/supervisor/reservations', icon: RiCalendarLine, text: 'Reservations' },
-      { to: '/supervisor/tables', icon: RiTableLine, text: 'Tables' },
       { to: '/supervisor/users', icon: RiUserLine, text: 'Users' },
+      { to: '/supervisor/tables', icon: RiTableLine, text: 'Tables' },
+      { to: '/supervisor/reservations', icon: RiCalendarLine, text: 'Reservations' },
       { to: '/supervisor/settings', icon: RiSettings4Line, text: 'Settings' }
     ],
     customer: [
