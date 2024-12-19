@@ -1,74 +1,47 @@
-import { useState, useEffect } from 'react'
-import { useAuth } from '../../../contexts/AuthContext/AuthContext'
-import { fetchReservations } from '../../../services/api'
+import { useEffect } from 'react'
+import { useApp } from '../../../contexts/AppContext/AppContext'
 import Card from '../../../components/ui/Card/Card'
 import Button from '../../../components/ui/Button/Button'
 import List from '../../../components/ui/List/List'
 import './ReservationList.css'
 
 const ReservationList = ({ onEdit }) => {
-  const [reservations, setReservations] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const { token, refreshToken } = useAuth()
+  const { 
+    data: { reservations },
+    loading: { reservations: loading },
+    errors: { reservations: error },
+    activeItems,
+    setActiveItem,
+    loadReservations
+  } = useApp()
 
   useEffect(() => {
     loadReservations()
-  }, [token])
-
-  const loadReservations = async () => {
-    if (!token) {
-      setError('No hay sesión activa')
-      setLoading(false)
-      return
-    }
-
-    try {
-      const data = await fetchReservations(token)
-      setReservations(data)
-      setError(null)
-    } catch (err) {
-      if (err.message === 'UNAUTHORIZED') {
-        const refreshResult = await refreshToken()
-        if (refreshResult.success) {
-          return loadReservations()
-        }
-        setError('Sesión expirada. Por favor, vuelva a iniciar sesión.')
-      } else {
-        setError(err.message)
-      }
-      setReservations([])
-    } finally {
-      setLoading(false)
-    }
-  }
+  }, [])
 
   const handleEdit = (reservation) => {
     if (onEdit) onEdit(reservation)
   }
 
-  const formatDateTime = (dateTimeStr) => {
-    const date = new Date(dateTimeStr)
-    return new Intl.DateTimeFormat('es-ES', {
-      dateStyle: 'medium',
-      timeStyle: 'short'
-    }).format(date)
+  const handleItemClick = (reservation) => {
+    if (activeItems.reservation && activeItems.reservation.id_reservation === reservation.id_reservation) {
+      setActiveItem('reservation', null)
+    } else {
+      setActiveItem('reservation', reservation)
+    }
   }
 
   const renderReservationItem = (reservation) => (
     <>
       <div className="reservation-primary">
-        <span className="reservation-restaurant">{reservation.restaurant?.name || 'Restaurante no disponible'}</span>
+        <span className="reservation-id">#{reservation.id}</span>
       </div>
       <div className="reservation-secondary">
-        <span className="reservation-datetime">{formatDateTime(reservation.datetime)}</span>
-        <span className="reservation-tables">
-          Mesas: {Array.isArray(reservation.tables) ? reservation.tables.join(', ') : 'No asignadas'}
-        </span>
+        <span className="reservation-table">Mesa: {reservation.table?.number}</span>
+        <span className="reservation-date">{new Date(reservation.date).toLocaleString()}</span>
       </div>
       <div className="reservation-tertiary">
-        <span className="reservation-user">{reservation.user?.name || 'Usuario no disponible'}</span>
-        <span className="reservation-status" data-status={reservation.status}>{reservation.status}</span>
+        <span className="reservation-people">Personas: {reservation.people}</span>
       </div>
     </>
   )
@@ -83,6 +56,8 @@ const ReservationList = ({ onEdit }) => {
         items={reservations}
         renderItem={renderReservationItem}
         threeLines={true}
+        activeItem={activeItems.reservation}
+        onItemClick={handleItemClick}
       />
     )
   }

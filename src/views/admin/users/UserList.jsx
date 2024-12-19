@@ -1,55 +1,34 @@
-import { useState, useEffect } from 'react'
-import { useAuth } from '../../../contexts/AuthContext/AuthContext'
-import { fetchUsers } from '../../../services/api'
+import { useEffect } from 'react'
+import { useApp } from '../../../contexts/AppContext/AppContext'
 import Card from '../../../components/ui/Card/Card'
 import Button from '../../../components/ui/Button/Button'
 import List from '../../../components/ui/List/List'
 import './UserList.css'
 
 const UserList = ({ onEdit }) => {
-  const [users, setUsers] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const { token, refreshToken } = useAuth()
+  const { 
+    data: { users },
+    loading: { users: loading },
+    errors: { users: error },
+    activeItems,
+    setActiveItem,
+    loadUsers
+  } = useApp()
 
   useEffect(() => {
     loadUsers()
-  }, [token])
-
-  const loadUsers = async () => {
-    if (!token) {
-      setError('No hay sesión activa')
-      setLoading(false)
-      return
-    }
-
-    try {
-      const data = await fetchUsers(token)
-      setUsers(data)
-      setError(null)
-    } catch (err) {
-      if (err.message === 'UNAUTHORIZED') {
-        const refreshResult = await refreshToken()
-        if (refreshResult.success) {
-          return loadUsers()
-        }
-        setError('Sesión expirada. Por favor, vuelva a iniciar sesión.')
-      } else {
-        setError(err.message)
-      }
-      setUsers([])
-    } finally {
-      setLoading(false)
-    }
-  }
+  }, [])
 
   const handleEdit = (user) => {
     if (onEdit) onEdit(user)
   }
 
-  const handleRefresh = () => {
-    setLoading(true)
-    loadUsers()
+  const handleItemClick = (user) => {
+    if (activeItems.user?.id === user.id) {
+      setActiveItem('user', null)
+    } else {
+      setActiveItem('user', user)
+    }
   }
 
   const renderUserItem = (user) => (
@@ -76,6 +55,9 @@ const UserList = ({ onEdit }) => {
         items={users}
         renderItem={renderUserItem}
         threeLines={true}
+        itemType="user"
+        activeItem={activeItems.user}
+        onItemClick={handleItemClick}
       />
     )
   }
@@ -85,18 +67,11 @@ const UserList = ({ onEdit }) => {
       card-header={<h3>Lista de Usuarios</h3>}
       card-body={renderUserList()}
       card-footer={
-        <div>
-          <Button 
-            title="Nuevo" 
-            variant="primary" 
-            onClick={() => handleEdit(null)}
-          />
-          <Button 
-            title="Actualizar" 
-            variant="secondary" 
-            onClick={handleRefresh}
-          />
-        </div>
+        <Button 
+          title="Nuevo" 
+          variant="primary" 
+          onClick={() => handleEdit(null)}
+        />
       }
     />
   )

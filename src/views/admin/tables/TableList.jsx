@@ -1,50 +1,34 @@
-import { useState, useEffect } from 'react'
-import { useAuth } from '../../../contexts/AuthContext/AuthContext'
-import { fetchTables } from '../../../services/api'
+import { useEffect } from 'react'
+import { useApp } from '../../../contexts/AppContext/AppContext'
 import Card from '../../../components/ui/Card/Card'
 import Button from '../../../components/ui/Button/Button'
 import List from '../../../components/ui/List/List'
 import './TableList.css'
 
 const TableList = ({ onEdit }) => {
-  const [tables, setTables] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const { token, refreshToken } = useAuth()
+  const { 
+    data: { tables },
+    loading: { tables: loading },
+    errors: { tables: error },
+    activeItems,
+    setActiveItem,
+    loadTables
+  } = useApp()
 
   useEffect(() => {
     loadTables()
-  }, [token])
-
-  const loadTables = async () => {
-    if (!token) {
-      setError('No hay sesión activa')
-      setLoading(false)
-      return
-    }
-
-    try {
-      const data = await fetchTables(token)
-      setTables(data)
-      setError(null)
-    } catch (err) {
-      if (err.message === 'UNAUTHORIZED') {
-        const refreshResult = await refreshToken()
-        if (refreshResult.success) {
-          return loadTables()
-        }
-        setError('Sesión expirada. Por favor, vuelva a iniciar sesión.')
-      } else {
-        setError(err.message)
-      }
-      setTables([])
-    } finally {
-      setLoading(false)
-    }
-  }
+  }, [])
 
   const handleEdit = (table) => {
     if (onEdit) onEdit(table)
+  }
+
+  const handleItemClick = (table) => {
+    if (activeItems.table && activeItems.table.id_table === table.id_table) {
+      setActiveItem('table', null)
+    } else {
+      setActiveItem('table', table)
+    }
   }
 
   const renderTableItem = (table) => (
@@ -53,11 +37,10 @@ const TableList = ({ onEdit }) => {
         <span className="table-number">Mesa {table.number}</span>
       </div>
       <div className="table-secondary">
-        <span className="table-restaurant">Restaurante: {table.restaurant?.name || 'No asignado'}</span>
-        <span className="table-capacity">Capacidad: {table.capacity || 4}</span>
+        <span className="table-restaurant">{table.restaurant?.name || 'Sin restaurante'}</span>
       </div>
       <div className="table-tertiary">
-        <span className="table-status" data-status={table.status}>{table.status}</span>
+        <span className="table-capacity">Capacidad: {table.capacity}</span>
       </div>
     </>
   )
@@ -72,6 +55,8 @@ const TableList = ({ onEdit }) => {
         items={tables}
         renderItem={renderTableItem}
         threeLines={true}
+        activeItem={activeItems.table}
+        onItemClick={handleItemClick}
       />
     )
   }

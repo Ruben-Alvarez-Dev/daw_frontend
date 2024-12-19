@@ -1,18 +1,22 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './Navbar.css'
 import { useAuth } from '../../../contexts/AuthContext/AuthContext'
-import { useSession } from '../../session/SessionManager/SessionManager'
+import { useApp } from '../../../contexts/AppContext/AppContext'
 import Label from '../../ui/Label/Label'
 import Button from '../../ui/Button/Button'
-import { FiInfo, FiUser } from 'react-icons/fi'
+import { FiUser, FiUsers, FiHome, FiGrid, FiCalendar } from 'react-icons/fi'
 import Login from '../../auth/Login/Login'
 import Register from '../../auth/Register/Register'
 
 const Navbar = () => {
     const { isAuthenticated, logout, user } = useAuth()
-    const { lastActivity } = useSession()
+    const { activeItems } = useApp()
     const [showLogin, setShowLogin] = useState(false)
     const [showRegister, setShowRegister] = useState(false)
+
+    useEffect(() => {
+        console.log('Active Items in Navbar:', activeItems)
+    }, [activeItems])
 
     return (
         <>
@@ -21,14 +25,43 @@ const Navbar = () => {
                     DAW Frontend
                 </div>
                 <div className="navbar-menu">Navbar Menu</div>
-                <div className="navbar-menu">Navbar Context</div>
+                <div className="navbar-context">
+                    {activeItems.user && (
+                        <Label 
+                            text={`Usuario: ${activeItems.user.name}`}
+                            variant="label-default"
+                            icon={<FiUsers />}
+                        />
+                    )}
+                    {activeItems.restaurant && (
+                        <Label 
+                            text={`Restaurante: ${activeItems.restaurant.name}`}
+                            variant="label-default"
+                            icon={<FiHome />}
+                        />
+                    )}
+                    {activeItems.table && (
+                        <Label 
+                            text={`Mesa: ${activeItems.table.number}`}
+                            variant="label-default"
+                            icon={<FiGrid />}
+                        />
+                    )}
+                    {activeItems.reservation && (
+                        <Label 
+                            text={`Reserva: ${activeItems.reservation.id}`}
+                            variant="label-default"
+                            icon={<FiCalendar />}
+                        />
+                    )}
+                </div>
                 <div className="navbar-auth">
                     {isAuthenticated && user && (
                         <>
                             <Label 
                                 text={user.email} 
                                 variant="label-info" 
-                                icon={<FiInfo />} 
+                                icon={<FiUser />} 
                             />
                             <Label 
                                 text={user.role} 

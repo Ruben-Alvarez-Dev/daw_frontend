@@ -1,5 +1,6 @@
-import { BrowserRouter as Router } from 'react-router-dom'
+import { BrowserRouter } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext/AuthContext'
+import { AppProvider } from './contexts/AppContext/AppContext'
 import SessionManager from './components/session/SessionManager/SessionManager'
 import { useAuth } from './contexts/AuthContext/AuthContext'
 import Navbar from './components/layout/Navbar/Navbar'
@@ -32,13 +33,15 @@ const AppContent = () => {
 
 const App = () => {
   return (
-    <Router>
+    <BrowserRouter>
       <AuthProvider>
-        <SessionManager>
-          <AppContent />
-        </SessionManager>
+        <AppProvider>
+          <SessionManager>
+            <AppContent />
+          </SessionManager>
+        </AppProvider>
       </AuthProvider>
-    </Router>
+    </BrowserRouter>
   )
 }
 
