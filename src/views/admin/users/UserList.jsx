@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../../../contexts/AuthContext/AuthContext'
+import { fetchUsers } from '../../../services/api'
 import Card from '../../../components/ui/Card/Card'
 import Button from '../../../components/ui/Button/Button'
 import List from '../../../components/ui/List/List'
@@ -9,33 +10,33 @@ const UserList = ({ onEdit }) => {
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const { token } = useAuth()
+  const { token, refreshToken } = useAuth()
 
   useEffect(() => {
-    fetchUsers()
+    loadUsers()
   }, [token])
 
-  const fetchUsers = async () => {
+  const loadUsers = async () => {
+    if (!token) {
+      setError('No hay sesión activa')
+      setLoading(false)
+      return
+    }
+
     try {
-      const response = await fetch('http://localhost:8000/api/users', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json'
-        }
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Error al cargar usuarios')
-      }
-
-      const data = await response.json()
-      const usersArray = Array.isArray(data.data) ? data.data : []
-      setUsers(usersArray)
+      const data = await fetchUsers(token)
+      setUsers(data)
       setError(null)
     } catch (err) {
-      setError('Error al cargar la lista de usuarios')
-      console.error('Error:', err)
+      if (err.message === 'UNAUTHORIZED') {
+        const refreshResult = await refreshToken()
+        if (refreshResult.success) {
+          return loadUsers()
+        }
+        setError('Sesión expirada. Por favor, vuelva a iniciar sesión.')
+      } else {
+        setError(err.message)
+      }
       setUsers([])
     } finally {
       setLoading(false)
@@ -48,7 +49,7 @@ const UserList = ({ onEdit }) => {
 
   const handleRefresh = () => {
     setLoading(true)
-    fetchUsers()
+    loadUsers()
   }
 
   const renderUserItem = (user) => (
@@ -81,14 +82,21 @@ const UserList = ({ onEdit }) => {
 
   return (
     <Card
-      card-header={<h2>Lista de Usuarios</h2>}
+      card-header={<h3>Lista de Usuarios</h3>}
       card-body={renderUserList()}
       card-footer={
-        <Button 
-          title="Nuevo" 
-          variant="primary" 
-          onClick={() => handleEdit(null)}
-        />
+        <div>
+          <Button 
+            title="Nuevo" 
+            variant="primary" 
+            onClick={() => handleEdit(null)}
+          />
+          <Button 
+            title="Actualizar" 
+            variant="secondary" 
+            onClick={handleRefresh}
+          />
+        </div>
       }
     />
   )

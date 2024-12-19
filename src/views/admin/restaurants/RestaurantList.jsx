@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../../../contexts/AuthContext/AuthContext'
+import { fetchRestaurants } from '../../../services/api'
 import Card from '../../../components/ui/Card/Card'
 import Button from '../../../components/ui/Button/Button'
 import List from '../../../components/ui/List/List'
@@ -9,35 +10,34 @@ const RestaurantList = ({ onEdit }) => {
   const [restaurants, setRestaurants] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const { token } = useAuth()
+  const { token, refreshToken } = useAuth()
 
   useEffect(() => {
-    fetchRestaurants()
-  }, [token]) // Añadido token como dependencia
+    loadRestaurants()
+  }, [token])
 
-  const fetchRestaurants = async () => {
+  const loadRestaurants = async () => {
+    if (!token) {
+      setError('No hay sesión activa')
+      setLoading(false)
+      return
+    }
+
     try {
-      const response = await fetch('http://localhost:8000/api/restaurants', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json'
-        }
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Error al cargar restaurantes')
-      }
-
-      const data = await response.json()
-      // Asegurarse de que data.data existe y es un array
-      const restaurantsArray = Array.isArray(data.data) ? data.data : []
-      setRestaurants(restaurantsArray)
+      const data = await fetchRestaurants(token)
+      setRestaurants(data)
       setError(null)
     } catch (err) {
-      setError('Error al cargar la lista de restaurantes')
-      console.error('Error:', err)
-      setRestaurants([]) // Resetear a array vacío en caso de error
+      if (err.message === 'UNAUTHORIZED') {
+        const refreshResult = await refreshToken()
+        if (refreshResult.success) {
+          return loadRestaurants()
+        }
+        setError('Sesión expirada. Por favor, vuelva a iniciar sesión.')
+      } else {
+        setError(err.message)
+      }
+      setRestaurants([])
     } finally {
       setLoading(false)
     }
@@ -49,7 +49,7 @@ const RestaurantList = ({ onEdit }) => {
 
   const handleRefresh = () => {
     setLoading(true)
-    fetchRestaurants()
+    loadRestaurants()
   }
 
   const renderRestaurantItem = (restaurant) => {
@@ -92,11 +92,18 @@ const RestaurantList = ({ onEdit }) => {
       card-header={<h3>Lista de Restaurantes</h3>}
       card-body={renderRestaurantList()}
       card-footer={
-        <Button 
-          title="Nuevo" 
-          variant="primary" 
-          onClick={() => handleEdit(null)}
-        />
+        <div>
+          <Button 
+            title="Nuevo" 
+            variant="primary" 
+            onClick={() => handleEdit(null)}
+          />
+          <Button 
+            title="Actualizar" 
+            variant="secondary" 
+            onClick={handleRefresh}
+          />
+        </div>
       }
     />
   )

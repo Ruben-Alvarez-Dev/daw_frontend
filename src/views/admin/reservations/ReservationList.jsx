@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../../../contexts/AuthContext/AuthContext'
+import { fetchReservations } from '../../../services/api'
 import Card from '../../../components/ui/Card/Card'
 import Button from '../../../components/ui/Button/Button'
 import List from '../../../components/ui/List/List'
@@ -12,10 +13,10 @@ const ReservationList = ({ onEdit }) => {
   const { token, refreshToken } = useAuth()
 
   useEffect(() => {
-    fetchReservations()
+    loadReservations()
   }, [token])
 
-  const fetchReservations = async () => {
+  const loadReservations = async () => {
     if (!token) {
       setError('No hay sesión activa')
       setLoading(false)
@@ -23,50 +24,19 @@ const ReservationList = ({ onEdit }) => {
     }
 
     try {
-      const response = await fetch('http://localhost:8000/api/reservations', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        }
-      })
-
-      // Si el token expiró, intentar refrescarlo
-      if (response.status === 401) {
-        const refreshResult = await refreshToken()
-        if (refreshResult.success) {
-          // Reintentar con el nuevo token
-          return fetchReservations()
-        } else {
-          throw new Error('Sesión expirada. Por favor, vuelva a iniciar sesión.')
-        }
-      }
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Error al cargar reservas')
-      }
-
-      const data = await response.json()
-      console.log('Respuesta API reservas:', data) // Debug
-      
-      // Manejar diferentes estructuras de respuesta
-      let reservationsArray = []
-      if (Array.isArray(data)) {
-        reservationsArray = data
-      } else if (data.data && Array.isArray(data.data)) {
-        reservationsArray = data.data
-      } else if (typeof data === 'object') {
-        reservationsArray = [data]
-      }
-
-      console.log('Reservas procesadas:', reservationsArray) // Debug
-      setReservations(reservationsArray)
+      const data = await fetchReservations(token)
+      setReservations(data)
       setError(null)
     } catch (err) {
-      console.error('Error fetchReservations:', err)
-      setError(err.message || 'Error al cargar la lista de reservas')
+      if (err.message === 'UNAUTHORIZED') {
+        const refreshResult = await refreshToken()
+        if (refreshResult.success) {
+          return loadReservations()
+        }
+        setError('Sesión expirada. Por favor, vuelva a iniciar sesión.')
+      } else {
+        setError(err.message)
+      }
       setReservations([])
     } finally {
       setLoading(false)

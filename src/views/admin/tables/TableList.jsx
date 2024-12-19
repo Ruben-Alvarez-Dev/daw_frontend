@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../../../contexts/AuthContext/AuthContext'
+import { fetchTables } from '../../../services/api'
 import Card from '../../../components/ui/Card/Card'
 import Button from '../../../components/ui/Button/Button'
 import List from '../../../components/ui/List/List'
@@ -9,33 +10,33 @@ const TableList = ({ onEdit }) => {
   const [tables, setTables] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const { token } = useAuth()
+  const { token, refreshToken } = useAuth()
 
   useEffect(() => {
-    fetchTables()
+    loadTables()
   }, [token])
 
-  const fetchTables = async () => {
+  const loadTables = async () => {
+    if (!token) {
+      setError('No hay sesión activa')
+      setLoading(false)
+      return
+    }
+
     try {
-      const response = await fetch('http://localhost:8000/api/tables', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json'
-        }
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Error al cargar mesas')
-      }
-
-      const data = await response.json()
-      const tablesArray = Array.isArray(data.data) ? data.data : []
-      setTables(tablesArray)
+      const data = await fetchTables(token)
+      setTables(data)
       setError(null)
     } catch (err) {
-      setError('Error al cargar la lista de mesas')
-      console.error('Error:', err)
+      if (err.message === 'UNAUTHORIZED') {
+        const refreshResult = await refreshToken()
+        if (refreshResult.success) {
+          return loadTables()
+        }
+        setError('Sesión expirada. Por favor, vuelva a iniciar sesión.')
+      } else {
+        setError(err.message)
+      }
       setTables([])
     } finally {
       setLoading(false)
