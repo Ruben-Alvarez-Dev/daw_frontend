@@ -1,3 +1,4 @@
+import React from 'react'
 import { BrowserRouter } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext/AuthContext'
 import { AppProvider } from './contexts/AppContext/AppContext'

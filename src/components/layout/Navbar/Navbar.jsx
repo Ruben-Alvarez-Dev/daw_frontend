@@ -28,28 +28,28 @@ const Navbar = () => {
                 <div className="navbar-context">
                     {activeItems.user && (
                         <Label 
-                            text={`Usuario: ${activeItems.user.name}`}
+                            text={`Usuario: ${activeItems.user.name || 'N/A'}`}
                             variant="label-default"
                             icon={<FiUsers />}
                         />
                     )}
                     {activeItems.restaurant && (
                         <Label 
-                            text={`Restaurante: ${activeItems.restaurant.name}`}
+                            text={`Restaurante: ${activeItems.restaurant.name || 'N/A'}`}
                             variant="label-default"
                             icon={<FiHome />}
                         />
                     )}
-                    {activeItems.table && (
+                    {activeItems.table && activeItems.table.number && (
                         <Label 
                             text={`Mesa: ${activeItems.table.number}`}
                             variant="label-default"
                             icon={<FiGrid />}
                         />
                     )}
-                    {activeItems.reservation && (
+                    {activeItems.reservation && activeItems.reservation.id_reservation && (
                         <Label 
-                            text={`Reserva: ${activeItems.reservation.id}`}
+                            text={`Reserva: #${activeItems.reservation.id_reservation}`}
                             variant="label-default"
                             icon={<FiCalendar />}
                         />

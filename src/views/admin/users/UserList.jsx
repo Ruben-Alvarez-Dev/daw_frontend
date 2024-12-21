@@ -2,7 +2,6 @@ import { useEffect } from 'react'
 import { useApp } from '../../../contexts/AppContext/AppContext'
 import Card from '../../../components/ui/Card/Card'
 import Button from '../../../components/ui/Button/Button'
-import List from '../../../components/ui/List/List'
 import './UserList.css'
 
 const UserList = ({ onEdit }) => {
@@ -24,26 +23,12 @@ const UserList = ({ onEdit }) => {
   }
 
   const handleItemClick = (user) => {
-    if (activeItems.user?.id === user.id) {
+    if (activeItems.user?.id_user === user.id_user) {
       setActiveItem('user', null)
     } else {
       setActiveItem('user', user)
     }
   }
-
-  const renderUserItem = (user) => (
-    <>
-      <div className="user-primary">
-        <span className="user-name">{user.name}</span>
-      </div>
-      <div className="user-secondary">
-        <span className="user-email">{user.email}</span>
-      </div>
-      <div className="user-tertiary">
-        <span className={`user-role role-${user.role}`}>{user.role}</span>
-      </div>
-    </>
-  )
 
   const renderUserList = () => {
     if (loading) return <p className="loading-message">Cargando usuarios...</p>
@@ -51,14 +36,25 @@ const UserList = ({ onEdit }) => {
     if (!users || users.length === 0) return <p className="empty-message">No hay usuarios registrados</p>
 
     return (
-      <List
-        items={users}
-        renderItem={renderUserItem}
-        threeLines={true}
-        itemType="user"
-        activeItem={activeItems.user}
-        onItemClick={handleItemClick}
-      />
+      <ul className="users-list">
+        {users.map((user) => (
+          <li 
+            key={user.id_user}
+            className={`user-item ${activeItems.user?.id_user === user.id_user ? 'active' : ''}`}
+            onClick={() => handleItemClick(user)}
+          >
+            <div className="user-primary">
+              <span className="user-name">{user.name}</span>
+            </div>
+            <div className="user-secondary">
+              <span className="user-email">{user.email}</span>
+            </div>
+            <div className="user-tertiary">
+              <span className={`user-role role-${user.role}`}>{user.role}</span>
+            </div>
+          </li>
+        ))}
+      </ul>
     )
   }
 

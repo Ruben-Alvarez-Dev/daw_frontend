@@ -2,7 +2,6 @@ import { useEffect } from 'react'
 import { useApp } from '../../../contexts/AppContext/AppContext'
 import Card from '../../../components/ui/Card/Card'
 import Button from '../../../components/ui/Button/Button'
-import List from '../../../components/ui/List/List'
 import './ReservationList.css'
 
 const ReservationList = ({ onEdit }) => {
@@ -31,34 +30,38 @@ const ReservationList = ({ onEdit }) => {
     }
   }
 
-  const renderReservationItem = (reservation) => (
-    <>
-      <div className="reservation-primary">
-        <span className="reservation-id">#{reservation.id}</span>
-      </div>
-      <div className="reservation-secondary">
-        <span className="reservation-table">Mesa: {reservation.table?.number}</span>
-        <span className="reservation-date">{new Date(reservation.date).toLocaleString()}</span>
-      </div>
-      <div className="reservation-tertiary">
-        <span className="reservation-people">Personas: {reservation.people}</span>
-      </div>
-    </>
-  )
-
   const renderReservationList = () => {
     if (loading) return <p className="loading-message">Cargando reservas...</p>
     if (error) return <p className="error-message">{error}</p>
     if (!reservations || reservations.length === 0) return <p className="empty-message">No hay reservas registradas</p>
 
     return (
-      <List
-        items={reservations}
-        renderItem={renderReservationItem}
-        threeLines={true}
-        activeItem={activeItems.reservation}
-        onItemClick={handleItemClick}
-      />
+      <ul className="reservations-list">
+        {reservations.map((reservation) => {
+          // Asegurarnos de que tables sea un array
+          const tables = Array.isArray(reservation.tables) ? reservation.tables : 
+                        (typeof reservation.tables === 'string' ? JSON.parse(reservation.tables) : []);
+          
+          return (
+            <li 
+              key={reservation.id_reservation}
+              className={`reservation-item ${activeItems.reservation?.id_reservation === reservation.id_reservation ? 'active' : ''}`}
+              onClick={() => handleItemClick(reservation)}
+            >
+              <div className="reservation-primary">
+                <span className="reservation-id">#{reservation.id_reservation}</span>
+              </div>
+              <div className="reservation-secondary">
+                <span className="reservation-table">Mesa: {tables.join(', ')}</span>
+                <span className="reservation-date">{new Date(reservation.datetime).toLocaleString()}</span>
+              </div>
+              <div className="reservation-tertiary">
+                <span className="reservation-status">{reservation.status}</span>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
     )
   }
 

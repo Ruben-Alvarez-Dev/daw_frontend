@@ -2,7 +2,6 @@ import { useEffect } from 'react'
 import { useApp } from '../../../contexts/AppContext/AppContext'
 import Card from '../../../components/ui/Card/Card'
 import Button from '../../../components/ui/Button/Button'
-import List from '../../../components/ui/List/List'
 import './RestaurantList.css'
 
 const RestaurantList = ({ onEdit }) => {
@@ -24,31 +23,12 @@ const RestaurantList = ({ onEdit }) => {
   }
 
   const handleItemClick = (restaurant) => {
-    console.log('Restaurant clicked:', restaurant)
-    console.log('Current active restaurant:', activeItems.restaurant)
-    
     if (activeItems.restaurant && activeItems.restaurant.id_restaurant === restaurant.id_restaurant) {
-      console.log('Deactivating restaurant')
       setActiveItem('restaurant', null)
     } else {
-      console.log('Activating restaurant')
       setActiveItem('restaurant', restaurant)
     }
   }
-
-  const renderRestaurantItem = (restaurant) => (
-    <>
-      <div className="restaurant-primary">
-        <span className="restaurant-name">{restaurant.name}</span>
-      </div>
-      <div className="restaurant-secondary">
-        <span className="restaurant-zones">{restaurant.zones?.join(', ') || 'Sin zonas'}</span>
-      </div>
-      <div className="restaurant-tertiary">
-        <span className="restaurant-capacity">Capacidad: {restaurant.capacity}</span>
-      </div>
-    </>
-  )
 
   const renderRestaurantList = () => {
     if (loading) return <p className="loading-message">Cargando restaurantes...</p>
@@ -56,13 +36,35 @@ const RestaurantList = ({ onEdit }) => {
     if (!restaurants || restaurants.length === 0) return <p className="empty-message">No hay restaurantes registrados</p>
 
     return (
-      <List
-        items={restaurants}
-        renderItem={renderRestaurantItem}
-        threeLines={true}
-        activeItem={activeItems.restaurant}
-        onItemClick={handleItemClick}
-      />
+      <ul className="restaurants-list">
+        {restaurants.map((restaurant) => {
+          // Parse zones if it's a JSON string
+          const zones = restaurant.zones ? 
+            (typeof restaurant.zones === 'string' ? JSON.parse(restaurant.zones) : restaurant.zones) 
+            : [];
+
+          return (
+            <li 
+              key={restaurant.id_restaurant}
+              className={`restaurant-item ${activeItems.restaurant?.id_restaurant === restaurant.id_restaurant ? 'active' : ''}`}
+              onClick={() => handleItemClick(restaurant)}
+            >
+              <div className="restaurant-primary">
+                <span className="restaurant-name">{restaurant.name}</span>
+              </div>
+              <div className="restaurant-secondary">
+                <span className="restaurant-zones">{zones.join(', ') || 'Sin zonas'}</span>
+              </div>
+              <div className="restaurant-tertiary">
+                <span className="restaurant-capacity">Capacidad: {restaurant.capacity}</span>
+                <span className={`restaurant-status status-${restaurant.status.replace(' ', '-')}`}>
+                  {restaurant.status}
+                </span>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
     )
   }
 

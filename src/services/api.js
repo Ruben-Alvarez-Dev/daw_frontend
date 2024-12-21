@@ -35,6 +35,22 @@ const createApiRequest = (token) => async (endpoint, options = {}) => {
   }
 }
 
+// Get ID based on endpoint type
+const getEndpointId = (endpoint, id) => {
+  switch (endpoint) {
+    case '/users':
+      return `id_user=${id}`
+    case '/restaurants':
+      return `id_restaurant=${id}`
+    case '/tables':
+      return `id_table=${id}`
+    case '/reservations':
+      return `id_reservation=${id}`
+    default:
+      return `id=${id}`
+  }
+}
+
 // Users API
 export const fetchUsers = (token) => {
   const apiRequest = createApiRequest(token)
@@ -71,7 +87,8 @@ export const createItem = (token, endpoint, data) => {
 // Update functions
 export const updateItem = (token, endpoint, id, data) => {
   const apiRequest = createApiRequest(token)
-  return apiRequest(`${endpoint}/${id}`, {
+  const idParam = getEndpointId(endpoint, id)
+  return apiRequest(`${endpoint}?${idParam}`, {
     method: 'PUT',
     body: JSON.stringify(data)
   })
@@ -80,7 +97,8 @@ export const updateItem = (token, endpoint, id, data) => {
 // Delete functions
 export const deleteItem = (token, endpoint, id) => {
   const apiRequest = createApiRequest(token)
-  return apiRequest(`${endpoint}/${id}`, {
+  const idParam = getEndpointId(endpoint, id)
+  return apiRequest(`${endpoint}?${idParam}`, {
     method: 'DELETE'
   })
 }

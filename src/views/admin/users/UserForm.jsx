@@ -43,7 +43,7 @@ const UserForm = ({ user, onSave, onCancel }) => {
 
     try {
       const url = user 
-        ? `http://localhost:8000/api/users/${user.id}`
+        ? `http://localhost:8000/api/users/${user.id_user}`
         : 'http://localhost:8000/api/users'
       
       const method = user ? 'PUT' : 'POST'
