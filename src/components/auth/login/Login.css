@@ -1,33 +1,35 @@
 .login-container {
     display: flex;
-    justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    padding: 1rem;
-    background-color: var(--bg-color);
+    justify-content: center;
+    min-height: 100%;
+    padding: 2rem;
 }
 
 .login-card {
     width: 100%;
     max-width: 400px;
-    padding: 2rem;
     background-color: white;
-    border: 1px solid var(--border-color);
     border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
 }
 
 .login-title {
     font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
     text-align: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
 }
 
 .login-error {
-    background-color: var(--error-bg);
     color: var(--error-color);
+    background-color: var(--error-bg);
     padding: 0.75rem;
     border-radius: 0.375rem;
     margin-bottom: 1rem;
+    font-size: 0.875rem;
 }
 
 .login-form {
@@ -43,13 +45,17 @@
 }
 
 .login-label {
+    font-size: 0.875rem;
     font-weight: 500;
+    color: var(--text-primary);
 }
 
 .login-input {
     padding: 0.5rem;
     border: 1px solid var(--border-color);
     border-radius: 0.375rem;
+    font-size: 0.875rem;
+    transition: border-color 0.2s;
 }
 
 .login-input:focus {
@@ -63,35 +69,33 @@
     color: white;
     border: none;
     border-radius: 0.375rem;
-    cursor: pointer;
     font-weight: 500;
-    margin-top: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
 }
 
-.login-button:hover {
+.login-button:hover:not(:disabled) {
     background-color: var(--primary-hover);
 }
 
 .login-button:disabled {
-    opacity: 0.7;
+    opacity: 0.5;
     cursor: not-allowed;
 }
 
 .login-register-link {
+    margin-top: 1.5rem;
     text-align: center;
-    margin-top: 1rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
 }
 
-.login-link {
+.login-register-link a {
     color: var(--primary-color);
-    background: none;
-    border: none;
-    padding: 0;
-    font: inherit;
-    cursor: pointer;
-    text-decoration: underline;
+    text-decoration: none;
+    font-weight: 500;
 }
 
-.login-link:hover {
-    color: var(--primary-hover);
+.login-register-link a:hover {
+    text-decoration: underline;
 }

@@ -1,53 +1,67 @@
-import { useNavigate } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
-import { useApp } from '../../../context/AppContext';
 import { ROLES } from '../../../constants/roles';
 import './Aside.css';
 
 const Aside = () => {
-    const navigate = useNavigate();
     const { user } = useAuth();
-    const { isSidebarOpen } = useApp();
 
-    const getMenuItems = () => {
-        switch (user?.role) {
-            case ROLES.ADMIN:
-                return [
-                    { label: 'Dashboard', path: '/admin' },
-                    { label: 'Usuarios', path: '/admin/users' }
-                ];
-            case ROLES.SUPERVISOR:
-                return [
-                    { label: 'Dashboard', path: '/supervisor' },
-                    { label: 'Restaurantes', path: '/supervisor/restaurants' }
-                ];
-            case ROLES.WAITER:
-                return [
-                    { label: 'Dashboard', path: '/waiter' },
-                    { label: 'Mesas', path: '/waiter/tables' }
-                ];
-            default:
-                return [];
-        }
-    };
+    const renderAdminLinks = () => (
+        <div className="aside-section">
+            <h2 className="aside-section-title">Administración</h2>
+            <nav className="aside-nav">
+                <NavLink to="/users" className="aside-link">
+                    <span className="aside-link-text">Usuarios</span>
+                </NavLink>
+                <NavLink to="/restaurants" className="aside-link">
+                    <span className="aside-link-text">Restaurantes</span>
+                </NavLink>
+            </nav>
+        </div>
+    );
 
-    const menuItems = getMenuItems();
+    const renderSupervisorLinks = () => (
+        <div className="aside-section">
+            <h2 className="aside-section-title">Gestión</h2>
+            <nav className="aside-nav">
+                <NavLink to="/tables" className="aside-link">
+                    <span className="aside-link-text">Mesas</span>
+                </NavLink>
+                <NavLink to="/reservations" className="aside-link">
+                    <span className="aside-link-text">Reservas</span>
+                </NavLink>
+            </nav>
+        </div>
+    );
 
-    if (!user || menuItems.length === 0) return null;
+    const renderWaiterLinks = () => (
+        <div className="aside-section">
+            <h2 className="aside-section-title">Servicio</h2>
+            <nav className="aside-nav">
+                <NavLink to="/my-tables" className="aside-link">
+                    <span className="aside-link-text">Mis Mesas</span>
+                </NavLink>
+                <NavLink to="/my-reservations" className="aside-link">
+                    <span className="aside-link-text">Mis Reservas</span>
+                </NavLink>
+            </nav>
+        </div>
+    );
 
     return (
-        <aside className={`aside ${isSidebarOpen ? 'open' : 'closed'}`}>
-            <nav className="aside-nav">
-                {menuItems.map((item, index) => (
-                    <button
-                        key={index}
-                        className="aside-item"
-                        onClick={() => navigate(item.path)}
-                    >
-                        {item.label}
-                    </button>
-                ))}
-            </nav>
+        <aside className="aside">
+            <div className="aside-section">
+                <h2 className="aside-section-title">General</h2>
+                <nav className="aside-nav">
+                    <NavLink to="/dashboard" className="aside-link">
+                        <span className="aside-link-text">Dashboard</span>
+                    </NavLink>
+                </nav>
+            </div>
+
+            {user?.role === ROLES.ADMIN && renderAdminLinks()}
+            {user?.role === ROLES.SUPERVISOR && renderSupervisorLinks()}
+            {user?.role === ROLES.WAITER && renderWaiterLinks()}
         </aside>
     );
 };

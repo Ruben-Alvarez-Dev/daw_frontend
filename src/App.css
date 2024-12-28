@@ -1,105 +1,114 @@
 /* src/App.css */
-html, body, #root {
-  margin: 0;
-  padding: 0;
-  height: 100vh;
-  width: 100vw;
-  overflow: hidden;
-}
-
+/* Estilos globales de la aplicación */
 .app {
-    min-height: 100vh;
     display: flex;
     flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Utilidades globales */
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.text-left {
+    text-align: left;
+}
+
+.mt-1 {
+    margin-top: 0.25rem;
+}
+
+.mt-2 {
+    margin-top: 0.5rem;
+}
+
+.mt-3 {
+    margin-top: 1rem;
+}
+
+.mt-4 {
+    margin-top: 1.5rem;
+}
+
+.mb-1 {
+    margin-bottom: 0.25rem;
+}
+
+.mb-2 {
+    margin-bottom: 0.5rem;
+}
+
+.mb-3 {
+    margin-bottom: 1rem;
+}
+
+.mb-4 {
+    margin-bottom: 1.5rem;
+}
+
+.mx-auto {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Estilos para formularios globales */
+.form-error {
+    color: var(--error-color);
+    background-color: var(--error-bg);
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+}
+
+.form-success {
+    color: #059669;
+    background-color: #d1fae5;
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+}
+
+/* Estilos para botones globales */
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 0.375rem;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.button-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.button-primary:hover:not(:disabled) {
+    background-color: var(--primary-hover);
+}
+
+.button-secondary {
+    background-color: white;
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+.button-secondary:hover:not(:disabled) {
     background-color: var(--bg-color);
-}
-
-.main {
-  display: flex;
-  justify-content: center;
-  align-content: center;
-
-  flex: 1;
-}
-
-.display {
-  flex: 1;
-  padding: 2rem;
-  background-color: var(--bg-color);
-  overflow-y: auto;
-}
-
-nav {
-  margin-bottom: 20px;
-  padding: 10px;
-  background-color: #f5f5f5;
-  border-radius: 4px;
-}
-
-nav a {
-  color: #333;
-  text-decoration: none;
-  margin: 0 10px;
-}
-
-nav a:hover {
-  color: #007bff;
-}
-
-.auth-form {
-  max-width: 400px;
-  margin: 0 auto;
-  padding: 20px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
-.auth-form h2 {
-  margin-bottom: 20px;
-  text-align: center;
-}
-
-.auth-form div {
-  margin-bottom: 15px;
-}
-
-.auth-form label {
-  display: block;
-  margin-bottom: 5px;
-}
-
-.auth-form input {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
-button {
-  width: 100%;
-  padding: 10px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #0056b3;
-}
-
-.dashboard {
-  padding: 20px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
-.user-info {
-  margin-bottom: 20px;
-}
-
-.error {
-  color: red;
-  margin-bottom: 10px;
 }

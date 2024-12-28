@@ -1,7 +1,18 @@
 .display {
     flex: 1;
-    padding: 2rem;
-    background-color: var(--bg-color);
+    display: flex;
+    flex-direction: column;
     overflow-y: auto;
-    min-height: 0; /* Importante para el scroll */
+    padding: 2rem;
+}
+
+.display-content {
+    flex: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
 }

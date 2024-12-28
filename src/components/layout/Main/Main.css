@@ -1,8 +1,19 @@
 .main {
     display: flex;
     flex: 1;
-    min-height: 0; /* Importante para el scroll */
+    padding: 2rem;
     background-color: var(--bg-color);
+    overflow-y: auto;
+}
+
+.main-content {
+    flex: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
 }
 
 /* Cuando el usuario no está autenticado, el main ocupa todo el espacio disponible */

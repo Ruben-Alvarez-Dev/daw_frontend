@@ -1,25 +1,22 @@
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { AppProvider } from './context/AppContext';
-import Navbar from './components/layout/Navbar/Navbar';
-import Main from './components/layout/Main/Main';
-import Footer from './components/layout/Footer/Footer';
+import Layout from './components/layout/Layout';
+import AppRoutes from './routes';
 import './App.css';
 
-function App() {
+const App = () => {
     return (
         <BrowserRouter>
             <AuthProvider>
                 <AppProvider>
-                    <div className="app">
-                        <Navbar />
-                        <Main />
-                        <Footer />
-                    </div>
+                    <Layout>
+                        <AppRoutes />
+                    </Layout>
                 </AppProvider>
             </AuthProvider>
         </BrowserRouter>
     );
-}
+};
 
 export default App;

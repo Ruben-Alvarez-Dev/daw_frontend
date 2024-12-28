@@ -1,10 +1,11 @@
-import AppRoutes from '../../../routes';
 import './Display.css';
 
-const Display = () => {
+const Display = ({ children }) => {
     return (
         <div className="display">
-            <AppRoutes />
+            <div className="display-content">
+                {children}
+            </div>
         </div>
     );
 };
