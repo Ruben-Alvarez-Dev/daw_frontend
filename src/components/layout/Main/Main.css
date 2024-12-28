@@ -1,0 +1,11 @@
+.main {
+    display: flex;
+    flex: 1;
+    min-height: 0; /* Importante para el scroll */
+    background-color: var(--bg-color);
+}
+
+/* Cuando el usuario no está autenticado, el main ocupa todo el espacio disponible */
+.main:only-child {
+    width: 100%;
+}

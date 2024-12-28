@@ -1,12 +1,25 @@
-import React from 'react'
-import './App.css'
+import { BrowserRouter } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import { AppProvider } from './context/AppContext';
+import Navbar from './components/layout/Navbar/Navbar';
+import Main from './components/layout/Main/Main';
+import Footer from './components/layout/Footer/Footer';
+import './App.css';
 
-const App = () => {
-  return (
-    <div className="app">
-      APP
-    </div>
-  )
+function App() {
+    return (
+        <BrowserRouter>
+            <AuthProvider>
+                <AppProvider>
+                    <div className="app">
+                        <Navbar />
+                        <Main />
+                        <Footer />
+                    </div>
+                </AppProvider>
+            </AuthProvider>
+        </BrowserRouter>
+    );
 }
 
-export default App
+export default App;
