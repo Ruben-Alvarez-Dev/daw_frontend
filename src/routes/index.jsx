@@ -1,70 +1,45 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import PrivateRoute from './PrivateRoute';
+
+// Auth components
 import Login from '../components/auth/login/Login';
 import Register from '../components/auth/register/Register';
-import Dashboard from '../components/dashboard/Dashboard';
 import Home from '../components/home/Home';
-import PrivateRoute from './PrivateRoute';
-import { useAuth } from '../context/AuthContext';
-import RestaurantList from '../components/restaurants/restaurantList/RestaurantList';
-import RestaurantForm from '../components/restaurants/restaurantForm/RestaurantForm';
-import TableList from '../components/tables/tableList/TableList';
-import TableForm from '../components/tables/tableForm/TableForm';
-import UserList from '../components/users/userList/UserList';
-import UserForm from '../components/users/userForm/UserForm';
-import { ROLES } from '../constants/roles';
+
+// Views
+import Dashboard from '../components/views/Dashboard';
+import Users from '../components/views/Users';
+import Restaurants from '../components/views/Restaurants';
+import Tables from '../components/views/Tables';
+import Zones from '../components/views/Zones';
+import Reservations from '../components/views/Reservations';
+import Profile from '../components/views/Profile';
+import Settings from '../components/views/Settings';
 
 const AppRoutes = () => {
     const { user } = useAuth();
 
     return (
         <Routes>
-            {/* Rutas públicas */}
+            {/* Public routes */}
             <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
             <Route path="/register" element={user ? <Navigate to="/dashboard" replace /> : <Register />} />
             <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <Home />} />
 
-            {/* Rutas privadas */}
+            {/* Private routes */}
             <Route element={<PrivateRoute />}>
                 <Route path="/dashboard" element={<Dashboard />} />
-                
-                {/* Rutas de restaurantes */}
-                <Route path="/restaurants" element={<RestaurantList />} />
-                <Route path="/restaurants/new" element={<RestaurantForm />} />
-                <Route path="/restaurants/:id/edit" element={<RestaurantForm />} />
-                
-                {/* Rutas de mesas */}
-                <Route path="/restaurants/:restaurantId/tables" element={<TableList />} />
-                <Route path="/restaurants/:restaurantId/tables/new" element={<TableForm />} />
-                <Route path="/restaurants/:restaurantId/tables/:id/edit" element={<TableForm />} />
-                
-                {/* Rutas de usuarios (solo admin) */}
-                <Route 
-                    path="/users" 
-                    element={
-                        user?.role === ROLES.ADMIN ? 
-                        <UserList /> : 
-                        <Navigate to="/dashboard" />
-                    } 
-                />
-                <Route 
-                    path="/users/new" 
-                    element={
-                        user?.role === ROLES.ADMIN ? 
-                        <UserForm /> : 
-                        <Navigate to="/dashboard" />
-                    } 
-                />
-                <Route 
-                    path="/users/:id/edit" 
-                    element={
-                        user?.role === ROLES.ADMIN ? 
-                        <UserForm /> : 
-                        <Navigate to="/dashboard" />
-                    } 
-                />
+                <Route path="/users" element={<Users />} />
+                <Route path="/restaurants" element={<Restaurants />} />
+                <Route path="/tables" element={<Tables />} />
+                <Route path="/zones" element={<Zones />} />
+                <Route path="/reservations" element={<Reservations />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/settings" element={<Settings />} />
             </Route>
 
-            {/* Ruta por defecto */}
+            {/* Default route */}
             <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
     );

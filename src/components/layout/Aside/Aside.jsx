@@ -3,65 +3,51 @@ import { useAuth } from '../../../context/AuthContext';
 import { ROLES } from '../../../constants/roles';
 import './Aside.css';
 
+const menuItems = {
+    [ROLES.ADMIN]: [
+        { to: '/dashboard', text: 'Dashboard' },
+        { to: '/users', text: 'Usuarios' },
+        { to: '/restaurants', text: 'Restaurantes' },
+        { to: '/tables', text: 'Mesas' },
+        { to: '/zones', text: 'Zonas' },
+        { to: '/reservations', text: 'Reservas' },
+        { to: '/profile', text: 'Perfil' },
+        { to: '/settings', text: 'Ajustes' }
+    ],
+    [ROLES.SUPERVISOR]: [
+        { to: '/dashboard', text: 'Dashboard' },
+        { to: '/tables', text: 'Mesas' },
+        { to: '/zones', text: 'Zonas' },
+        { to: '/reservations', text: 'Reservas' },
+        { to: '/profile', text: 'Perfil' },
+        { to: '/settings', text: 'Ajustes' }
+    ],
+    [ROLES.WAITER]: [
+        { to: '/dashboard', text: 'Dashboard' },
+        { to: '/my-tables', text: 'Mis Mesas' },
+        { to: '/my-reservations', text: 'Mis Reservas' },
+        { to: '/profile', text: 'Perfil' },
+        { to: '/settings', text: 'Ajustes' }
+    ]
+};
+
 const Aside = () => {
     const { user } = useAuth();
-
-    const renderAdminLinks = () => (
-        <div className="aside-section">
-            <h2 className="aside-section-title">Administración</h2>
-            <nav className="aside-nav">
-                <NavLink to="/users" className="aside-link">
-                    <span className="aside-link-text">Usuarios</span>
-                </NavLink>
-                <NavLink to="/restaurants" className="aside-link">
-                    <span className="aside-link-text">Restaurantes</span>
-                </NavLink>
-            </nav>
-        </div>
-    );
-
-    const renderSupervisorLinks = () => (
-        <div className="aside-section">
-            <h2 className="aside-section-title">Gestión</h2>
-            <nav className="aside-nav">
-                <NavLink to="/tables" className="aside-link">
-                    <span className="aside-link-text">Mesas</span>
-                </NavLink>
-                <NavLink to="/reservations" className="aside-link">
-                    <span className="aside-link-text">Reservas</span>
-                </NavLink>
-            </nav>
-        </div>
-    );
-
-    const renderWaiterLinks = () => (
-        <div className="aside-section">
-            <h2 className="aside-section-title">Servicio</h2>
-            <nav className="aside-nav">
-                <NavLink to="/my-tables" className="aside-link">
-                    <span className="aside-link-text">Mis Mesas</span>
-                </NavLink>
-                <NavLink to="/my-reservations" className="aside-link">
-                    <span className="aside-link-text">Mis Reservas</span>
-                </NavLink>
-            </nav>
-        </div>
-    );
+    const items = menuItems[user?.role] || [];
 
     return (
         <aside className="aside">
-            <div className="aside-section">
-                <h2 className="aside-section-title">General</h2>
-                <nav className="aside-nav">
-                    <NavLink to="/dashboard" className="aside-link">
-                        <span className="aside-link-text">Dashboard</span>
+            <nav className="aside-nav">
+                {items.map((item, index) => (
+                    <NavLink
+                        key={index}
+                        to={item.to}
+                        className="aside-link"
+                    >
+                        <span className="aside-link-text">{item.text}</span>
                     </NavLink>
-                </nav>
-            </div>
-
-            {user?.role === ROLES.ADMIN && renderAdminLinks()}
-            {user?.role === ROLES.SUPERVISOR && renderSupervisorLinks()}
-            {user?.role === ROLES.WAITER && renderWaiterLinks()}
+                ))}
+            </nav>
         </aside>
     );
 };
