@@ -3,7 +3,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 // Auth services
 export const login = async (credentials) => {
     try {
-        const response = await fetch(`${API_URL}/login`, {
+        const response = await fetch(`${API_URL}/api/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -26,7 +26,7 @@ export const login = async (credentials) => {
 
 export const register = async (userData) => {
     try {
-        const response = await fetch(`${API_URL}/register`, {
+        const response = await fetch(`${API_URL}/api/register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -50,7 +50,7 @@ export const register = async (userData) => {
 // Restaurant services
 export const getRestaurants = async (token) => {
     try {
-        const response = await fetch(`${API_URL}/restaurants`, {
+        const response = await fetch(`${API_URL}/api/restaurants`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
             },
@@ -71,7 +71,7 @@ export const getRestaurants = async (token) => {
 
 export const getRestaurant = async (token, id) => {
     try {
-        const response = await fetch(`${API_URL}/restaurants/${id}`, {
+        const response = await fetch(`${API_URL}/api/restaurants/${id}`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
             },
@@ -92,7 +92,7 @@ export const getRestaurant = async (token, id) => {
 
 export const createRestaurant = async (token, data) => {
     try {
-        const response = await fetch(`${API_URL}/restaurants`, {
+        const response = await fetch(`${API_URL}/api/restaurants`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -116,7 +116,7 @@ export const createRestaurant = async (token, data) => {
 
 export const updateRestaurant = async (token, id, data) => {
     try {
-        const response = await fetch(`${API_URL}/restaurants/${id}`, {
+        const response = await fetch(`${API_URL}/api/restaurants/${id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -141,7 +141,7 @@ export const updateRestaurant = async (token, id, data) => {
 // Table services
 export const getTables = async (token, restaurantId) => {
     try {
-        const response = await fetch(`${API_URL}/restaurants/${restaurantId}/tables`, {
+        const response = await fetch(`${API_URL}/api/restaurants/${restaurantId}/tables`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
             },
@@ -162,7 +162,7 @@ export const getTables = async (token, restaurantId) => {
 
 export const getTable = async (token, restaurantId, tableId) => {
     try {
-        const response = await fetch(`${API_URL}/restaurants/${restaurantId}/tables/${tableId}`, {
+        const response = await fetch(`${API_URL}/api/restaurants/${restaurantId}/tables/${tableId}`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
             },
@@ -183,7 +183,7 @@ export const getTable = async (token, restaurantId, tableId) => {
 
 export const createTable = async (token, restaurantId, data) => {
     try {
-        const response = await fetch(`${API_URL}/restaurants/${restaurantId}/tables`, {
+        const response = await fetch(`${API_URL}/api/restaurants/${restaurantId}/tables`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -207,7 +207,7 @@ export const createTable = async (token, restaurantId, data) => {
 
 export const updateTable = async (token, restaurantId, tableId, data) => {
     try {
-        const response = await fetch(`${API_URL}/restaurants/${restaurantId}/tables/${tableId}`, {
+        const response = await fetch(`${API_URL}/api/restaurants/${restaurantId}/tables/${tableId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -232,16 +232,19 @@ export const updateTable = async (token, restaurantId, tableId, data) => {
 // User services
 export const getUsers = async (token) => {
     try {
-        const response = await fetch(`${API_URL}/users`, {
+        const response = await fetch(`${API_URL}/api/users`, {
+            method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
-            },
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
         });
-        
+
         const data = await response.json();
         
         if (!response.ok) {
-            throw new Error(data.message || 'Error al obtener usuarios');
+            throw new Error(data.message || `Error HTTP: ${response.status}`);
         }
         
         return data;
@@ -253,7 +256,7 @@ export const getUsers = async (token) => {
 
 export const getUser = async (token, id) => {
     try {
-        const response = await fetch(`${API_URL}/users/${id}`, {
+        const response = await fetch(`${API_URL}/api/users/${id}`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
             },
@@ -274,7 +277,7 @@ export const getUser = async (token, id) => {
 
 export const createUser = async (token, data) => {
     try {
-        const response = await fetch(`${API_URL}/users`, {
+        const response = await fetch(`${API_URL}/api/users`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -298,24 +301,65 @@ export const createUser = async (token, data) => {
 
 export const updateUser = async (token, id, data) => {
     try {
-        const response = await fetch(`${API_URL}/users/${id}`, {
-            method: 'PUT',
+        console.log('Enviando actualización de usuario:', {
+            url: `${API_URL}/api/users/${id}`,
+            method: 'PATCH',
+            data
+        });
+
+        const response = await fetch(`${API_URL}/api/users/${id}`, {
+            method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json'
             },
             body: JSON.stringify(data),
         });
-        
-        const result = await response.json();
+
+        // Si la respuesta no es ok, intentamos obtener el mensaje de error
+        if (!response.ok) {
+            let errorMessage = 'Error al actualizar el usuario';
+            try {
+                const errorData = await response.json();
+                errorMessage = errorData.message || errorData.error || errorMessage;
+            } catch (e) {
+                console.error('Error al parsear respuesta de error:', e);
+            }
+            throw new Error(errorMessage);
+        }
+
+        // Solo intentamos parsear como JSON si la respuesta fue exitosa
+        try {
+            const result = await response.json();
+            return result;
+        } catch (e) {
+            console.error('Error al parsear respuesta exitosa:', e);
+            return null; // Retornamos null si no hay datos pero la operación fue exitosa
+        }
+    } catch (error) {
+        console.error('Error completo al actualizar usuario:', error);
+        throw error;
+    }
+};
+
+export const deleteUser = async (token, id) => {
+    try {
+        const response = await fetch(`${API_URL}/api/users/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        });
         
         if (!response.ok) {
-            throw new Error(result.message || 'Error al actualizar el usuario');
+            const data = await response.json();
+            throw new Error(data.message || 'Error al eliminar el usuario');
         }
         
-        return result;
+        return response;
     } catch (error) {
-        console.error('Error al actualizar el usuario:', error);
+        console.error('Error al eliminar el usuario:', error);
         throw error;
     }
 };

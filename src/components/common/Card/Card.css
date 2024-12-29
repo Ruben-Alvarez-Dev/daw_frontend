@@ -1,0 +1,52 @@
+.card {
+    margin: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    max-width: 50%;
+    background-color: var(--bg-color);
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--box-shadow);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.card:hover {
+    border-color: var(--primary-color);
+}
+
+.card.active {
+    border-color: var(--success-color);
+    box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.1);
+    flex: 0 0 50%;
+    max-width: 50%;
+}
+
+.card-header {
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    border-bottom: 1px solid #ddd;
+    background-color: white;
+    flex: 0 0 auto;
+}
+
+.card-body {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: auto;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-footer {
+    padding: 0.5rem 1rem;
+    border-top: 1px solid #ddd;
+    background-color: white;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    flex: 0 0 auto;
+}

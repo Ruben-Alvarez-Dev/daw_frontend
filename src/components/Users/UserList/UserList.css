@@ -1,0 +1,110 @@
+.user-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.message {
+    text-align: center;
+    padding: 1rem;
+    color: #666;
+}
+
+.error-message {
+    text-align: center;
+    padding: 1rem;
+    color: var(--danger-color);
+    background-color: rgba(var(--danger-color-rgb), 0.1);
+    border-radius: 4px;
+}
+
+.user-list-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.users-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.user-item {
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.user-item:hover {
+    border-color: var(--primary-color);
+    background-color: #eaeaea;
+}
+
+.user-item.selected {
+    border-color: var(--success-color);
+    background-color: rgba(var(--success-color-rgb), 0.1);
+}
+
+.user-item div {
+    line-height: 1.2;
+}
+
+.user-name {
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 1.1rem;
+}
+
+.user-email {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.user-role {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.delete-button {
+    padding: 0.3rem 0.6rem;
+    background-color: var(--danger-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 0.5rem;
+    align-self: flex-start;
+}
+
+.delete-button:hover {
+    background-color: var(--danger-color-dark);
+}
+
+.add-user-btn {
+    padding: 0.5rem 1rem;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin: 0.5rem;
+}
+
+.error {
+    color: var(--danger-color);
+    padding: 1rem;
+    text-align: center;
+}
