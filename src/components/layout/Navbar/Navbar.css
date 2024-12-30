@@ -49,8 +49,19 @@
 }
 
 .navbar-user {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
     font-weight: 500;
     color: var(--text-secondary);
+}
+
+.active-user {
+    /* padding: 0.5rem 1rem;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 4px;
+    font-weight: 500; */
 }
 
 .navbar-logout {

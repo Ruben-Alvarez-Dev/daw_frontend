@@ -1,48 +1,53 @@
 import { useState, useEffect } from 'react';
-import Card from '../../common/Card/Card';
-import './UserForm.css';
 import PropTypes from 'prop-types';
-import { createUser, updateUser } from '../../../services/api.js';
+import Card from '../../common/Card/Card';
 import { useAuth } from '../../../context/AuthContext';
+import { useApp } from '../../../context/AppContext';
+import './UserForm.css';
 
-// Definimos los roles válidos como constante para mantener consistencia
 const ROLES = {
     CUSTOMER: 'customer',
     SUPERVISOR: 'supervisor',
     ADMIN: 'admin'
 };
 
-const UserForm = ({ id, isActive, onActivate, selectedUser, onUpdate }) => {
+const UserForm = ({ id }) => {
     const { token } = useAuth();
-    const [isEditing, setIsEditing] = useState(false);
+    const { userActive, clearUserActive } = useApp();
+    const [isEditing, setIsEditing] = useState(!userActive);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [formData, setFormData] = useState({
+
+    const initialFormState = {
+        id: '',
         name: '',
         email: '',
         role: ROLES.CUSTOMER,
-        password: ''
-    });
+        phone: '',
+        address: '',
+        visits: 0
+    };
+
+    const [formData, setFormData] = useState(initialFormState);
 
     useEffect(() => {
-        if (selectedUser) {
+        if (userActive) {
             setFormData({
-                ...selectedUser,
-                password: '' // No mostramos la contraseña por seguridad
+                id: userActive.id || '',
+                name: userActive.name || '',
+                email: userActive.email || '',
+                role: userActive.role || ROLES.CUSTOMER,
+                phone: userActive.phone || '',
+                address: userActive.address || '',
+                visits: userActive.visits || 0
             });
             setIsEditing(false);
         } else {
-            // Si no hay usuario seleccionado, limpiamos el formulario
-            setFormData({
-                name: '',
-                email: '',
-                role: ROLES.CUSTOMER,
-                password: ''
-            });
-            setIsEditing(true); // Activamos edición para nuevo usuario
+            setFormData({...initialFormState});
+            setIsEditing(true);
         }
         setError(null);
-    }, [selectedUser]);
+    }, [userActive]);
 
     const handleChange = (e) => {
         if (!isEditing) return;
@@ -57,75 +62,61 @@ const UserForm = ({ id, isActive, onActivate, selectedUser, onUpdate }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!isEditing) return;
-        
+
+        setLoading(true);
+        setError(null);
+
         try {
-            setLoading(true);
-            setError(null);
+            const url = userActive 
+                ? `http://localhost:8000/api/users/${userActive.id}`
+                : 'http://localhost:8000/api/users';
+            
+            const method = userActive ? 'PUT' : 'POST';
 
-            // Preparamos los datos a enviar
-            const dataToSend = {
-                name: formData.name.trim(),
-                email: formData.email.trim(),
-                role: formData.role,
-                password: formData.password // Siempre incluimos password para nuevos usuarios
-            };
+            const response = await fetch(url, {
+                method,
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
 
-            let response;
-            if (selectedUser) {
-                // Si hay password y no está vacío, lo incluimos en la actualización
-                if (!formData.password || formData.password.trim() === '') {
-                    delete dataToSend.password;
-                }
-                response = await updateUser(token, selectedUser.id, dataToSend);
-            } else {
-                // Para nuevos usuarios, password es obligatorio
-                if (!formData.password || formData.password.trim() === '') {
-                    throw new Error('La contraseña es obligatoria para nuevos usuarios');
-                }
-                response = await createUser(token, dataToSend);
+            if (!response.ok) {
+                throw new Error('Error al guardar usuario');
             }
 
-            setIsEditing(false);
-            if (onUpdate) {
-                onUpdate(); // Notificamos al padre para que actualice la lista
-            }
+            handleClear();
         } catch (err) {
-            console.error('Error completo:', err);
-            setError(err.message || 'Error al guardar el usuario');
+            console.error('Error saving user:', err);
+            setError('Error al guardar el usuario');
         } finally {
             setLoading(false);
         }
     };
 
     const handleClear = () => {
-        setFormData({
-            name: '',
-            email: '',
-            role: ROLES.CUSTOMER,
-            password: ''
-        });
+        setFormData({...initialFormState});
         setIsEditing(true);
         setError(null);
+        clearUserActive();
     };
 
     const toggleEdit = () => {
-        if (isEditing) {
-            handleSubmit({ preventDefault: () => {} });
-        } else {
-            setIsEditing(true);
-        }
+        if (!userActive) return;
+        setIsEditing(!isEditing);
     };
 
     return (
         <Card
             id={id}
-            isActive={isActive}
-            onActivate={onActivate}
-            header={<h2>{isEditing ? (selectedUser ? 'Editar Usuario' : 'Nuevo Usuario') : 'Detalles de Usuario'}</h2>}
+            header={<h2>{isEditing ? (userActive ? 'Editar Usuario' : 'Nuevo Usuario') : 'Detalles de Usuario'}</h2>}
             body={
-                <form className="user-form" onSubmit={handleSubmit}>
-                    {error && <div className="error-message">{error}</div>}
-                    <div>
+                <form className="user-form">
+                    {error && <div className="error">{error}</div>}
+                    
+                    <div className="form-group">
                         <label htmlFor="name">Nombre de usuario</label>
                         <input
                             type="text"
@@ -133,12 +124,12 @@ const UserForm = ({ id, isActive, onActivate, selectedUser, onUpdate }) => {
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
+                            disabled={!isEditing}
                             required
-                            disabled={!isEditing || loading}
-                            placeholder="Nombre de usuario"
                         />
                     </div>
-                    <div>
+
+                    <div className="form-group">
                         <label htmlFor="email">Email</label>
                         <input
                             type="email"
@@ -146,65 +137,95 @@ const UserForm = ({ id, isActive, onActivate, selectedUser, onUpdate }) => {
                             name="email"
                             value={formData.email}
                             onChange={handleChange}
+                            disabled={!isEditing}
                             required
-                            disabled={!isEditing || loading}
-                            placeholder="email@ejemplo.com"
                         />
                     </div>
-                    <div>
+
+                    <div className="form-group">
                         <label htmlFor="role">Rol</label>
                         <select
                             id="role"
                             name="role"
                             value={formData.role}
                             onChange={handleChange}
-                            required
-                            disabled={!isEditing || loading}
+                            disabled={!isEditing}
                         >
-                            {Object.values(ROLES).map(role => (
-                                <option key={role} value={role}>
-                                    {role}
-                                </option>
-                            ))}
+                            <option value={ROLES.CUSTOMER}>Customer</option>
+                            <option value={ROLES.SUPERVISOR}>Supervisor</option>
+                            <option value={ROLES.ADMIN}>Admin</option>
                         </select>
                     </div>
-                    {isEditing && (
-                        <div>
-                            <label htmlFor="password">
-                                Contraseña {selectedUser && '(dejar en blanco para mantener)'}
-                            </label>
-                            <input
-                                type="password"
-                                id="password"
-                                name="password"
-                                value={formData.password}
-                                onChange={handleChange}
-                                required={!selectedUser}
-                                disabled={loading}
-                                placeholder={selectedUser ? '(Sin cambios)' : ''}
-                            />
-                        </div>
-                    )}
+
+                    <div className="form-group">
+                        <label htmlFor="phone">Teléfono</label>
+                        <input
+                            type="tel"
+                            id="phone"
+                            name="phone"
+                            value={formData.phone}
+                            onChange={handleChange}
+                            disabled={!isEditing}
+                            placeholder="(Opcional)"
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label htmlFor="address">Dirección</label>
+                        <input
+                            type="text"
+                            id="address"
+                            name="address"
+                            value={formData.address}
+                            onChange={handleChange}
+                            disabled={!isEditing}
+                            placeholder="(Opcional)"
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label htmlFor="visits">Visitas</label>
+                        <input
+                            type="number"
+                            id="visits"
+                            name="visits"
+                            value={formData.visits}
+                            onChange={handleChange}
+                            disabled={!isEditing}
+                            min="0"
+                        />
+                    </div>
                 </form>
             }
             footer={
                 <div className="form-actions">
-                    <button 
-                        type="button" 
-                        className="button"
-                        onClick={toggleEdit}
-                        disabled={loading}
-                    >
-                        {loading ? 'Guardando...' : (isEditing ? 'Guardar' : 'Editar')}
-                    </button>
-                    <button 
-                        type="button" 
-                        className="button"
-                        onClick={handleClear}
-                        disabled={loading}
-                    >
-                        Limpiar
-                    </button>
+                    {isEditing ? (
+                        <>
+                            <button 
+                                type="button"
+                                onClick={handleSubmit}
+                                className="submit-button"
+                                disabled={loading}
+                            >
+                                {loading ? 'Guardando...' : 'Guardar'}
+                            </button>
+                            <button 
+                                type="button" 
+                                onClick={handleClear}
+                                className="cancel-button"
+                            >
+                                Cancelar
+                            </button>
+                        </>
+                    ) : (
+                        <button 
+                            type="button" 
+                            onClick={toggleEdit}
+                            className="edit-button"
+                        >
+                            Editar
+                        </button>
+                    )}
                 </div>
             }
         />
@@ -212,16 +233,7 @@ const UserForm = ({ id, isActive, onActivate, selectedUser, onUpdate }) => {
 };
 
 UserForm.propTypes = {
-    id: PropTypes.string.isRequired,
-    isActive: PropTypes.bool,
-    onActivate: PropTypes.func.isRequired,
-    selectedUser: PropTypes.shape({
-        id: PropTypes.number,
-        name: PropTypes.string,
-        email: PropTypes.string,
-        role: PropTypes.oneOf(Object.values(ROLES))
-    }),
-    onUpdate: PropTypes.func
+    id: PropTypes.string.isRequired
 };
 
 export default UserForm;

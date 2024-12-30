@@ -3,74 +3,100 @@ import Card from '../../common/Card/Card';
 import './UserList.css';
 import PropTypes from 'prop-types';
 import { useAuth } from '../../../context/AuthContext';
-import { getUsers } from '../../../services/api';
+import { useApp } from '../../../context/AppContext';
 
-const UserList = ({ id, isActive, onActivate, onSelectUser, onAddUser, refreshTrigger }) => {
+const UserList = ({ id }) => {
     const { token } = useAuth();
+    const { userActive, setUserActive, clearUserActive } = useApp();
     const [users, setUsers] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [selectedUserId, setSelectedUserId] = useState(null);
 
-    // Cargar usuarios cuando cambie el token o refreshTrigger
     useEffect(() => {
-        console.log('UserList - Token actual:', token);
-        if (token) {
-            loadUsers();
-        } else {
-            console.log('UserList - No hay token disponible');
-            setError('No hay token de autenticación disponible');
-        }
-    }, [token, refreshTrigger]);
+        loadUsers();
+    }, []);
 
     const loadUsers = async () => {
         try {
-            console.log('UserList - Iniciando carga de usuarios');
-            setLoading(true);
-            setError(null);
+            const response = await fetch('http://localhost:8000/api/users', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
 
-            const data = await getUsers(token);
-            console.log('UserList - Datos recibidos:', data);
-            setUsers(Array.isArray(data) ? data : []);
-        } catch (error) {
-            console.error('UserList - Error al cargar usuarios:', error);
-            setError(error.message || 'Error al cargar los usuarios');
-        } finally {
-            setLoading(false);
+            if (!response.ok) {
+                throw new Error('Error al cargar usuarios');
+            }
+
+            const data = await response.json();
+            setUsers(data);
+            setError(null);
+        } catch (err) {
+            console.error('Error loading users:', err);
+            setError('Error al cargar la lista de usuarios');
+        }
+    };
+
+    const handleUserClick = (user) => {
+        if (userActive?.id === user.id) {
+            clearUserActive();
+        } else {
+            setUserActive(user);
         }
     };
 
     const handleDeleteUser = async (userId, e) => {
         e.stopPropagation();
-        if (window.confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
+        if (window.confirm('¿Estás seguro de que quieres eliminar este usuario?')) {
             try {
                 const response = await fetch(`http://localhost:8000/api/users/${userId}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${token}`,
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
+                        'Accept': 'application/json'
                     }
                 });
 
-                console.log('Respuesta del servidor:', response);
-
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    console.error('Error del servidor:', errorData);
-                    throw new Error(errorData.message || 'Error al eliminar usuario');
+                    throw new Error('Error al eliminar usuario');
                 }
 
-                await loadUsers();
-                if (selectedUserId === userId) {
-                    setSelectedUserId(null);
-                    onSelectUser(null);
+                // Si el usuario eliminado era el activo, lo limpiamos
+                if (userActive?.id === userId) {
+                    clearUserActive();
                 }
-            } catch (err) {
-                console.error('Error detallado:', err);
-                alert('Error al eliminar el usuario');
+                
+                // Recargar la lista de usuarios
+                loadUsers();
+            } catch (error) {
+                console.error('Error:', error);
             }
         }
+    };
+
+    const renderUserItem = (user) => {
+        return (
+            <div 
+                key={user.id}
+                className={`user-item ${userActive?.id === user.id ? 'active' : ''}`}
+                onClick={() => handleUserClick(user)}
+            >
+                <div className="user-header">
+                    <span>ID: {user.id}</span>
+                    <button
+                        className="delete-button"
+                        onClick={(e) => handleDeleteUser(user.id, e)}
+                    >
+                        Eliminar
+                    </button>
+                </div>
+                <div className="user-name">{user.name}</div>
+                <div className="user-email">{user.email}</div>
+                <div className="user-role">Rol: {user.role}</div>
+                <div className="user-phone">Teléfono: {user.phone || 'No especificado'}</div>
+                <div className="user-visits">Visitas: {user.visits || 0}</div>
+            </div>
+        );
     };
 
     return (
@@ -79,62 +105,28 @@ const UserList = ({ id, isActive, onActivate, onSelectUser, onAddUser, refreshTr
             header={<h2>Lista de Usuarios</h2>}
             body={
                 <div className="user-list-container">
-                    {loading && <p>Cargando usuarios...</p>}
-                    {error && <p className="error">{error}</p>}
-                    {!loading && !error && users.length === 0 && (
-                        <p>No hay usuarios para mostrar</p>
-                    )}
-                    {!loading && !error && users.length > 0 && (
-                        <div className="users-grid">
-                            {users.map(user => (
-                                <div 
-                                    className={`user-item ${selectedUserId === user.id ? 'selected' : ''}`}
-                                    onClick={() => {
-                                        setSelectedUserId(user.id);
-                                        onSelectUser(user);
-                                    }}
-                                    key={user.id}
-                                >
-                                    <div className="user-name">{user.name}</div>
-                                    <div className="user-email">{user.email}</div>
-                                    <div className="user-role">Rol: {user.role}</div>
-                                    <button 
-                                        className="delete-button"
-                                        onClick={(e) => handleDeleteUser(user.id, e)}
-                                    >
-                                        Eliminar
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    )}
+                    {error && <div className="error">{error}</div>}
+                    <div className="users-grid">
+                        {users.map(renderUserItem)}
+                    </div>
                 </div>
             }
             footer={
-                <button 
-                    className="add-user-btn"
-                    onClick={() => {
-                        setSelectedUserId(null);
-                        onSelectUser(null);
-                        onAddUser(); // Llamamos a la nueva función
-                    }}
-                >
-                    Añadir Usuario
-                </button>
+                <div className="list-actions">
+                    <button 
+                        className="add-button"
+                        onClick={() => clearUserActive()}
+                    >
+                        Añadir Usuario
+                    </button>
+                </div>
             }
-            isActive={isActive}
-            onActivate={onActivate}
         />
     );
 };
 
 UserList.propTypes = {
-    id: PropTypes.string.isRequired,
-    isActive: PropTypes.bool,
-    onActivate: PropTypes.func.isRequired,
-    onSelectUser: PropTypes.func.isRequired,
-    onAddUser: PropTypes.func.isRequired,
-    refreshTrigger: PropTypes.any // Puede ser cualquier valor que cambie para forzar la actualización
+    id: PropTypes.string.isRequired
 };
 
 export default UserList;

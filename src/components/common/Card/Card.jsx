@@ -1,24 +1,63 @@
+import { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import './Card.css';
+import { useApp } from '../../../context/AppContext';
 
-const Card = ({ id, header, body, footer, isActive, onActivate }) => {
-    const handleCardClick = (e) => {
+const Card = ({ id, header, body, footer }) => {
+    const { cardActive, activateCard, clearCardActive, showCard, hideCard } = useApp();
+
+    // Extraer el título del header, buscando recursivamente si es necesario
+    const getTitle = (element) => {
+        if (!element) return null;
+        if (typeof element === 'string') return element;
+        if (element.type === 'h2') {
+            return typeof element.props.children === 'string' 
+                ? element.props.children 
+                : getTitle(element.props.children);
+        }
+        return null;
+    };
+
+    const title = getTitle(header);
+
+    // Solo registramos la card una vez al montarse y la limpiamos al desmontarse
+    useEffect(() => {
+        if (title) {
+            showCard(title);
+        }
+        return () => {
+            if (title) {
+                hideCard(title);
+            }
+        };
+    // Eliminamos las dependencias para que solo se ejecute al montar/desmontar
+    }, []); 
+
+    const handleClick = () => {
         if (!isActive) {
-            e.preventDefault();
-            e.stopPropagation();
-            onActivate(id);
-            return;
+            activateCard(title);
         }
     };
 
+    const isActive = cardActive === title;
+
     return (
         <div 
+            id={id}
             className={`card ${isActive ? 'active' : ''}`}
-            onClick={handleCardClick}
+            onClick={handleClick}
         >
-            {header && <div className="card-header">{header}</div>}
-            <div className="card-body">{body}</div>
-            {footer && <div className="card-footer">{footer}</div>}
+            <div className="card-header">
+                {header}
+            </div>
+            <div className="card-body">
+                {body}
+            </div>
+            {footer && (
+                <div className="card-footer">
+                    {footer}
+                </div>
+            )}
         </div>
     );
 };
@@ -26,10 +65,8 @@ const Card = ({ id, header, body, footer, isActive, onActivate }) => {
 Card.propTypes = {
     id: PropTypes.string.isRequired,
     header: PropTypes.node,
-    body: PropTypes.node.isRequired,
-    footer: PropTypes.node,
-    isActive: PropTypes.bool,
-    onActivate: PropTypes.func.isRequired
+    body: PropTypes.node,
+    footer: PropTypes.node
 };
 
 export default Card;

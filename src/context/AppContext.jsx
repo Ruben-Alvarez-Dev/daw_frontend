@@ -1,70 +1,80 @@
-import React, { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState } from 'react';
+import PropTypes from 'prop-types';
 
-const AppContext = createContext(null);
+const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
-    // Estado para el restaurante activo
-    const [activeRestaurant, setActiveRestaurant] = useState(null);
-    
-    // Estado para la zona activa
-    const [activeZone, setActiveZone] = useState(null);
-    
-    // Estado para la mesa activa
-    const [activeTable, setActiveTable] = useState(null);
-    
-    // Estado para el menú lateral
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-    
-    // Estado para mensajes globales/notificaciones
-    const [notification, setNotification] = useState(null);
+    const [userActive, setUserActive] = useState(null);
+    const [cardActive, setCardActive] = useState(null);
+    const [cardsShown, setCardsShown] = useState([]);
 
-    const showNotification = (message, type = 'info') => {
-        setNotification({ message, type });
-        setTimeout(() => setNotification(null), 3000);
+    const clearUserActive = () => setUserActive(null);
+
+    const activateCard = (title) => {
+        if (cardsShown.includes(title)) {
+            setCardActive(title);
+        }
     };
 
-    const toggleSidebar = () => {
-        setIsSidebarOpen(prev => !prev);
+    const clearCardActive = () => {
+        if (cardsShown.length > 1) {
+            const nextCard = cardsShown.find(card => card !== cardActive);
+            setCardActive(nextCard);
+        }
     };
 
-    const clearActiveItems = () => {
-        setActiveRestaurant(null);
-        setActiveZone(null);
-        setActiveTable(null);
+    const showCard = (title) => {
+        if (!cardsShown.includes(title)) {
+            setCardsShown(prev => [...prev, title]);
+            if (!cardActive) {
+                setCardActive(title);
+            }
+        }
     };
 
-    const value = {
-        // Estados activos
-        activeRestaurant,
-        setActiveRestaurant,
-        activeZone,
-        setActiveZone,
-        activeTable,
-        setActiveTable,
-        
-        // Control del sidebar
-        isSidebarOpen,
-        toggleSidebar,
-        
-        // Notificaciones
-        notification,
-        showNotification,
-        
-        // Utilidades
-        clearActiveItems
+    const hideCard = (title) => {
+        setCardsShown(prev => prev.filter(t => t !== title));
+        if (cardActive === title) {
+            const remaining = cardsShown.filter(t => t !== title);
+            if (remaining.length > 0) {
+                setCardActive(remaining[0]);
+            } else {
+                setCardActive(null);
+            }
+        }
+    };
+
+    const clearCardsShown = () => {
+        setCardsShown([]);
+        setCardActive(null);
     };
 
     return (
-        <AppContext.Provider value={value}>
+        <AppContext.Provider value={{ 
+            userActive,
+            setUserActive,
+            clearUserActive,
+            cardActive,
+            activateCard,
+            clearCardActive,
+            cardsShown,
+            showCard,
+            hideCard,
+            clearCardsShown
+        }}>
             {children}
         </AppContext.Provider>
     );
 };
 
+AppProvider.propTypes = {
+    children: PropTypes.node.isRequired
+};
+
 export const useApp = () => {
     const context = useContext(AppContext);
     if (!context) {
-        throw new Error('useApp must be used within an AppProvider');
+        throw new Error('useApp debe usarse dentro de un AppProvider');
     }
     return context;
 };
