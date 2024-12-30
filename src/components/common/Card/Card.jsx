@@ -4,7 +4,7 @@ import './Card.css';
 import { useApp } from '../../../context/AppContext';
 
 const Card = ({ id, header, body, footer }) => {
-    const { cardActive, activateCard, clearCardActive, showCard, hideCard } = useApp();
+    const { cardActive, activateCard, showCard, hideCard } = useApp();
 
     // Extraer el título del header, buscando recursivamente si es necesario
     const getTitle = (element) => {
@@ -20,7 +20,6 @@ const Card = ({ id, header, body, footer }) => {
 
     const title = getTitle(header);
 
-    // Solo registramos la card una vez al montarse y la limpiamos al desmontarse
     useEffect(() => {
         if (title) {
             showCard(title);
@@ -30,13 +29,10 @@ const Card = ({ id, header, body, footer }) => {
                 hideCard(title);
             }
         };
-    // Eliminamos las dependencias para que solo se ejecute al montar/desmontar
     }, []); 
 
     const handleClick = () => {
-        if (!isActive) {
-            activateCard(title);
-        }
+        activateCard(title);
     };
 
     const isActive = cardActive === title;

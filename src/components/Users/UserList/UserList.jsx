@@ -13,7 +13,7 @@ const UserList = ({ id }) => {
 
     useEffect(() => {
         loadUsers();
-    }, []);
+    }, [userActive]); // Recargar cuando cambie userActive
 
     const loadUsers = async () => {
         try {
@@ -74,6 +74,10 @@ const UserList = ({ id }) => {
         }
     };
 
+    const handleNewUser = () => {
+        clearUserActive();
+    };
+
     const renderUserItem = (user) => {
         return (
             <div 
@@ -104,9 +108,9 @@ const UserList = ({ id }) => {
             id={id}
             header={<h2>Lista de Usuarios</h2>}
             body={
-                <div className="user-list-container">
+                <div className="user-list">
                     {error && <div className="error">{error}</div>}
-                    <div className="users-grid">
+                    <div className="list-container">
                         {users.map(renderUserItem)}
                     </div>
                 </div>
@@ -114,8 +118,8 @@ const UserList = ({ id }) => {
             footer={
                 <div className="list-actions">
                     <button 
-                        className="add-button"
-                        onClick={() => clearUserActive()}
+                        className="new-user-button"
+                        onClick={handleNewUser}
                     >
                         Añadir Usuario
                     </button>

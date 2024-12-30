@@ -13,7 +13,7 @@ const ROLES = {
 
 const UserForm = ({ id }) => {
     const { token } = useAuth();
-    const { userActive, clearUserActive } = useApp();
+    const { userActive, clearUserActive, setUserActive } = useApp();
     const [isEditing, setIsEditing] = useState(!userActive);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -23,9 +23,12 @@ const UserForm = ({ id }) => {
         name: '',
         email: '',
         role: ROLES.CUSTOMER,
+        password: '',
         phone: '',
         address: '',
-        visits: 0
+        visits: 0,
+        comments: '',
+        created_by: ''
     };
 
     const [formData, setFormData] = useState(initialFormState);
@@ -33,13 +36,8 @@ const UserForm = ({ id }) => {
     useEffect(() => {
         if (userActive) {
             setFormData({
-                id: userActive.id || '',
-                name: userActive.name || '',
-                email: userActive.email || '',
-                role: userActive.role || ROLES.CUSTOMER,
-                phone: userActive.phone || '',
-                address: userActive.address || '',
-                visits: userActive.visits || 0
+                ...userActive,
+                password: '' // No mostramos la contraseña por seguridad
             });
             setIsEditing(false);
         } else {
@@ -62,35 +60,73 @@ const UserForm = ({ id }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!isEditing) return;
-
-        setLoading(true);
-        setError(null);
-
+        
         try {
-            const url = userActive 
-                ? `http://localhost:8000/api/users/${userActive.id}`
-                : 'http://localhost:8000/api/users';
-            
-            const method = userActive ? 'PUT' : 'POST';
+            setLoading(true);
+            setError(null);
 
-            const response = await fetch(url, {
-                method,
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify(formData)
-            });
+            const dataToSend = {
+                name: formData.name.trim(),
+                email: formData.email.trim(),
+                role: formData.role,
+                password: formData.password
+            };
 
-            if (!response.ok) {
-                throw new Error('Error al guardar usuario');
+            if (formData.phone) {
+                dataToSend.phone = formData.phone.trim();
             }
 
-            handleClear();
+            if (formData.address) {
+                dataToSend.address = formData.address.trim();
+            }
+
+            if (formData.comments) {
+                dataToSend.comments = formData.comments.trim();
+            }
+
+            let response;
+            if (userActive) {
+                // Si estamos editando y no hay contraseña nueva, no la enviamos
+                if (!formData.password || formData.password.trim() === '') {
+                    delete dataToSend.password;
+                }
+                response = await fetch(`http://localhost:8000/api/users/${userActive.id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(dataToSend)
+                });
+            } else {
+                if (!formData.password || formData.password.trim() === '') {
+                    throw new Error('La contraseña es obligatoria para nuevos usuarios');
+                }
+                response = await fetch('http://localhost:8000/api/users', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(dataToSend)
+                });
+            }
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Error al guardar el usuario');
+            }
+
+            // Obtener los datos actualizados del usuario
+            const updatedUser = await response.json();
+            setUserActive(updatedUser); // Actualizar el usuario activo con los datos nuevos
+            setIsEditing(false);
+
         } catch (err) {
-            console.error('Error saving user:', err);
-            setError('Error al guardar el usuario');
+            console.error('Error completo:', err);
+            setError(err.message || 'Error al guardar el usuario');
         } finally {
             setLoading(false);
         }
@@ -104,8 +140,11 @@ const UserForm = ({ id }) => {
     };
 
     const toggleEdit = () => {
-        if (!userActive) return;
-        setIsEditing(!isEditing);
+        if (isEditing) {
+            handleSubmit({ preventDefault: () => {} });
+        } else {
+            setIsEditing(true);
+        }
     };
 
     return (
@@ -114,8 +153,21 @@ const UserForm = ({ id }) => {
             header={<h2>{isEditing ? (userActive ? 'Editar Usuario' : 'Nuevo Usuario') : 'Detalles de Usuario'}</h2>}
             body={
                 <form className="user-form">
-                    {error && <div className="error">{error}</div>}
+                    {error && <div className="error-message">{error}</div>}
                     
+                    {userActive && (
+                        <div className="form-group">
+                            <label htmlFor="id">ID</label>
+                            <input
+                                type="text"
+                                id="id"
+                                value={formData.id}
+                                disabled
+                                className="readonly-field"
+                            />
+                        </div>
+                    )}
+
                     <div className="form-group">
                         <label htmlFor="name">Nombre de usuario</label>
                         <input
@@ -124,8 +176,9 @@ const UserForm = ({ id }) => {
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
-                            disabled={!isEditing}
                             required
+                            disabled={!isEditing || loading}
+                            placeholder="Nombre de usuario"
                         />
                     </div>
 
@@ -137,8 +190,9 @@ const UserForm = ({ id }) => {
                             name="email"
                             value={formData.email}
                             onChange={handleChange}
-                            disabled={!isEditing}
                             required
+                            disabled={!isEditing || loading}
+                            placeholder="email@ejemplo.com"
                         />
                     </div>
 
@@ -149,11 +203,14 @@ const UserForm = ({ id }) => {
                             name="role"
                             value={formData.role}
                             onChange={handleChange}
-                            disabled={!isEditing}
+                            required
+                            disabled={!isEditing || loading}
                         >
-                            <option value={ROLES.CUSTOMER}>Customer</option>
-                            <option value={ROLES.SUPERVISOR}>Supervisor</option>
-                            <option value={ROLES.ADMIN}>Admin</option>
+                            {Object.values(ROLES).map(role => (
+                                <option key={role} value={role}>
+                                    {role}
+                                </option>
+                            ))}
                         </select>
                     </div>
 
@@ -163,10 +220,10 @@ const UserForm = ({ id }) => {
                             type="tel"
                             id="phone"
                             name="phone"
-                            value={formData.phone}
+                            value={formData.phone || ''}
                             onChange={handleChange}
-                            disabled={!isEditing}
-                            placeholder="(Opcional)"
+                            disabled={!isEditing || loading}
+                            placeholder="Teléfono (opcional)"
                         />
                     </div>
 
@@ -176,10 +233,10 @@ const UserForm = ({ id }) => {
                             type="text"
                             id="address"
                             name="address"
-                            value={formData.address}
+                            value={formData.address || ''}
                             onChange={handleChange}
-                            disabled={!isEditing}
-                            placeholder="(Opcional)"
+                            disabled={!isEditing || loading}
+                            placeholder="Dirección (opcional)"
                         />
                     </div>
 
@@ -188,44 +245,76 @@ const UserForm = ({ id }) => {
                         <input
                             type="number"
                             id="visits"
-                            name="visits"
-                            value={formData.visits}
-                            onChange={handleChange}
-                            disabled={!isEditing}
-                            min="0"
+                            value={formData.visits || 0}
+                            disabled
+                            className="readonly-field"
                         />
                     </div>
+
+                    <div className="form-group">
+                        <label htmlFor="comments">Comentarios</label>
+                        <textarea
+                            id="comments"
+                            name="comments"
+                            value={formData.comments || ''}
+                            onChange={handleChange}
+                            disabled={!isEditing || loading}
+                            placeholder="Comentarios (opcional)"
+                            rows="3"
+                        />
+                    </div>
+
+                    {formData.created_by && (
+                        <div className="form-group">
+                            <label htmlFor="created_by">Creado por</label>
+                            <input
+                                type="text"
+                                id="created_by"
+                                value={formData.created_by}
+                                disabled
+                                className="readonly-field"
+                            />
+                        </div>
+                    )}
+
+                    {isEditing && (
+                        <div className="form-group">
+                            <label htmlFor="password">
+                                Contraseña {userActive && '(dejar en blanco para mantener)'}
+                            </label>
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                value={formData.password}
+                                onChange={handleChange}
+                                required={!userActive}
+                                disabled={loading}
+                                placeholder={userActive ? '(Sin cambios)' : 'Contraseña'}
+                                autoComplete="new-password"
+                            />
+                        </div>
+                    )}
                 </form>
             }
             footer={
                 <div className="form-actions">
-                    {isEditing ? (
-                        <>
-                            <button 
-                                type="button"
-                                onClick={handleSubmit}
-                                className="submit-button"
-                                disabled={loading}
-                            >
-                                {loading ? 'Guardando...' : 'Guardar'}
-                            </button>
-                            <button 
-                                type="button" 
-                                onClick={handleClear}
-                                className="cancel-button"
-                            >
-                                Cancelar
-                            </button>
-                        </>
-                    ) : (
-                        <button 
-                            type="button" 
-                            onClick={toggleEdit}
-                            className="edit-button"
-                        >
-                            Editar
-                        </button>
-                    )}
+                    <button 
+                        type="button" 
+                        className="button"
+                        onClick={toggleEdit}
+                        disabled={loading}
+                    >
+                        {loading ? 'Guardando...' : (isEditing ? 'Guardar' : 'Editar')}
+                    </button>
+                    <button 
+                        type="button" 
+                        className="button"
+                        onClick={handleClear}
+                        disabled={loading}
+                    >
+                        Cancelar
+                    </button>
                 </div>
             }
         />

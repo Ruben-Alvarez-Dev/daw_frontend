@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
 const AppContext = createContext();
@@ -8,12 +8,17 @@ export const AppProvider = ({ children }) => {
     const [cardActive, setCardActive] = useState(null);
     const [cardsShown, setCardsShown] = useState([]);
 
+    // Asegurar que siempre haya una card activa si hay cards mostradas
+    useEffect(() => {
+        if (cardsShown.length > 0 && !cardActive) {
+            setCardActive(cardsShown[0]);
+        }
+    }, [cardsShown, cardActive]);
+
     const clearUserActive = () => setUserActive(null);
 
     const activateCard = (title) => {
-        if (cardsShown.includes(title)) {
-            setCardActive(title);
-        }
+        setCardActive(title);
     };
 
     const clearCardActive = () => {
@@ -26,9 +31,6 @@ export const AppProvider = ({ children }) => {
     const showCard = (title) => {
         if (!cardsShown.includes(title)) {
             setCardsShown(prev => [...prev, title]);
-            if (!cardActive) {
-                setCardActive(title);
-            }
         }
     };
 
