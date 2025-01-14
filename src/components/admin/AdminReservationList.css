@@ -1,0 +1,30 @@
+.admin-reservations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.reservation-item {
+  background-color: rgb(29, 29, 29);
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.reservation-item:hover {
+  background-color: rgb(50, 50, 50);
+  transition: all 0.3s;
+
+}
+
+.reservation-line {
+  margin-bottom: 0.5rem;
+}
+
+.reservation-field {
+  margin-right: 1rem;
+}
+
+.delete-button {
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+}

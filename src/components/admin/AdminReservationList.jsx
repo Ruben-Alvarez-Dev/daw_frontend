@@ -1,5 +1,6 @@
 import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import './AdminReservationList.css';
 
 const AdminReservationList = forwardRef((props, ref) => {
   const [reservations, setReservations] = useState([]);
@@ -21,10 +22,8 @@ const AdminReservationList = forwardRef((props, ref) => {
 
       const data = await response.json();
       setReservations(data);
-      setError('');
     } catch (err) {
-      setError('Error al cargar las reservas');
-      console.error('Error fetching reservations:', err);
+      setError(err.message);
     }
   };
 
@@ -32,59 +31,61 @@ const AdminReservationList = forwardRef((props, ref) => {
     refresh: fetchReservations
   }));
 
-  useEffect(() => {
-    if (token) {
+  const handleDelete = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:8000/api/reservations/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al eliminar la reserva');
+      }
+
+      // Solo actualizamos la lista si la eliminación fue exitosa
       fetchReservations();
+    } catch (err) {
+      setError(err.message);
+      // Mantenemos la lista visible incluso si hay error
+      setTimeout(() => setError(''), 3000); // El error desaparecerá después de 3 segundos
     }
-  }, [token]);
-
-  const formatDateTime = (datetime) => {
-    return new Date(datetime).toLocaleString('es-ES', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
   };
 
-  const formatUserInfo = (user) => {
-    if (!user) return 'N/A';
-    return `${user.name} (${user.email})`;
-  };
+  useEffect(() => {
+    fetchReservations();
+  }, []);
 
   return (
-    <div className="mt-6">
-      <h3 className="text-xl font-semibold mb-4">Reservas</h3>
-      {error && <p className="text-red-500">{error}</p>}
-      {!error && reservations.length === 0 ? (
-        <p className="text-gray-500">No hay reservas</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-white border border-gray-300">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="px-4 py-2 border-b">ID</th>
-                <th className="px-4 py-2 border-b">Cliente</th>
-                <th className="px-4 py-2 border-b">Personas</th>
-                <th className="px-4 py-2 border-b">Fecha y Hora</th>
-                <th className="px-4 py-2 border-b">Estado</th>
-              </tr>
-            </thead>
-            <tbody>
-              {reservations.map((reservation) => (
-                <tr key={reservation.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-2 border-b">{reservation.id}</td>
-                  <td className="px-4 py-2 border-b">{formatUserInfo(reservation.user)}</td>
-                  <td className="px-4 py-2 border-b">{reservation.guests}</td>
-                  <td className="px-4 py-2 border-b">{formatDateTime(reservation.datetime)}</td>
-                  <td className="px-4 py-2 border-b">{reservation.status}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+    <div>
+      {error && <div className="error-message">{error}</div>}
+      <ul className="admin-reservations-list">
+        {reservations.map(reservation => (
+          <li key={reservation.id} className="reservation-item" onMouseEnter={(e) => e.currentTarget.classList.add('hover')} onMouseLeave={(e) => e.currentTarget.classList.remove('hover')}>
+            <div className="reservation-line">
+              <span className="reservation-field">ID: {reservation.id}</span>
+              <span>User: {reservation.user_info?.name}
+                {reservation.user_info?.email && `, ${reservation.user_info.email}`}
+                {reservation.user_info?.phone && `, ${reservation.user_info.phone}`}
+              </span>
+            </div>
+            <div className="reservation-line">
+              <span className="reservation-field">Guests: {reservation.guests}</span>
+              <span>Date & Time: {new Date(reservation.datetime).toLocaleString()}</span>
+            </div>
+            <div className="reservation-line">
+              <span className="reservation-field">Tables: {reservation.tables_ids ? reservation.tables_ids.join(', ') : '-'}</span>
+              <span className="reservation-field">Status: {reservation.status}</span>
+              <button className="delete-button" onClick={() => handleDelete(reservation.id)}>
+                Eliminar
+              </button>
+            </div>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 });
