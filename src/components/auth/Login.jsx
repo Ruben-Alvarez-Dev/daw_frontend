@@ -17,40 +17,24 @@ export default function Login() {
   }, []);
 
   const validateIdentifier = (identifier) => {
-    // Si solo contiene números
-    if (/^\d+$/.test(identifier)) {
-      return { isValid: true, type: 'phone' };
-    }
-    // Si contiene @
-    else if (identifier.includes('@')) {
-      return { isValid: true, type: 'email' };
-    }
-    // Si contiene letras pero no @
-    else if (/[a-zA-Z]/.test(identifier)) {
-      return { isValid: false, type: null };
-    }
-    // Cualquier otro caso
-    return { isValid: false, type: null };
+    // Si contiene @ es email, si no es teléfono
+    return identifier.includes('@') ? { type: 'email' } : { type: 'phone' };
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    const { isValid, type } = validateIdentifier(formData.identifier);
+    const { type } = validateIdentifier(formData.identifier);
     
-    if (!isValid) {
-      setError('El identificador debe ser un email válido o un número de teléfono');
-      return;
-    }
-
     try {
       const credentials = {
         password: formData.password,
         [type]: formData.identifier
       };
 
-      const response = await fetch('http://localhost:8000/api/login', {
+      const endpoint = type === 'email' ? 'login/email' : 'login/phone';
+      const response = await fetch(`http://localhost:8000/api/${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

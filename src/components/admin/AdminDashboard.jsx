@@ -12,6 +12,12 @@ export default function AdminDashboard() {
   const userListRef = useRef();
   const tableListRef = useRef();
 
+  const handleReservationCreated = () => {
+    if (reservationListRef.current) {
+      reservationListRef.current.refresh();
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">Panel de Administración</h1>
@@ -71,7 +77,7 @@ export default function AdminDashboard() {
         {activeTab === 'reservations' && (
           <>
             <h2 className="text-2xl font-semibold mb-4">Gestión de Reservas</h2>
-            <AdminReservationForm listRef={reservationListRef} />
+            <AdminReservationForm onReservationCreated={handleReservationCreated} />
             <AdminReservationList ref={reservationListRef} />
           </>
         )}
