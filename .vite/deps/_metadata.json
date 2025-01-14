@@ -1,58 +1,8 @@
 {
-  "hash": "95a40eb1",
-  "configHash": "4fae1d27",
-  "lockfileHash": "28a53458",
-  "browserHash": "e880a269",
-  "optimized": {
-    "react": {
-      "src": "../../node_modules/react/index.js",
-      "file": "react.js",
-      "fileHash": "278a0183",
-      "needsInterop": true
-    },
-    "react-dom/client": {
-      "src": "../../node_modules/react-dom/client.js",
-      "file": "react-dom_client.js",
-      "fileHash": "5351f812",
-      "needsInterop": true
-    },
-    "react-router-dom": {
-      "src": "../../node_modules/react-router-dom/dist/index.mjs",
-      "file": "react-router-dom.js",
-      "fileHash": "07c2d624",
-      "needsInterop": false
-    },
-    "react-icons/fi": {
-      "src": "../../node_modules/react-icons/fi/index.mjs",
-      "file": "react-icons_fi.js",
-      "fileHash": "edde5717",
-      "needsInterop": false
-    },
-    "react-icons/ri": {
-      "src": "../../node_modules/react-icons/ri/index.mjs",
-      "file": "react-icons_ri.js",
-      "fileHash": "bc40d77d",
-      "needsInterop": false
-    },
-    "prop-types": {
-      "src": "../../node_modules/prop-types/index.js",
-      "file": "prop-types.js",
-      "fileHash": "7b61ac5d",
-      "needsInterop": true
-    }
-  },
-  "chunks": {
-    "chunk-IPYILTUR": {
-      "file": "chunk-IPYILTUR.js"
-    },
-    "chunk-WNYT3RZK": {
-      "file": "chunk-WNYT3RZK.js"
-    },
-    "chunk-4SFRHSJ3": {
-      "file": "chunk-4SFRHSJ3.js"
-    },
-    "chunk-EQCVQC35": {
-      "file": "chunk-EQCVQC35.js"
-    }
-  }
+  "hash": "d0397923",
+  "configHash": "b72dc9db",
+  "lockfileHash": "e3b0c442",
+  "browserHash": "d8f5dd64",
+  "optimized": {},
+  "chunks": {}
 }

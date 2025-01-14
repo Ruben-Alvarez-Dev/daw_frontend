@@ -1,28 +1,22 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
-import { AuthProvider } from './contexts/AuthContext'
-import { AppProvider } from './contexts/AppContext'
-import Layout from './components/Layout'
-import Login from './components/Login'
-import Tables from './components/Tables'
-import Users from './components/Users'
-import Reservations from './components/Reservations'
-import './styles/components.css'
+import { AuthProvider } from './context/AuthContext';
+import { BrowserRouter as Router } from 'react-router-dom';
+import Navbar from './components/layout/Navbar';
+import Display from './components/layout/Display';
+import Footer from './components/layout/Footer';
+import './App.css';
 
 function App() {
   return (
     <AuthProvider>
-      <AppProvider>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Tables />} />
-            <Route path="reservations" element={<Reservations />} />
-            <Route path="users" element={<Users />} />
-          </Route>
-        </Routes>
-      </AppProvider>
+      <Router>
+        <div className="app">
+          <Navbar />
+          <Display />
+          <Footer />
+        </div>
+      </Router>
     </AuthProvider>
-  )
+  );
 }
 
-export default App
+export default App;
