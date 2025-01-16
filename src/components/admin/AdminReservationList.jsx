@@ -2,7 +2,7 @@ import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import './AdminReservationList.css';
 
-const AdminReservationList = forwardRef((props, ref) => {
+const AdminReservationList = forwardRef(({ onEdit }, ref) => {
   const [reservations, setReservations] = useState([]);
   const [error, setError] = useState('');
   const { token } = useAuth();
@@ -46,12 +46,10 @@ const AdminReservationList = forwardRef((props, ref) => {
         throw new Error(errorData.message || 'Error al eliminar la reserva');
       }
 
-      // Solo actualizamos la lista si la eliminación fue exitosa
       fetchReservations();
     } catch (err) {
       setError(err.message);
-      // Mantenemos la lista visible incluso si hay error
-      setTimeout(() => setError(''), 3000); // El error desaparecerá después de 3 segundos
+      setTimeout(() => setError(''), 3000);
     }
   };
 
@@ -64,7 +62,7 @@ const AdminReservationList = forwardRef((props, ref) => {
       {error && <div className="error-message">{error}</div>}
       <ul className="admin-reservations-list">
         {reservations.map(reservation => (
-          <li key={reservation.id} className="reservation-item" onMouseEnter={(e) => e.currentTarget.classList.add('hover')} onMouseLeave={(e) => e.currentTarget.classList.remove('hover')}>
+          <li key={reservation.id} className="reservation-item">
             <div className="reservation-line">
               <span className="reservation-field">ID: {reservation.id}</span>
               <span>User: {reservation.user_info?.name}
@@ -79,9 +77,14 @@ const AdminReservationList = forwardRef((props, ref) => {
             <div className="reservation-line">
               <span className="reservation-field">Tables: {reservation.tables_ids ? reservation.tables_ids.join(', ') : '-'}</span>
               <span className="reservation-field">Status: {reservation.status}</span>
-              <button className="delete-button" onClick={() => handleDelete(reservation.id)}>
-                Eliminar
-              </button>
+              <div className="button-group">
+                <button className="edit-button" onClick={() => onEdit(reservation)}>
+                  Editar
+                </button>
+                <button className="delete-button" onClick={() => handleDelete(reservation.id)}>
+                  Eliminar
+                </button>
+              </div>
             </div>
           </li>
         ))}

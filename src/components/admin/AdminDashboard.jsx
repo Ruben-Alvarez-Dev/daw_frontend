@@ -8,6 +8,7 @@ import AdminTableList from './AdminTableList';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('users');
+  const [editingReservation, setEditingReservation] = useState(null);
   const reservationListRef = useRef();
   const userListRef = useRef();
   const tableListRef = useRef();
@@ -16,6 +17,11 @@ export default function AdminDashboard() {
     if (reservationListRef.current) {
       reservationListRef.current.refresh();
     }
+    setEditingReservation(null);
+  };
+
+  const handleReservationEdit = (reservation) => {
+    setEditingReservation(reservation);
   };
 
   return (
@@ -77,8 +83,14 @@ export default function AdminDashboard() {
         {activeTab === 'reservations' && (
           <>
             <h2 className="text-2xl font-semibold mb-4">Gestión de Reservas</h2>
-            <AdminReservationForm onReservationCreated={handleReservationCreated} />
-            <AdminReservationList ref={reservationListRef} />
+            <AdminReservationForm 
+              onReservationCreated={handleReservationCreated}
+              editingReservation={editingReservation}
+            />
+            <AdminReservationList 
+              ref={reservationListRef}
+              onEdit={handleReservationEdit}
+            />
           </>
         )}
       </div>
