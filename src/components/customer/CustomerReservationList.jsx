@@ -1,8 +1,8 @@
-import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import './CustomerReservationList.css';
 
-const CustomerReservationList = forwardRef((props, ref) => {
+export default function CustomerReservationList({ onNewReservation }) {
   const [reservations, setReservations] = useState([]);
   const [error, setError] = useState('');
   const { token } = useAuth();
@@ -29,10 +29,6 @@ const CustomerReservationList = forwardRef((props, ref) => {
     }
   };
 
-  useImperativeHandle(ref, () => ({
-    refresh: fetchReservations
-  }));
-
   useEffect(() => {
     if (token) {
       fetchReservations();
@@ -56,27 +52,50 @@ const CustomerReservationList = forwardRef((props, ref) => {
   };
 
   return (
-    <div>
-      <h2>Tus Reservas</h2>
-      {error && <p className="error">{error}</p>}
+    <div className="max-w-4xl mx-auto">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold">Mis Reservas</h2>
+        <button
+          onClick={onNewReservation}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          Nueva Reserva
+        </button>
+      </div>
+
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          {error}
+        </div>
+      )}
+
       {!error && reservations.length === 0 ? (
-        <p>No tienes reservas</p>
+        <p className="text-gray-500 text-center py-4">No tienes reservas</p>
       ) : (
-        <div className="reservations-list">
+        <div className="space-y-4">
           {reservations.map(reservation => (
-            <div key={reservation.id} className="reservation-item">
-              <p>Fecha y hora: {formatDateTime(reservation.datetime)}</p>
-              <p>Personas: {reservation.guests}</p>
-              <p>Estado: {reservation.status || 'pending'}</p>
-              {reservation.tables_ids && reservation.tables_ids.length > 0 && (
-                <p>Mesas asignadas: {reservation.tables_ids.join(', ')}</p>
-              )}
+            <div
+              key={reservation.id}
+              className="bg-white p-4 rounded-lg shadow"
+            >
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <span className="text-gray-600">Fecha y hora:</span>
+                  <div className="font-medium">{formatDateTime(reservation.datetime)}</div>
+                </div>
+                <div>
+                  <span className="text-gray-600">Personas:</span>
+                  <div className="font-medium">{reservation.guests}</div>
+                </div>
+                <div>
+                  <span className="text-gray-600">Estado:</span>
+                  <div className="font-medium">{reservation.status || 'pending'}</div>
+                </div>
+              </div>
             </div>
           ))}
         </div>
       )}
     </div>
   );
-});
-
-export default CustomerReservationList;
+}
