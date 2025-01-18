@@ -1,80 +1,174 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import './AdminUserForm.css';
 
-export default function AdminUserForm({ listRef }) {
+export default function AdminUserForm({ onUserCreated, editingUser }) {
   const [formData, setFormData] = useState({
     name: '',
-    phone: ''
+    email: '',
+    phone: '',
+    password: '',
+    role: 'client'
   });
   const [error, setError] = useState('');
   const { token } = useAuth();
+
+  useEffect(() => {
+    if (editingUser) {
+      setFormData({
+        name: editingUser.name,
+        email: editingUser.email,
+        phone: editingUser.phone || '',
+        password: '',
+        role: editingUser.role
+      });
+    } else {
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        password: '',
+        role: 'client'
+      });
+    }
+  }, [editingUser]);
+
+  const clearForm = () => {
+    setFormData({
+      name: '',
+      email: '',
+      phone: '',
+      password: '',
+      role: 'client'
+    });
+    setError('');
+    
+    // Si estamos en modo edición, notificar al padre para salir de ese modo
+    if (editingUser && onUserCreated) {
+      onUserCreated();
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
     try {
-      const response = await fetch('http://localhost:8000/api/users/simple', {
-        method: 'POST',
+      const url = editingUser 
+        ? `http://localhost:8000/api/users/${editingUser.id}`
+        : 'http://localhost:8000/api/users';
+
+      const method = editingUser ? 'PUT' : 'POST';
+
+      // Si estamos editando y no se ha cambiado la contraseña, no la enviamos
+      const dataToSend = {...formData};
+      if (editingUser && !formData.password) {
+        delete dataToSend.password;
+      }
+
+      const response = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(dataToSend)
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.message || 'Error al crear el usuario');
+        const errorData = await response.json();
+        throw errorData;
       }
 
       setFormData({
         name: '',
-        phone: ''
+        email: '',
+        phone: '',
+        password: '',
+        role: 'client'
       });
 
-      if (listRef && listRef.current) {
-        listRef.current.refresh();
+      if (onUserCreated) {
+        onUserCreated();
       }
     } catch (err) {
       console.error('Error:', err);
-      setError(err.message || 'Error al crear el usuario');
+      if (err.message) {
+        setError(err.message);
+      } else if (err.errors) {
+        const firstError = Object.values(err.errors)[0];
+        setError(Array.isArray(firstError) ? firstError[0] : firstError);
+      } else {
+        setError('Error al procesar la solicitud');
+      }
     }
   };
 
   return (
-    <div className="mb-8">
-      <h3 className="text-xl font-semibold mb-4">Nuevo Usuario</h3>
-      {error && <p className="text-red-500 mb-4">{error}</p>}
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
+    <div className="admin-user-form">
+      <h3>{editingUser ? 'Editar Usuario' : 'Nuevo Usuario'}</h3>
+      <form onSubmit={handleSubmit}>
+        {error && <div className="error-message">{error}</div>}
+        
+        <div className="form-group">
           <input
             type="text"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             placeholder="Nombre"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+            value={formData.name}
+            onChange={(e) => setFormData({...formData, name: e.target.value})}
             required
           />
         </div>
-        <div>
+
+        <div className="form-group">
+          <input
+            type="email"
+            placeholder="Email"
+            value={formData.email}
+            onChange={(e) => setFormData({...formData, email: e.target.value})}
+            required
+          />
+        </div>
+
+        <div className="form-group">
           <input
             type="tel"
-            value={formData.phone}
-            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
             placeholder="Teléfono"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-            required
+            value={formData.phone}
+            onChange={(e) => setFormData({...formData, phone: e.target.value})}
           />
         </div>
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-        >
-          Crear Usuario
-        </button>
+
+        <div className="form-group">
+          <input
+            type="password"
+            placeholder={editingUser ? "Contraseña (dejar vacío para mantener)" : "Contraseña"}
+            value={formData.password}
+            onChange={(e) => setFormData({...formData, password: e.target.value})}
+            required={!editingUser}
+          />
+        </div>
+
+        <div className="form-group">
+          <select
+            value={formData.role}
+            onChange={(e) => setFormData({...formData, role: e.target.value})}
+            required
+          >
+            <option value="client">Cliente</option>
+            <option value="admin">Administrador</option>
+          </select>
+        </div>
+
+        <div className="button-group">
+          <button type="submit" className="submit-button">
+            {editingUser ? 'Actualizar Usuario' : 'Crear Usuario'}
+          </button>
+          <button type="button" onClick={clearForm} className="clear-button">
+            Limpiar
+          </button>
+        </div>
       </form>
     </div>
   );

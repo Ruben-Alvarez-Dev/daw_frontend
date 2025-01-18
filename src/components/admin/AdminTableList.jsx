@@ -1,7 +1,8 @@
 import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import './AdminTableList.css';
 
-const AdminTableList = forwardRef((props, ref) => {
+const AdminTableList = forwardRef(({ onEdit }, ref) => {
   const [tables, setTables] = useState([]);
   const [error, setError] = useState('');
   const { token } = useAuth();
@@ -32,6 +33,28 @@ const AdminTableList = forwardRef((props, ref) => {
     refresh: fetchTables
   }));
 
+  const handleDelete = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:8000/api/tables/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al eliminar la mesa');
+      }
+
+      fetchTables();
+    } catch (err) {
+      setError(err.message);
+      setTimeout(() => setError(''), 3000);
+    }
+  };
+
   useEffect(() => {
     if (token) {
       fetchTables();
@@ -48,22 +71,32 @@ const AdminTableList = forwardRef((props, ref) => {
   };
 
   return (
-    <div className="mt-8">
-      <h2 className="text-xl font-semibold mb-4">Lista de Mesas</h2>
-      {error && <p className="text-red-500 mb-4">{error}</p>}
-      {!error && tables.length === 0 ? (
-        <p className="text-gray-500">No hay mesas registradas</p>
-      ) : (
-        <div className="space-y-4">
-          {tables.map(table => (
-            <div key={table.id} className="p-4 bg-white shadow rounded-lg">
-              <p className="font-medium">Mesa: {table.name}</p>
-              <p>Capacidad: {table.capacity} personas</p>
-              <p>Estado: {translateStatus(table.status)}</p>
+    <div>
+      {error && <div className="error-message">{error}</div>}
+      <ul className="admin-tables-list">
+        {tables.map(table => (
+          <li key={table.id} className="table-item">
+            <div className="table-line">
+              <span className="table-field">ID: {table.id}</span>
+              <span className="table-field">Nombre: {table.name}</span>
             </div>
-          ))}
-        </div>
-      )}
+            <div className="table-line">
+              <span className="table-field">Capacidad: {table.capacity} personas</span>
+              <span className="table-field">Estado: {translateStatus(table.status)}</span>
+            </div>
+            <div className="table-line">
+              <div className="button-group">
+                <button className="edit-button" onClick={() => onEdit(table)}>
+                  Editar
+                </button>
+                <button className="delete-button" onClick={() => handleDelete(table.id)}>
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 });

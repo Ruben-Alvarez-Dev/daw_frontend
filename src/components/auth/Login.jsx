@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useRestaurantConfig } from '../../context/RestaurantConfigContext';
 
 export default function Login() {
   const [formData, setFormData] = useState({ identifier: '', password: '' });
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const { login: loginFn } = useAuth();
+  const { fetchConfig } = useRestaurantConfig();
 
   useEffect(() => {
     // Limpiar el formulario cuando el componente se monta
@@ -49,8 +51,13 @@ export default function Login() {
         throw new Error(data.message || 'Error al iniciar sesión');
       }
 
+      // Primero hacemos login
       await loginFn(data.authorisation.token, data.user);
       
+      // Después cargamos la configuración
+      await fetchConfig();
+      
+      // Y finalmente navegamos según el rol
       if (data.user.role === 'admin') {
         navigate('/admin');
       } else {
@@ -101,13 +108,13 @@ export default function Login() {
               Iniciar sesión
             </button>
           </div>
-        </form>
 
-        <div className="text-center">
-          <Link to="/register" className="text-indigo-600 hover:text-indigo-500">
-            ¿No tienes una cuenta? Regístrate
-          </Link>
-        </div>
+          <div className="text-sm text-center">
+            <Link to="/register" className="font-medium text-indigo-600 hover:text-indigo-500">
+              ¿No tienes una cuenta? Regístrate
+            </Link>
+          </div>
+        </form>
       </div>
     </div>
   );

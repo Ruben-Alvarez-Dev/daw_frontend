@@ -1,92 +1,117 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import './AdminTableForm.css';
 
-export default function AdminTableForm({ listRef }) {
+export default function AdminTableForm({ onTableCreated, editingTable }) {
   const [formData, setFormData] = useState({
-    name: '',
-    capacity: ''
+    capacity: '',
+    name: ''
   });
   const [error, setError] = useState('');
   const { token } = useAuth();
+
+  useEffect(() => {
+    if (editingTable) {
+      setFormData({
+        capacity: editingTable.capacity,
+        name: editingTable.name || ''
+      });
+    } else {
+      setFormData({
+        capacity: '',
+        name: ''
+      });
+    }
+  }, [editingTable]);
+
+  const clearForm = () => {
+    setFormData({
+      capacity: '',
+      name: ''
+    });
+    setError('');
+    
+    // Si estamos en modo edición, notificar al padre para salir de ese modo
+    if (editingTable && onTableCreated) {
+      onTableCreated();
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
     try {
-      const response = await fetch('http://localhost:8000/api/tables', {
-        method: 'POST',
+      const url = editingTable
+        ? `http://localhost:8000/api/tables/${editingTable.id}`
+        : 'http://localhost:8000/api/tables';
+
+      const method = editingTable ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({
-          ...formData,
-          name: formData.name,
-          capacity: parseInt(formData.capacity)
-        })
+        body: JSON.stringify(formData)
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw data;
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al guardar la mesa');
       }
 
       setFormData({
-        name: '',
-        capacity: ''
+        capacity: '',
+        name: ''
       });
 
-      if (listRef && listRef.current) {
-        listRef.current.refresh();
+      if (onTableCreated) {
+        onTableCreated();
       }
     } catch (err) {
-      console.error('Error al crear mesa:', err);
-      if (err.message) {
-        setError(err.message);
-      } else if (err.errors) {
-        const firstError = Object.values(err.errors)[0];
-        setError(Array.isArray(firstError) ? firstError[0] : firstError);
-      } else {
-        setError('Error al crear mesa');
-      }
+      console.error('Error:', err);
+      setError(err.message);
     }
   };
 
   return (
-    <div className="mb-8">
-      <h3 className="text-xl font-semibold mb-4">Nueva Mesa</h3>
-      {error && <p className="text-red-500 mb-4">{error}</p>}
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <input
-            type="text"
-            placeholder="Nombre de mesa"
-            value={formData.name}
-            onChange={(e) => setFormData({...formData, name: e.target.value})}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-            required
-          />
-        </div>
-        <div>
+    <div className="admin-table-form">
+      <h3>{editingTable ? 'Editar Mesa' : 'Nueva Mesa'}</h3>
+      <form onSubmit={handleSubmit}>
+        {error && <div className="error-message">{error}</div>}
+        
+        <div className="form-group">
           <input
             type="number"
             placeholder="Capacidad"
             value={formData.capacity}
             onChange={(e) => setFormData({...formData, capacity: e.target.value})}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-            required
             min="1"
+            required
           />
         </div>
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-        >
-          Crear Mesa
-        </button>
+
+        <div className="form-group">
+          <input
+            type="text"
+            placeholder="Nombre"
+            value={formData.name}
+            onChange={(e) => setFormData({...formData, name: e.target.value})}
+            required
+          />
+        </div>
+
+        <div className="button-group">
+          <button type="submit" className="submit-button">
+            {editingTable ? 'Actualizar Mesa' : 'Crear Mesa'}
+          </button>
+          <button type="button" onClick={clearForm} className="clear-button">
+            Limpiar
+          </button>
+        </div>
       </form>
     </div>
   );

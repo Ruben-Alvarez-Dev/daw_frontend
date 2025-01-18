@@ -1,7 +1,8 @@
 import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import './AdminUserList.css';
 
-const AdminUserList = forwardRef((props, ref) => {
+const AdminUserList = forwardRef(({ onEdit }, ref) => {
   const [users, setUsers] = useState([]);
   const [error, setError] = useState('');
   const { token } = useAuth();
@@ -32,6 +33,28 @@ const AdminUserList = forwardRef((props, ref) => {
     refresh: fetchUsers
   }));
 
+  const handleDelete = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:8000/api/users/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al eliminar el usuario');
+      }
+
+      fetchUsers();
+    } catch (err) {
+      setError(err.message);
+      setTimeout(() => setError(''), 3000);
+    }
+  };
+
   useEffect(() => {
     if (token) {
       fetchUsers();
@@ -40,22 +63,32 @@ const AdminUserList = forwardRef((props, ref) => {
 
   return (
     <div>
-      <h2>Lista de Usuarios</h2>
-      {error && <p className="error">{error}</p>}
-      {!error && users.length === 0 ? (
-        <p>No hay usuarios registrados</p>
-      ) : (
-        <div className="users-list">
-          {users.map(user => (
-            <div key={user.id} className="user-item">
-              <p>Nombre: {user.name}</p>
-              <p>Email: {user.email}</p>
-              <p>Teléfono: {user.phone}</p>
-              <p>Rol: {user.role === 'admin' ? 'Administrador' : 'Cliente'}</p>
+      {error && <div className="error-message">{error}</div>}
+      <ul className="admin-users-list">
+        {users.map(user => (
+          <li key={user.id} className="user-item">
+            <div className="user-line">
+              <span className="user-field">ID: {user.id}</span>
+              <span className="user-field">Nombre: {user.name}</span>
             </div>
-          ))}
-        </div>
-      )}
+            <div className="user-line">
+              <span className="user-field">Email: {user.email}</span>
+              <span className="user-field">Teléfono: {user.phone}</span>
+            </div>
+            <div className="user-line">
+              <span className="user-field">Rol: {user.role === 'admin' ? 'Administrador' : 'Cliente'}</span>
+              <div className="button-group">
+                <button className="edit-button" onClick={() => onEdit(user)}>
+                  Editar
+                </button>
+                <button className="delete-button" onClick={() => handleDelete(user.id)}>
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 });

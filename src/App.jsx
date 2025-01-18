@@ -1,21 +1,18 @@
-import { AuthProvider } from './context/AuthContext';
 import { BrowserRouter as Router } from 'react-router-dom';
-import Navbar from './components/layout/Navbar';
-import Display from './components/layout/Display';
-import Footer from './components/layout/Footer';
+import { AuthProvider } from './context/AuthContext';
+import { RestaurantConfigProvider } from './context/RestaurantConfigContext';
+import AppRoutes from './AppRoutes';
 import './App.css';
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <div className="app">
-          <Navbar />
-          <Display />
-          <Footer />
-        </div>
-      </Router>
-    </AuthProvider>
+    <Router>
+      <AuthProvider>
+        <RestaurantConfigProvider>
+          <AppRoutes />
+        </RestaurantConfigProvider>
+      </AuthProvider>
+    </Router>
   );
 }
 

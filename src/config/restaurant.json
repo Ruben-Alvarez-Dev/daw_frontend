@@ -1,0 +1,15 @@
+{
+  "totalCapacity": 0,
+  "timeEstimateSmall": 60,
+  "timeEstimateLarge": 90,
+  "openingHours": {
+    "afternoon": {
+      "open": "13:00",
+      "close": "16:00"
+    },
+    "evening": {
+      "open": "20:00",
+      "close": "23:30"
+    }
+  }
+}
