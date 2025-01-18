@@ -6,6 +6,7 @@ import AdminUserList from './AdminUserList';
 import AdminTableForm from './AdminTableForm';
 import AdminTableList from './AdminTableList';
 import RestaurantProfile from './RestaurantProfile';
+import AdminAssignment from './AdminAssignment';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('users');
@@ -161,7 +162,7 @@ export default function AdminDashboard() {
         {activeTab === 'assignment' && (
           <>
             <h2 className="text-2xl font-semibold mb-4">Asignación de Turnos</h2>
-            <div className="text-gray-500 italic">Componente en desarrollo</div>
+            <AdminAssignment />
           </>
         )}
       </div>

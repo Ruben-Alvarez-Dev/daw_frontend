@@ -36,7 +36,7 @@ export default function Login() {
       };
 
       const endpoint = type === 'email' ? 'login/email' : 'login/phone';
-      const response = await fetch(`http://localhost:8000/api/${endpoint}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -81,6 +81,7 @@ export default function Login() {
             <div>
               <input
                 type="text"
+                name="identifier"
                 value={formData.identifier}
                 onChange={(e) => setFormData({...formData, identifier: e.target.value})}
                 placeholder="Email o teléfono"
@@ -91,6 +92,7 @@ export default function Login() {
             <div>
               <input
                 type="password"
+                name="password"
                 value={formData.password}
                 onChange={(e) => setFormData({...formData, password: e.target.value})}
                 placeholder="Contraseña"

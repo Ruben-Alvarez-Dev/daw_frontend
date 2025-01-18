@@ -2,14 +2,34 @@ import { useState, useEffect } from 'react';
 import { useRestaurantConfig } from '../../context/RestaurantConfigContext';
 import './RestaurantProfile.css';
 
+const defaultConfig = {
+  totalCapacity: 0,
+  timeEstimateSmall: 60,
+  timeEstimateLarge: 90,
+  timeInterval: 15,
+  simultaneousTables: 2,
+  openingHours: {
+    afternoon: {
+      open: '13:00',
+      close: '16:00'
+    },
+    evening: {
+      open: '20:00',
+      close: '23:30'
+    }
+  }
+};
+
 export default function RestaurantProfile() {
-  const { config, updateConfig } = useRestaurantConfig();
-  const [localConfig, setLocalConfig] = useState(config);
+  const { config, updateConfig, loading } = useRestaurantConfig();
+  const [localConfig, setLocalConfig] = useState(defaultConfig);
   const [error, setError] = useState('');
 
   // Actualizar localConfig cuando config cambie (por ejemplo, al cargar inicialmente)
   useEffect(() => {
-    setLocalConfig(config);
+    if (config) {
+      setLocalConfig(config);
+    }
   }, [config]);
 
   const handleSubmit = async (e) => {
@@ -39,6 +59,15 @@ export default function RestaurantProfile() {
     }));
   };
 
+  if (loading) {
+    return (
+      <div className="restaurant-profile">
+        <h2>Configuración del Restaurante</h2>
+        <div className="loading">Cargando configuración...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="restaurant-profile">
       <h2>Configuración del Restaurante</h2>
@@ -50,14 +79,10 @@ export default function RestaurantProfile() {
           <input
             type="number"
             value={localConfig.totalCapacity}
-            onChange={(e) => setLocalConfig(prev => ({
-              ...prev,
-              totalCapacity: e.target.value ? parseInt(e.target.value) : ''
-            }))}
-            min="0"
-            required
+            readOnly
+            disabled
           />
-          <small>Suma de la capacidad de todas las mesas</small>
+          <small>Suma automática de la capacidad de todas las mesas</small>
         </div>
 
         <div className="form-group">
@@ -90,6 +115,36 @@ export default function RestaurantProfile() {
           <small>Tiempo medio de ocupación para grupos grandes</small>
         </div>
 
+        <div className="form-group">
+          <label>Intervalo entre Mesas (minutos)</label>
+          <input
+            type="number"
+            value={localConfig.timeInterval}
+            onChange={(e) => setLocalConfig(prev => ({
+              ...prev,
+              timeInterval: e.target.value ? parseInt(e.target.value) : ''
+            }))}
+            min="5"
+            required
+          />
+          <small>Tiempo entre franjas horarias para reservas</small>
+        </div>
+
+        <div className="form-group">
+          <label>Entrada de Mesas Simultáneas</label>
+          <input
+            type="number"
+            value={localConfig.simultaneousTables}
+            onChange={(e) => setLocalConfig(prev => ({
+              ...prev,
+              simultaneousTables: e.target.value ? parseInt(e.target.value) : ''
+            }))}
+            min="1"
+            required
+          />
+          <small>Número de mesas que pueden entrar en el mismo horario</small>
+        </div>
+
         <div className="time-section">
           <h3>Horario de Tarde</h3>
           <div className="time-group">
@@ -97,7 +152,7 @@ export default function RestaurantProfile() {
               <label>Hora de Apertura</label>
               <input
                 type="time"
-                value={localConfig.openingHours.afternoon.open}
+                value={localConfig.openingHours?.afternoon?.open || '13:00'}
                 onChange={(e) => handleTimeChange('afternoon', 'open', e.target.value)}
                 required
               />
@@ -106,7 +161,7 @@ export default function RestaurantProfile() {
               <label>Hora de Cierre</label>
               <input
                 type="time"
-                value={localConfig.openingHours.afternoon.close}
+                value={localConfig.openingHours?.afternoon?.close || '16:00'}
                 onChange={(e) => handleTimeChange('afternoon', 'close', e.target.value)}
                 required
               />
@@ -121,7 +176,7 @@ export default function RestaurantProfile() {
               <label>Hora de Apertura</label>
               <input
                 type="time"
-                value={localConfig.openingHours.evening.open}
+                value={localConfig.openingHours?.evening?.open || '20:00'}
                 onChange={(e) => handleTimeChange('evening', 'open', e.target.value)}
                 required
               />
@@ -130,7 +185,7 @@ export default function RestaurantProfile() {
               <label>Hora de Cierre</label>
               <input
                 type="time"
-                value={localConfig.openingHours.evening.close}
+                value={localConfig.openingHours?.evening?.close || '23:30'}
                 onChange={(e) => handleTimeChange('evening', 'close', e.target.value)}
                 required
               />

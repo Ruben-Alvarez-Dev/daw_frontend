@@ -1,0 +1,121 @@
+.timeslot-container {
+  @apply space-y-6;
+  margin: 20px 0;
+  background-color: #2d3748;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.period-title {
+  @apply text-lg font-semibold text-blue-300 mb-4;
+  font-size: 1.2em;
+  font-weight: bold;
+  padding: 10px;
+  background-color: #1a202c;
+  color: #fff;
+  border-radius: 5px;
+}
+
+.timeslots-grid {
+  @apply space-y-2;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin: 10px 0;
+}
+
+.interval-row {
+  @apply grid grid-cols-4 gap-2;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  padding: 10px;
+  background-color: #1a202c;
+  border-radius: 5px;
+  align-items: center;
+}
+
+.timeslot-card {
+  @apply px-3 py-2 rounded-lg text-center cursor-pointer transition-all duration-200 text-sm;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9em;
+  color: #fff;
+  padding: 0 15px;
+  text-align: center;
+  position: relative;
+}
+
+/* Estados de disponibilidad */
+.timeslot-card.full {
+  @apply bg-green-600 text-white hover:bg-green-700;
+  border: 1px solid #38a169;
+}
+
+.timeslot-card.full:hover {
+  background-color: #38a169;
+}
+
+.timeslot-card.high {
+  @apply bg-green-500/70 text-white hover:bg-green-600;
+  border: 1px solid #48bb78;
+}
+
+.timeslot-card.high:hover {
+  background-color: #48bb78;
+}
+
+.timeslot-card.medium {
+  @apply bg-yellow-500/70 text-white hover:bg-yellow-600;
+  border: 1px solid #ecc94b;
+  color: #744210;
+}
+
+.timeslot-card.medium:hover {
+  background-color: #ecc94b;
+}
+
+.timeslot-card.low {
+  @apply bg-red-500/70 text-white hover:bg-red-600;
+  border: 1px solid #f56565;
+}
+
+.timeslot-card.low:hover {
+  background-color: #f56565;
+}
+
+.timeslot-card.disabled {
+  @apply bg-gray-700 text-gray-500 cursor-not-allowed;
+  color: #a0aec0;
+  cursor: not-allowed;
+  border: 1px solid #2d3748;
+  opacity: 0.7;
+}
+
+.timeslot-card.disabled:hover {
+  background-color: #4a5568;
+  border-color: #2d3748;
+}
+
+.timeslot-card.disabled::after {
+  content: '✕';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.2em;
+  opacity: 0.5;
+}
+
+.timeslot-card.selected {
+  @apply ring-2 ring-blue-400 ring-offset-2 ring-offset-gray-800;
+}
+
+.slots-available {
+  color: #a0aec0;
+  font-size: 0.9em;
+}

@@ -5,6 +5,8 @@ const defaultConfig = {
   totalCapacity: 0,
   timeEstimateSmall: 60,
   timeEstimateLarge: 90,
+  timeInterval: 15,
+  simultaneousTables: 2,
   openingHours: {
     afternoon: {
       open: "13:00",
@@ -21,7 +23,7 @@ const RestaurantConfigContext = createContext();
 
 export function RestaurantConfigProvider({ children }) {
   const [config, setConfig] = useState(defaultConfig);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { token, user } = useAuth();
 
@@ -31,12 +33,15 @@ export function RestaurantConfigProvider({ children }) {
   useEffect(() => {
     if (token) {
       fetchConfig();
+    } else {
+      setLoading(false);
     }
   }, [token]);
 
   const fetchConfig = async () => {
     if (!token) {
       setError('Usuario no autenticado');
+      setLoading(false);
       return;
     }
     
@@ -44,58 +49,67 @@ export function RestaurantConfigProvider({ children }) {
     setError(null);
     
     try {
-      const response = await fetch('http://localhost:8000/api/config', {
+      console.log('Fetching restaurant config...');
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/config`, {
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
         }
       });
-      
+
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Error fetching config:', errorText);
         throw new Error('Error al cargar la configuración');
       }
-      
+
       const data = await response.json();
-      setConfig(data);
+      console.log('Received config:', data);
+      
+      // Asegurarse de que la configuración tiene todos los campos necesarios
+      const newConfig = {
+        ...defaultConfig,
+        ...data
+      };
+      
+      setConfig(newConfig);
+      setError(null);
     } catch (error) {
-      console.error('Error al cargar la configuración:', error);
+      console.error('Error:', error);
       setError(error.message);
+      setConfig(defaultConfig);
     } finally {
       setLoading(false);
     }
   };
 
   const updateConfig = async (newConfig) => {
-    if (!token) {
-      setError('Usuario no autenticado');
+    if (!token || !isAdmin) {
+      setError('No autorizado');
       return false;
     }
 
-    if (!isAdmin) {
-      setError('No tienes permisos para modificar la configuración');
-      return false;
-    }
-    
     setLoading(true);
     setError(null);
     
     try {
-      const response = await fetch('http://localhost:8000/api/config', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/config`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
         },
         body: JSON.stringify(newConfig)
       });
 
       if (!response.ok) {
-        throw new Error('Error al guardar la configuración');
+        throw new Error('Error al actualizar la configuración');
       }
-      
+
       setConfig(newConfig);
       return true;
     } catch (error) {
-      console.error('Error al guardar la configuración:', error);
       setError(error.message);
       return false;
     } finally {
@@ -103,18 +117,8 @@ export function RestaurantConfigProvider({ children }) {
     }
   };
 
-  const value = {
-    config,
-    loading,
-    error,
-    fetchConfig,
-    updateConfig,
-    isAdmin,
-    defaultConfig
-  };
-
   return (
-    <RestaurantConfigContext.Provider value={value}>
+    <RestaurantConfigContext.Provider value={{ config, loading, error, updateConfig, fetchConfig }}>
       {children}
     </RestaurantConfigContext.Provider>
   );
@@ -123,7 +127,7 @@ export function RestaurantConfigProvider({ children }) {
 export function useRestaurantConfig() {
   const context = useContext(RestaurantConfigContext);
   if (!context) {
-    throw new Error('useRestaurantConfig debe usarse dentro de RestaurantConfigProvider');
+    throw new Error('useRestaurantConfig debe usarse dentro de un RestaurantConfigProvider');
   }
   return context;
 }
