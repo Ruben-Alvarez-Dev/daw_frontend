@@ -86,14 +86,17 @@ function DailyView() {
                     'Accept': 'application/json'
                 },
                 body: JSON.stringify({
-                    ...reservation,
+                    user_id: reservation.user_id,
+                    datetime: reservation.datetime,
+                    guests: reservation.guests,
+                    status: reservation.status,
                     tables_ids: newTablesIds
                 })
             });
 
             if (!response.ok) throw new Error('Error al actualizar la reserva');
 
-            // Actualizar la lista de reservas
+            // Actualizar estado local
             setReservations(prevReservations => 
                 prevReservations.map(r => 
                     r.id === reservationId 
@@ -103,7 +106,6 @@ function DailyView() {
             );
         } catch (error) {
             console.error('Error:', error);
-            alert('Error al actualizar la mesa');
         }
     };
 
@@ -111,7 +113,9 @@ function DailyView() {
         <div 
             key={reservation.id} 
             className={`reservation-item ${selectedReservation?.id === reservation.id ? 'selected' : ''}`}
-            onClick={() => setSelectedReservation(reservation)}
+            onClick={() => setSelectedReservation(
+                selectedReservation?.id === reservation.id ? null : reservation
+            )}
         >
             <div className="reservation-info">
                 <span className="reservation-time">{reservation.time}</span>

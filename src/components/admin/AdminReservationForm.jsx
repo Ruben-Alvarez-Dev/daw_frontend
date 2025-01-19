@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useRestaurantConfig } from '../../context/RestaurantConfigContext';
 import './AdminReservationForm.css';
 
 export default function AdminReservationForm({ onReservationCreated, editingReservation }) {
@@ -20,7 +21,8 @@ export default function AdminReservationForm({ onReservationCreated, editingRese
     phone: ''
   });
   const { token } = useAuth();
-
+  const { config } = useRestaurantConfig();
+  const [timeOptions, setTimeOptions] = useState([]);
   const statusOptions = [
     'pending',
     'confirmed',
@@ -28,7 +30,40 @@ export default function AdminReservationForm({ onReservationCreated, editingRese
     'completed'
   ];
 
-  // Efecto para cargar los datos cuando se está editando
+  useEffect(() => {
+    if (config) {
+      const options = [];
+      const shifts = Object.keys(config.openingHours || {});
+      
+      shifts.forEach(shift => {
+        const { open, close, interval } = config.openingHours[shift];
+        const [openHour, openMinute] = open.split(':').map(Number);
+        const [closeHour, closeMinute] = close.split(':').map(Number);
+        
+        let currentTime = new Date();
+        currentTime.setHours(openHour, openMinute, 0);
+        
+        const closeTime = new Date();
+        closeTime.setHours(closeHour, closeMinute, 0);
+        
+        while (currentTime <= closeTime) {
+          const timeString = currentTime.toTimeString().slice(0, 5);
+          // Si hay una fecha seleccionada, usar el formato completo
+          if (formData.datetime) {
+            const [date] = formData.datetime.split('T');
+            options.push(`${date}T${timeString}`);
+          } else {
+            // Si no hay fecha, solo guardar la hora
+            options.push(timeString);
+          }
+          currentTime.setMinutes(currentTime.getMinutes() + (interval || 30));
+        }
+      });
+      
+      setTimeOptions(options);
+    }
+  }, [config, formData.datetime]);
+
   useEffect(() => {
     if (editingReservation) {
       setFormData({
@@ -42,7 +77,6 @@ export default function AdminReservationForm({ onReservationCreated, editingRese
     }
   }, [editingReservation]);
 
-  // Cargar mesas disponibles
   useEffect(() => {
     const fetchTables = async () => {
       try {
@@ -65,7 +99,6 @@ export default function AdminReservationForm({ onReservationCreated, editingRese
     fetchTables();
   }, [token]);
 
-  // Búsqueda de usuarios
   useEffect(() => {
     const searchUsers = async () => {
       if (!searchTerm) {
@@ -93,11 +126,9 @@ export default function AdminReservationForm({ onReservationCreated, editingRese
         
         setUserResults(filteredUsers);
         
-        // Si el searchTerm tiene el formato "nombre (teléfono)" significa que hay un usuario seleccionado
         const isUserSelected = searchTerm.includes('(') && searchTerm.includes(')');
         setShowQuickCreate(searchTerm.length >= 3 && filteredUsers.length === 0 && !isUserSelected);
 
-        // Determinar si el searchTerm parece un teléfono
         const isPhone = /^\d+$/.test(searchTerm);
         setNewUserData({
           name: isPhone ? '' : searchTerm,
@@ -137,7 +168,6 @@ export default function AdminReservationForm({ onReservationCreated, editingRese
 
       const newUser = await response.json();
       
-      // Actualizar el formulario directamente con los datos del nuevo usuario
       setFormData(prev => ({ ...prev, user_id: newUser.user.id }));
       setSearchTerm(`${newUser.user.name} (${newUser.user.phone})`);
       setShowQuickCreate(false);
@@ -174,6 +204,8 @@ export default function AdminReservationForm({ onReservationCreated, editingRese
 
       const method = editingReservation ? 'PUT' : 'POST';
 
+      const formattedDatetime = formData.datetime.replace('T', ' ');
+
       const response = await fetch(url, {
         method,
         headers: {
@@ -182,33 +214,35 @@ export default function AdminReservationForm({ onReservationCreated, editingRese
           'Accept': 'application/json'
         },
         body: JSON.stringify({
-          user_id: formData.user_id,
-          datetime: formData.datetime,
+          user_id: parseInt(formData.user_id),
+          datetime: formattedDatetime,
           guests: parseInt(formData.guests),
-          status: formData.status,
+          status: formData.status || 'pending',
           tables_ids: selectedTables
         })
       });
 
-      if (!response.ok) throw new Error('Error al guardar la reserva');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al guardar la reserva');
+      }
 
       const data = await response.json();
       
-      // Limpiar formulario
       setFormData({
         user_id: '',
         datetime: '',
         guests: '',
         status: 'pending'
       });
-      setSearchTerm('');
       setSelectedTables([]);
       
       if (onReservationCreated) {
-        onReservationCreated(data);
+        onReservationCreated(data.reservation);
       }
-    } catch (err) {
-      setError(err.message);
+    } catch (error) {
+      console.error('Error:', error);
+      setError(error.message);
     }
   };
 
@@ -231,10 +265,56 @@ export default function AdminReservationForm({ onReservationCreated, editingRese
     setShowQuickCreate(false);
     setNewUserData({ name: '', phone: '' });
     
-    // Si estamos en modo edición, notificar al padre para salir de ese modo
     if (editingReservation && onReservationCreated) {
       onReservationCreated();
     }
+  };
+
+  const renderDateTimeField = () => {
+    const dateValue = formData.datetime.split('T')[0];
+    const timeValue = formData.datetime.split('T')[1];
+
+    return (
+      <div className="form-group">
+        <label>Fecha y Hora:</label>
+        <div className="datetime-inputs">
+          <input
+            type="date"
+            value={dateValue || ''}
+            onChange={(e) => {
+              const newDate = e.target.value;
+              const newTime = timeValue || (timeOptions.length > 0 ? timeOptions[0] : '');
+              setFormData(prev => ({
+                ...prev,
+                datetime: newDate + (newTime ? `T${newTime}` : '')
+              }));
+            }}
+          />
+          <select
+            value={timeValue || ''}
+            onChange={(e) => {
+              const newTime = e.target.value;
+              setFormData(prev => ({
+                ...prev,
+                datetime: dateValue 
+                  ? `${dateValue}T${newTime}`
+                  : ''
+              }));
+            }}
+          >
+            <option value="">Selecciona hora</option>
+            {timeOptions.map(time => {
+              const displayTime = time.includes('T') ? time.split('T')[1] : time;
+              return (
+                <option key={time} value={displayTime}>
+                  {displayTime}
+                </option>
+              );
+            })}
+          </select>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -298,15 +378,7 @@ export default function AdminReservationForm({ onReservationCreated, editingRese
           )}
         </div>
 
-        <div className="form-group">
-          <label>Fecha y Hora</label>
-          <input
-            type="datetime-local"
-            value={formData.datetime}
-            onChange={(e) => setFormData(prev => ({ ...prev, datetime: e.target.value }))}
-            required
-          />
-        </div>
+        {renderDateTimeField()}
 
         <div className="form-group">
           <label>Número de Invitados</label>
