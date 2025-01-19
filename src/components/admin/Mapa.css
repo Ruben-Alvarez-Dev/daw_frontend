@@ -1,0 +1,347 @@
+.mapa-container {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.mapa-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 100px;
+}
+
+.tool-button {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  background: white;
+  cursor: pointer;
+}
+
+.tool-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tool-button.selected {
+  background: #e0e0e0;
+  border-color: #999;
+}
+
+.tool-button.delete-button {
+  margin-top: 0.5rem;
+  color: #d32f2f;
+}
+
+.tool-info {
+  margin-top: 1rem;
+  padding: 0.5rem;
+  background: #f5f5f5;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: #666;
+}
+
+.mapa-grid {
+  flex-grow: 1;
+  border: 1px solid #ccc;
+  background: white;
+  height: 600px;
+  position: relative;
+  overflow: auto;
+  cursor: crosshair;
+}
+
+.mapa-grid.mode-draw {
+  cursor: crosshair;
+}
+
+.mapa-grid.mode-move {
+  cursor: default;
+}
+
+.mapa-grid.mode-move .element {
+  cursor: move;
+}
+
+.mapa-grid:has(.element:hover) {
+  cursor: move;
+}
+
+.mapa-svg {
+  width: 1000px;
+  height: 1000px;
+}
+
+.grid-line {
+  stroke: #eee;
+  stroke-width: 1;
+}
+
+/* Elementos del mapa */
+.wall-element {
+  fill: #000;
+  stroke: #000;
+  stroke-width: 1;
+}
+
+.window-element {
+  fill: #e3f2fd;
+  stroke: #000;
+  stroke-width: 1;
+}
+
+.door-element {
+  fill: #e8f5e9;
+  stroke: #000;
+  stroke-width: 1;
+}
+
+.surface-element {
+  fill: #fff3e0;
+  stroke: #000;
+  stroke-width: 1;
+}
+
+.vegetation-element {
+  fill: #c8e6c9;
+  stroke: #000;
+  stroke-width: 1;
+}
+
+.vegetation-shape {
+  stroke: #1B5E20;
+  stroke-width: 1;
+  transition: all 0.2s ease;
+}
+
+.vegetation-shape:hover {
+  filter: brightness(1.1);
+}
+
+.vegetation-element.selected .vegetation-shape {
+  stroke: #E65100;
+  stroke-width: 2;
+}
+
+.surface-shape {
+  stroke: #5D4037;
+  stroke-width: 1;
+  transition: all 0.2s ease;
+}
+
+.surface-shape:hover {
+  filter: brightness(1.1);
+}
+
+.surface-element.selected .surface-shape {
+  stroke: #E65100;
+  stroke-width: 2;
+}
+
+.table-shape {
+  fill: #4CAF50;
+  stroke: #2E7D32;
+  stroke-width: 2;
+}
+
+.chair-element {
+  fill: #bcaaa4;
+  stroke: #000;
+  stroke-width: 1;
+}
+
+.element-shape {
+  fill: inherit;
+  stroke: inherit;
+  stroke-width: inherit;
+}
+
+.table-label {
+  fill: white;
+  font-size: 12px;
+  font-weight: bold;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Elementos de previsualización */
+.preview-element {
+  fill: rgba(102, 102, 102, 0.3);
+  stroke: #666;
+  stroke-width: 1;
+  stroke-dasharray: 4;
+}
+
+.element {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  stroke: #000;
+  stroke-width: 1;
+}
+
+.element.selected {
+  stroke: #2196f3;
+  stroke-width: 2;
+}
+
+.rotation-handle {
+  fill: #2196f3;
+  cursor: grab;
+  stroke: white;
+  stroke-width: 2;
+}
+
+.rotation-handle:hover {
+  fill: #1976d2;
+}
+
+.rotation-line {
+  stroke: #2196f3;
+  stroke-width: 1;
+  stroke-dasharray: 4;
+  pointer-events: none;
+}
+
+.resize-handle {
+  fill: white;
+  stroke: #2196f3;
+  stroke-width: 2;
+  cursor: pointer;
+}
+
+.resize-handle:hover {
+  fill: #2196f3;
+}
+
+.resize-n { cursor: n-resize; }
+.resize-s { cursor: s-resize; }
+.resize-e { cursor: e-resize; }
+.resize-w { cursor: w-resize; }
+.resize-ne { cursor: ne-resize; }
+.resize-nw { cursor: nw-resize; }
+.resize-se { cursor: se-resize; }
+.resize-sw { cursor: sw-resize; }
+
+.group-bounds-rect {
+  fill: none;
+  stroke: #2196f3;
+  stroke-width: 1;
+  stroke-dasharray: 4;
+  pointer-events: none;
+}
+
+.group-bounds .resize-handle {
+  fill: white;
+  stroke: #2196f3;
+  stroke-width: 2;
+}
+
+.group-bounds .rotation-handle {
+  fill: #2196f3;
+  cursor: pointer;
+}
+
+.group-bounds .rotation-line {
+  stroke: #2196f3;
+  stroke-width: 1;
+  stroke-dasharray: 4;
+  pointer-events: none;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid #ccc;
+  margin: 0.5rem 0;
+}
+
+.save-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 1000;
+}
+
+.save-dialog input {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.save-dialog button {
+  padding: 8px 16px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.save-dialog button:last-child {
+  background: #9e9e9e;
+}
+
+.save-button {
+  background: #2196F3 !important;
+  color: white !important;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  min-width: 300px;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.templates-list {
+  margin: 20px 0;
+}
+
+.template-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.template-item:last-child {
+  border-bottom: none;
+}
+
+.template-item button {
+  padding: 5px 10px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.template-item button:hover {
+  background-color: #45a049;
+}

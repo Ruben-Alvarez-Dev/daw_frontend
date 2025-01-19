@@ -7,6 +7,8 @@ import AdminTableForm from './AdminTableForm';
 import AdminTableList from './AdminTableList';
 import RestaurantProfile from './RestaurantProfile';
 import AdminAssignment from './AdminAssignment';
+import Mapa from './Mapa';
+import DailyView from './DailyView';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('users');
@@ -106,6 +108,26 @@ export default function AdminDashboard() {
         >
           Asignación
         </button>
+        <button
+          className={`px-4 py-2 rounded-lg ${
+            activeTab === 'mapa' 
+              ? 'bg-blue-600 text-white' 
+              : 'bg-gray-200 hover:bg-gray-300'
+          }`}
+          onClick={() => setActiveTab('mapa')}
+        >
+          Mapa
+        </button>
+        <button
+          className={`px-4 py-2 rounded-lg ${
+            activeTab === 'diario' 
+              ? 'bg-blue-600 text-white' 
+              : 'bg-gray-200 hover:bg-gray-300'
+          }`}
+          onClick={() => setActiveTab('diario')}
+        >
+          Diario
+        </button>
       </div>
 
       {/* Contenido según la pestaña activa */}
@@ -163,6 +185,20 @@ export default function AdminDashboard() {
           <>
             <h2 className="text-2xl font-semibold mb-4">Asignación de Turnos</h2>
             <AdminAssignment />
+          </>
+        )}
+
+        {activeTab === 'mapa' && (
+          <>
+            <h2 className="text-2xl font-semibold mb-4">Mapa</h2>
+            <Mapa />
+          </>
+        )}
+
+        {activeTab === 'diario' && (
+          <>
+            <h2 className="text-2xl font-semibold mb-4">Vista Diaria</h2>
+            <DailyView />
           </>
         )}
       </div>
