@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useRestaurantConfig } from '../../context/RestaurantConfigContext';
+import { useConfiguration } from '../../context/ConfigurationContext';
 import './TimeSlotGrid.css';
 
 const TimeSlotGrid = ({ onSelectTimeSlot, selectedTime, reservations = [] }) => {
-  const { config, loading: configLoading } = useRestaurantConfig();
+  const { config, loading: configLoading } = useConfiguration();
   const [slots, setSlots] = useState([]);
 
   useEffect(() => {

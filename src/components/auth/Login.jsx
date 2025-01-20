@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { useRestaurantConfig } from '../../context/RestaurantConfigContext';
+import { useConfiguration } from '../../context/ConfigurationContext';
 
 export default function Login() {
   const [formData, setFormData] = useState({ identifier: '', password: '' });
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const { login: loginFn } = useAuth();
-  const { fetchConfig } = useRestaurantConfig();
+  const { fetchConfig } = useConfiguration();
 
   useEffect(() => {
     // Limpiar el formulario cuando el componente se monta

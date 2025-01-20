@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
-import { useRestaurantConfig } from './RestaurantConfigContext';
+import { useConfiguration } from './ConfigurationContext';
 
 const TablesContext = createContext();
 
@@ -9,7 +9,7 @@ export function TablesProvider({ children }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { token } = useAuth();
-  const { updateConfig } = useRestaurantConfig();
+  const { updateConfig } = useConfiguration();
 
   const fetchTables = async () => {
     if (!token) return;

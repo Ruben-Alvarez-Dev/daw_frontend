@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useAuth } from '../../context/AuthContext';
-import { useRestaurantConfig } from '../../context/RestaurantConfigContext';
+import { useConfiguration } from '../../context/ConfigurationContext';
 import './DailyView.css';
 
 function DailyView() {
@@ -12,7 +12,7 @@ function DailyView() {
     const [reservations, setReservations] = useState([]);
     const [selectedReservation, setSelectedReservation] = useState(null);
     const { token } = useAuth();
-    const { config } = useRestaurantConfig();
+    const { config } = useConfiguration();
 
     useEffect(() => {
         // Cargar el layout por defecto

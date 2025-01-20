@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { useRestaurantConfig } from '../../context/RestaurantConfigContext';
+import { useConfiguration } from '../../context/ConfigurationContext';
 import './AdminReservationForm.css';
 
 export default function AdminReservationForm({ onReservationCreated, editingReservation }) {
@@ -21,7 +21,7 @@ export default function AdminReservationForm({ onReservationCreated, editingRese
     phone: ''
   });
   const { token } = useAuth();
-  const { config } = useRestaurantConfig();
+  const { config } = useConfiguration();
   const [timeOptions, setTimeOptions] = useState([]);
   const statusOptions = [
     'pending',
