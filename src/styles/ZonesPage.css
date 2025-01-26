@@ -1,0 +1,185 @@
+.zones-page {
+    display: flex;
+    height: calc(100vh - var(--navbar-height));
+    margin-left: 250px; /* AdminSidebar width */
+}
+
+.zones-page__sidebar {
+    width: 300px;
+    background-color: var(--color-light);
+    border-right: 1px solid var(--color-border);
+    padding: 1rem;
+    overflow-y: auto;
+}
+
+.zones-page__content {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+}
+
+.zones-page__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.zones-page__add-btn {
+    background-color: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.zones-page__add-btn:hover {
+    background-color: var(--color-primary-dark);
+}
+
+.zones-page__form {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background-color: var(--color-background);
+    border-radius: 0.5rem;
+}
+
+.zones-page__form input {
+    width: 100%;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.25rem;
+}
+
+.zones-page__form-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.zones-page__form-actions button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 0.25rem;
+    cursor: pointer;
+}
+
+.zones-page__form-actions button[type="submit"] {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+.zones-page__form-actions button[type="button"] {
+    background-color: var(--color-border);
+}
+
+.zones-page__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.zones-page__item {
+    margin-bottom: 1rem;
+}
+
+.zones-page__zone-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    background-color: var(--color-background);
+}
+
+.zones-page__zone-name {
+    cursor: pointer;
+    flex: 1;
+}
+
+.zones-page__zone-name--active {
+    color: var(--color-primary);
+    font-weight: bold;
+}
+
+.zones-page__zone-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.zones-page__zone-actions button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text);
+    opacity: 0.6;
+    transition: all 0.3s ease;
+}
+
+.zones-page__zone-actions button:hover {
+    opacity: 1;
+    color: var(--color-primary);
+}
+
+.zones-page__maps {
+    margin-top: 0.5rem;
+    padding-left: 1rem;
+}
+
+.zones-page__maps-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.zones-page__map-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    margin: 0.25rem 0;
+    cursor: pointer;
+    border-radius: 0.25rem;
+    background-color: var(--color-background-light);
+    transition: all 0.3s ease;
+}
+
+.zones-page__map-item:hover {
+    background-color: var(--color-background);
+}
+
+.zones-page__map-item--active {
+    background-color: var(--color-primary-light);
+    color: var(--color-primary);
+}
+
+.zones-page__default-badge {
+    font-size: 0.8rem;
+    padding: 0.2rem 0.5rem;
+    background-color: var(--color-primary);
+    color: white;
+    border-radius: 1rem;
+}
+
+.zones-page__no-map {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--color-text-light);
+}
+
+.zones-page__loading,
+.zones-page__error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    margin-left: 250px; /* AdminSidebar width */
+}

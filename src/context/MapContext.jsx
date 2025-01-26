@@ -1,177 +1,168 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { useAuth } from './AuthContext';
+import { mapService } from '../services/mapService';
 
 const MapContext = createContext();
 
 export function MapProvider({ children }) {
-    const [map, setMap] = useState(null);
-    const [templates, setTemplates] = useState([]);
+    const [zones, setZones] = useState([]);
+    const [selectedZone, setSelectedZone] = useState(null);
+    const [selectedMap, setSelectedMap] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const { token } = useAuth();
 
-    // Fetch del mapa base (único)
-    const fetchMap = useCallback(async () => {
-        if (!token) return;
+    // Fetch all zones
+    const fetchZones = useCallback(async () => {
         setLoading(true);
         try {
-            const response = await fetch('http://localhost:8000/api/map', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Accept': 'application/json'
-                }
-            });
-            if (!response.ok) throw new Error('Error fetching map');
-            const data = await response.json();
-            setMap(data);
+            const { data } = await mapService.getZones();
+            setZones(data);
             setError(null);
         } catch (err) {
             setError(err.message);
         } finally {
             setLoading(false);
         }
-    }, [token]);
+    }, []);
 
-    // Actualizar el mapa base
-    const updateMap = useCallback(async (layoutData) => {
-        if (!token || !map) return;
+    // Create new zone
+    const createZone = useCallback(async (zoneData) => {
         try {
-            const response = await fetch(`http://localhost:8000/api/map/${map.id}`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({ layout_data: layoutData })
-            });
-            if (!response.ok) throw new Error('Error updating map');
-            const updatedMap = await response.json();
-            setMap(updatedMap);
-            return updatedMap;
+            const { data } = await mapService.createZone(zoneData);
+            setZones(prev => [...prev, data]);
+            return data;
         } catch (err) {
             setError(err.message);
             throw err;
         }
-    }, [token, map]);
+    }, []);
 
-    // Fetch de todos los templates
-    const fetchTemplates = useCallback(async () => {
-        if (!token) return;
-        setLoading(true);
+    // Update zone
+    const updateZone = useCallback(async (zoneId, zoneData) => {
         try {
-            const response = await fetch('http://localhost:8000/api/templates', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Accept': 'application/json'
-                }
-            });
-            if (!response.ok) throw new Error('Error fetching templates');
-            const data = await response.json();
-            setTemplates(data);
-            setError(null);
-        } catch (err) {
-            setError(err.message);
-        } finally {
-            setLoading(false);
-        }
-    }, [token]);
-
-    // Crear nuevo template
-    const createTemplate = useCallback(async (templateData) => {
-        if (!token) return;
-        try {
-            const response = await fetch('http://localhost:8000/api/templates', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify(templateData)
-            });
-            if (!response.ok) throw new Error('Error creating template');
-            const newTemplate = await response.json();
-            setTemplates(prev => [...prev, newTemplate]);
-            return newTemplate;
+            const { data } = await mapService.updateZone(zoneId, zoneData);
+            setZones(prev => prev.map(z => z.id === zoneId ? data : z));
+            if (selectedZone?.id === zoneId) {
+                setSelectedZone(data);
+            }
+            return data;
         } catch (err) {
             setError(err.message);
             throw err;
         }
-    }, [token]);
+    }, [selectedZone]);
 
-    // Actualizar template existente
-    const updateTemplate = useCallback(async (templateId, templateData) => {
-        if (!token) return;
+    // Delete zone
+    const deleteZone = useCallback(async (zoneId) => {
         try {
-            const response = await fetch(`http://localhost:8000/api/templates/${templateId}`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify(templateData)
-            });
-            if (!response.ok) throw new Error('Error updating template');
-            const updatedTemplate = await response.json();
-            setTemplates(prev => prev.map(t => t.id === templateId ? updatedTemplate : t));
-            return updatedTemplate;
+            await mapService.deleteZone(zoneId);
+            setZones(prev => prev.filter(z => z.id !== zoneId));
+            if (selectedZone?.id === zoneId) {
+                setSelectedZone(null);
+                setSelectedMap(null);
+            }
         } catch (err) {
             setError(err.message);
             throw err;
         }
-    }, [token]);
+    }, [selectedZone]);
 
-    // Eliminar template
-    const deleteTemplate = useCallback(async (templateId) => {
-        if (!token) return;
+    // Create new map
+    const createMap = useCallback(async (mapData) => {
         try {
-            const response = await fetch(`http://localhost:8000/api/templates/${templateId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Accept': 'application/json'
-                }
-            });
-            if (!response.ok) throw new Error('Error deleting template');
-            setTemplates(prev => prev.filter(t => t.id !== templateId));
+            const { data } = await mapService.createMap(mapData);
+            if (selectedZone?.id === data.zone_id) {
+                setSelectedZone(prev => ({
+                    ...prev,
+                    maps: [...(prev.maps || []), data]
+                }));
+            }
+            return data;
         } catch (err) {
             setError(err.message);
             throw err;
         }
-    }, [token]);
+    }, [selectedZone]);
 
-    // Obtener template para un turno específico
-    const getTemplateForShift = useCallback(async (date, type) => {
-        if (!token) return;
+    // Update map
+    const updateMap = useCallback(async (mapId, mapData) => {
         try {
-            const response = await fetch(`http://localhost:8000/api/templates/shift?date=${date}&type=${type}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Accept': 'application/json'
-                }
-            });
-            if (!response.ok) throw new Error('Error fetching shift template');
-            return await response.json();
+            const { data } = await mapService.updateMap(mapId, mapData);
+            if (selectedZone?.id === data.zone_id) {
+                setSelectedZone(prev => ({
+                    ...prev,
+                    maps: prev.maps.map(m => m.id === mapId ? data : m)
+                }));
+            }
+            if (selectedMap?.id === mapId) {
+                setSelectedMap(data);
+            }
+            return data;
         } catch (err) {
             setError(err.message);
             throw err;
         }
-    }, [token]);
+    }, [selectedZone, selectedMap]);
+
+    // Delete map
+    const deleteMap = useCallback(async (mapId) => {
+        try {
+            await mapService.deleteMap(mapId);
+            if (selectedZone) {
+                setSelectedZone(prev => ({
+                    ...prev,
+                    maps: prev.maps.filter(m => m.id !== mapId)
+                }));
+            }
+            if (selectedMap?.id === mapId) {
+                setSelectedMap(null);
+            }
+        } catch (err) {
+            setError(err.message);
+            throw err;
+        }
+    }, [selectedZone, selectedMap]);
+
+    // Get map history
+    const getMapHistory = useCallback(async (mapId) => {
+        try {
+            const { data } = await mapService.getMapHistory(mapId);
+            return data;
+        } catch (err) {
+            setError(err.message);
+            throw err;
+        }
+    }, []);
+
+    // Select zone and load its maps
+    const selectZone = useCallback(async (zoneId) => {
+        try {
+            const { data } = await mapService.getZone(zoneId);
+            setSelectedZone(data);
+            setSelectedMap(data.default_map);
+            return data;
+        } catch (err) {
+            setError(err.message);
+            throw err;
+        }
+    }, []);
 
     const value = {
-        map,
-        templates,
+        zones,
+        selectedZone,
+        selectedMap,
         loading,
         error,
-        fetchMap,
+        fetchZones,
+        createZone,
+        updateZone,
+        deleteZone,
+        createMap,
         updateMap,
-        fetchTemplates,
-        createTemplate,
-        updateTemplate,
-        deleteTemplate,
-        getTemplateForShift
+        deleteMap,
+        getMapHistory,
+        selectZone,
+        setSelectedMap
     };
 
     return (

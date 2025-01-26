@@ -18,15 +18,12 @@ export default function MapEditor() {
     useEffect(() => {
         const loadMaps = async () => {
             try {
-                // TODO: Cuando tengamos el backend, cargar desde ahí
-                const initialMaps = [
-                    { id: 1, name: 'Mapa Principal', zone: 'salon', active: true },
-                    { id: 2, name: 'Terraza', zone: 'terrace', active: true }
-                ];
-                setMaps(initialMaps);
-                if (initialMaps.length > 0) {
-                    setCurrentMapId(initialMaps[0].id);
-                    setMapName(initialMaps[0].name);
+                const response = await fetch('http://localhost:8000/api/maps');
+                const data = await response.json();
+                setMaps(data);
+                if (data.length > 0) {
+                    setCurrentMapId(data[0].id);
+                    setMapName(data[0].name);
                 }
                 setIsLoading(false);
             } catch (error) {
@@ -44,15 +41,11 @@ export default function MapEditor() {
             
             try {
                 setIsLoading(true);
-                // TODO: Cuando tengamos el backend, cargar desde ahí
-                const map = maps.find(m => m.id === currentMapId);
-                if (map) {
-                    setMapName(map.name);
-                    // Por ahora inicializamos con un array vacío
-                    setElements([]);
-                    setHistory([[]]);
-                    setHistoryIndex(0);
-                }
+                const response = await fetch(`http://localhost:8000/api/maps/${currentMapId}/elements`);
+                const data = await response.json();
+                setElements(data);
+                setHistory([[...data]]);
+                setHistoryIndex(0);
                 setIsLoading(false);
             } catch (error) {
                 console.error('Error al cargar elementos del mapa:', error);
@@ -60,53 +53,85 @@ export default function MapEditor() {
             }
         };
         loadMapElements();
-    }, [currentMapId, maps]);
+    }, [currentMapId]);
 
-    const addElement = (element) => {
-        if (!element) return;
-        const newElements = [...elements, element];
+    const handleAddElement = (newElement) => {
+        const newElements = [...elements, newElement];
         setElements(newElements);
-        addToHistory(newElements);
-    };
-
-    const updateElement = (index, updatedElement) => {
-        if (index < 0 || !updatedElement) return;
-        const newElements = [...elements];
-        newElements[index] = updatedElement;
-        setElements(newElements);
-        addToHistory(newElements);
-    };
-
-    const deleteElement = (index) => {
-        if (index < 0) return;
-        const newElements = elements.filter((_, i) => i !== index);
-        setElements(newElements);
-        addToHistory(newElements);
-    };
-
-    const addToHistory = (newElements) => {
+        
+        // Actualizar historial
         const newHistory = history.slice(0, historyIndex + 1);
         newHistory.push([...newElements]);
         setHistory(newHistory);
-        setHistoryIndex(newHistory.length - 1);
+        setHistoryIndex(historyIndex + 1);
+
+        // Guardar en el backend
+        saveMapElements(newElements);
+    };
+
+    const handleUpdateElement = (updatedElement) => {
+        const newElements = elements.map(el => 
+            el.id === updatedElement.id ? updatedElement : el
+        );
+        setElements(newElements);
+        
+        // Actualizar historial
+        const newHistory = history.slice(0, historyIndex + 1);
+        newHistory.push([...newElements]);
+        setHistory(newHistory);
+        setHistoryIndex(historyIndex + 1);
+
+        // Guardar en el backend
+        saveMapElements(newElements);
+    };
+
+    const handleDeleteElement = (elementId) => {
+        const newElements = elements.filter(el => el.id !== elementId);
+        setElements(newElements);
+        
+        // Actualizar historial
+        const newHistory = history.slice(0, historyIndex + 1);
+        newHistory.push([...newElements]);
+        setHistory(newHistory);
+        setHistoryIndex(historyIndex + 1);
+
+        // Guardar en el backend
+        saveMapElements(newElements);
+    };
+
+    const saveMapElements = async (elements) => {
+        if (!currentMapId) return;
+
+        try {
+            await fetch(`http://localhost:8000/api/maps/${currentMapId}/elements`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(elements),
+            });
+        } catch (error) {
+            console.error('Error al guardar elementos del mapa:', error);
+        }
     };
 
     const handleUndo = () => {
         if (historyIndex > 0) {
             setHistoryIndex(historyIndex - 1);
-            setElements(history[historyIndex - 1]);
+            setElements([...history[historyIndex - 1]]);
+            saveMapElements(history[historyIndex - 1]);
         }
     };
 
     const handleRedo = () => {
         if (historyIndex < history.length - 1) {
             setHistoryIndex(historyIndex + 1);
-            setElements(history[historyIndex + 1]);
+            setElements([...history[historyIndex + 1]]);
+            saveMapElements(history[historyIndex + 1]);
         }
     };
 
     const handleMapNameChange = async (newName) => {
-        // TODO: Actualizar nombre en el backend
         const updatedMaps = maps.map(map => 
             map.id === currentMapId ? { ...map, name: newName } : map
         );
@@ -119,7 +144,6 @@ export default function MapEditor() {
     };
 
     const handleCreateZone = async (zoneName) => {
-        // TODO: Crear zona en el backend
         const newId = Math.max(...maps.map(m => m.id)) + 1;
         const newMap = {
             id: newId,
@@ -133,14 +157,12 @@ export default function MapEditor() {
     };
 
     const handleDeactivateMap = async (mapId) => {
-        // TODO: Desactivar mapa en el backend
         const updatedMaps = maps.map(map => 
             map.id === mapId ? { ...map, active: false } : map
         );
         
         setMaps(updatedMaps);
         
-        // Si el mapa actual fue desactivado, cambiar a otro mapa activo
         if (mapId === currentMapId) {
             const nextActiveMap = updatedMaps.find(m => m.active && m.id !== mapId);
             if (nextActiveMap) {
@@ -152,11 +174,12 @@ export default function MapEditor() {
     const handleClear = () => {
         const newElements = [];
         setElements(newElements);
-        addToHistory(newElements);
+        setHistory([newElements]);
+        setHistoryIndex(0);
+        saveMapElements(newElements);
     };
 
     const handleSave = async () => {
-        // TODO: Guardar en el backend
         const mapData = {
             id: currentMapId,
             name: mapName,
@@ -164,7 +187,6 @@ export default function MapEditor() {
         };
         
         console.log('Guardando mapa:', mapData);
-        // Aquí iría la llamada al backend
     };
 
     if (isLoading) {
@@ -175,7 +197,7 @@ export default function MapEditor() {
         <div className="map-editor">
             <MapToolbar
                 mapName={mapName}
-                onMapNameChange={setMapName}
+                onMapNameChange={handleMapNameChange}
                 onUndo={handleUndo}
                 onRedo={handleRedo}
                 onClear={handleClear}
@@ -199,9 +221,9 @@ export default function MapEditor() {
                     <MapPreview
                         elements={elements}
                         selectedTool={selectedTool}
-                        onAddElement={addElement}
-                        onUpdateElement={updateElement}
-                        onDeleteElement={deleteElement}
+                        onAddElement={handleAddElement}
+                        onUpdateElement={handleUpdateElement}
+                        onDeleteElement={handleDeleteElement}
                     />
                 </div>
             </div>

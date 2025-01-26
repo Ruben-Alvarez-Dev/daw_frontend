@@ -1,24 +1,25 @@
 .map-preview {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 800px;
+    height: 600px;
     background-color: white;
-    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     overflow: hidden;
     position: relative;
 }
 
-.map-preview__canvas {
-    background-color: white;
-    border-radius: 0.25rem;
-    cursor: crosshair;
+.map-preview:focus {
+    outline: none;
+    border-color: var(--primary-color);
 }
 
-canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
+/* Estilos para el contenedor del Stage de Konva */
+.map-preview .konvajs-content {
     background-color: white;
+    border: 1px solid #e1e4e8;
+}
+
+.map-preview .konvajs-content canvas {
+    cursor: crosshair;
 }

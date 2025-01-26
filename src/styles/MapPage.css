@@ -1,0 +1,55 @@
+.map-page {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+}
+
+.map-page__sidebar {
+    width: 300px;
+    padding: 20px;
+    background-color: var(--background-color);
+    border-right: 1px solid var(--border-color);
+    overflow-y: auto;
+}
+
+.map-page__zone-list,
+.map-page__map-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.map-page__zone-item,
+.map-page__map-item {
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.map-page__zone-item:hover,
+.map-page__map-item:hover {
+    background-color: var(--hover-color);
+}
+
+.map-page__zone-item--selected,
+.map-page__map-item--selected {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.map-page__editor {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--background-color-light);
+}
+
+.map-page__no-map {
+    text-align: center;
+    color: var(--text-color-light);
+}

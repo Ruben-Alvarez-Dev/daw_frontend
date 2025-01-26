@@ -1,0 +1,16 @@
+.admin-layout {
+    min-height: 100vh;
+    background-color: var(--color-background);
+}
+
+.admin-layout__container {
+    display: flex;
+    min-height: calc(100vh - var(--navbar-height));
+}
+
+.admin-layout__content {
+    flex: 1;
+    margin-left: 250px; /* AdminSidebar width */
+    padding: 2rem;
+    background-color: var(--color-background-light);
+}
