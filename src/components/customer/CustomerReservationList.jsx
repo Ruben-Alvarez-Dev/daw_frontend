@@ -9,7 +9,7 @@ export default function CustomerReservationList({ onNewReservation }) {
 
   const fetchReservations = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/my-reservations', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/my-reservations`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json'
@@ -52,44 +52,44 @@ export default function CustomerReservationList({ onNewReservation }) {
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">Mis Reservas</h2>
+    <div className="reservation-list">
+      <div className="reservation-list__header">
+        <h2 className="reservation-list__title">Mis Reservas</h2>
         <button
           onClick={onNewReservation}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          className="reservation-list__new-button"
         >
           Nueva Reserva
         </button>
       </div>
 
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <div className="reservation-list__error">
           {error}
         </div>
       )}
 
       {!error && reservations.length === 0 ? (
-        <p className="text-gray-500 text-center py-4">No tienes reservas</p>
+        <p className="reservation-list__empty">No tienes reservas</p>
       ) : (
-        <div className="space-y-4">
+        <div className="reservation-list__grid">
           {reservations.map(reservation => (
             <div
               key={reservation.id}
-              className="bg-white p-4 rounded-lg shadow"
+              className="reservation-list__item"
             >
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <span className="text-gray-600">Fecha y hora:</span>
-                  <div className="font-medium">{formatDateTime(reservation.datetime)}</div>
+              <div className="reservation-list__item-grid">
+                <div className="reservation-list__item-field">
+                  <span className="reservation-list__item-label">Fecha y hora:</span>
+                  <div className="reservation-list__item-value">{formatDateTime(reservation.datetime)}</div>
                 </div>
-                <div>
-                  <span className="text-gray-600">Personas:</span>
-                  <div className="font-medium">{reservation.guests}</div>
+                <div className="reservation-list__item-field">
+                  <span className="reservation-list__item-label">Personas:</span>
+                  <div className="reservation-list__item-value">{reservation.guests}</div>
                 </div>
-                <div>
-                  <span className="text-gray-600">Estado:</span>
-                  <div className="font-medium">{reservation.status || 'pending'}</div>
+                <div className="reservation-list__item-field">
+                  <span className="reservation-list__item-label">Estado:</span>
+                  <div className="reservation-list__item-value">{reservation.status || 'pending'}</div>
                 </div>
               </div>
             </div>

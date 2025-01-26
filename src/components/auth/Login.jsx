@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useConfiguration } from '../../context/ConfigurationContext';
+import './Login.css';
 
 export default function Login() {
   const [formData, setFormData] = useState({ identifier: '', password: '' });
@@ -69,50 +70,41 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
-        <div>
-          <h2 className="text-center text-3xl font-bold text-gray-900">Iniciar sesión</h2>
-          {error && <p className="mt-2 text-center text-sm text-red-600">{error}</p>}
+    <div className="auth">
+      <div className="auth__container">
+        <div className="auth__header">
+          <h2 className="auth__title">Iniciar sesión</h2>
+          {error && <p className="auth__error">{error}</p>}
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-6" autoComplete="off">
-          <div className="space-y-4">
-            <div>
-              <input
-                type="text"
-                name="identifier"
-                value={formData.identifier}
-                onChange={(e) => setFormData({...formData, identifier: e.target.value})}
-                placeholder="Email o teléfono"
-                required
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              />
-            </div>
-            <div>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={(e) => setFormData({...formData, password: e.target.value})}
-                placeholder="Contraseña"
-                required
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              />
-            </div>
+        <form onSubmit={handleSubmit} className="auth__form" autoComplete="off">
+          <div className="auth__input-group">
+            <input
+              type="text"
+              name="identifier"
+              value={formData.identifier}
+              onChange={(e) => setFormData({...formData, identifier: e.target.value})}
+              placeholder="Email o teléfono"
+              required
+              className="auth__input"
+            />
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={(e) => setFormData({...formData, password: e.target.value})}
+              placeholder="Contraseña"
+              required
+              className="auth__input"
+            />
           </div>
 
-          <div>
-            <button
-              type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Iniciar sesión
-            </button>
-          </div>
+          <button type="submit" className="auth__button">
+            Iniciar sesión
+          </button>
 
-          <div className="text-sm text-center">
-            <Link to="/register" className="font-medium text-indigo-600 hover:text-indigo-500">
+          <div className="auth__link-container">
+            <Link to="/register" className="auth__link">
               ¿No tienes una cuenta? Regístrate
             </Link>
           </div>

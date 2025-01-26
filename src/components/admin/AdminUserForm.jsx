@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useUser } from '../../context/UserContext';
 import './AdminUserForm.css';
 
 export default function AdminUserForm({ onUserCreated, editingUser }) {
@@ -8,10 +9,11 @@ export default function AdminUserForm({ onUserCreated, editingUser }) {
     email: '',
     phone: '',
     password: '',
-    role: 'client'
+    role: 'customer'
   });
   const [error, setError] = useState('');
   const { token } = useAuth();
+  const { fetchUsers } = useUser();
 
   useEffect(() => {
     if (editingUser) {
@@ -28,7 +30,7 @@ export default function AdminUserForm({ onUserCreated, editingUser }) {
         email: '',
         phone: '',
         password: '',
-        role: 'client'
+        role: 'customer'
       });
     }
   }, [editingUser]);
@@ -39,7 +41,7 @@ export default function AdminUserForm({ onUserCreated, editingUser }) {
       email: '',
       phone: '',
       password: '',
-      role: 'client'
+      role: 'customer'
     });
     setError('');
     
@@ -86,8 +88,11 @@ export default function AdminUserForm({ onUserCreated, editingUser }) {
         email: '',
         phone: '',
         password: '',
-        role: 'client'
+        role: 'customer'
       });
+
+      // Refrescar la lista de usuarios
+      await fetchUsers();
 
       if (onUserCreated) {
         onUserCreated();
@@ -156,8 +161,8 @@ export default function AdminUserForm({ onUserCreated, editingUser }) {
             onChange={(e) => setFormData({...formData, role: e.target.value})}
             required
           >
-            <option value="client">Cliente</option>
-            <option value="admin">Administrador</option>
+            <option value="customer">customer</option>
+            <option value="admin">admin</option>
           </select>
         </div>
 

@@ -1,0 +1,102 @@
+.reservation-form {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: var(--space-md);
+}
+
+.reservation-form__title {
+  font-size: var(--font-size-xl);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-lg);
+}
+
+.reservation-form__error {
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--border-radius-md);
+  margin-bottom: var(--space-md);
+  background-color: rgba(207, 102, 121, 0.1);
+  border: 1px solid var(--color-error);
+  color: var(--color-error);
+}
+
+.reservation-form__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.reservation-form__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.reservation-form__label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.reservation-form__input {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  background-color: var(--color-input-background);
+  border: 1px solid var(--color-input-border);
+  border-radius: var(--border-radius-md);
+  color: var(--color-text-primary);
+  transition: border-color var(--transition-fast);
+}
+
+.reservation-form__input:focus {
+  border-color: var(--color-input-focus-border);
+  outline: none;
+}
+
+.reservation-form__input[type="datetime-local"] {
+  color-scheme: dark;
+}
+
+.reservation-form__input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.reservation-form__input[type="number"]::-webkit-outer-spin-button,
+.reservation-form__input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.reservation-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+.reservation-form__button {
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.reservation-form__button--secondary {
+  background-color: var(--color-surface-light);
+  border: 1px solid var(--color-input-border);
+  color: var(--color-text-primary);
+}
+
+.reservation-form__button--secondary:hover {
+  background-color: var(--color-surface);
+}
+
+.reservation-form__button--primary {
+  background-color: var(--color-primary);
+  border: none;
+  color: var(--color-text-primary);
+}
+
+.reservation-form__button--primary:hover {
+  background-color: var(--color-primary-hover);
+}

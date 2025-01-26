@@ -78,26 +78,29 @@ export default function AdminReservationForm({ onReservationCreated, editingRese
   }, [editingReservation]);
 
   useEffect(() => {
-    const fetchTables = async () => {
+    const fetchAvailableTables = async () => {
+      if (!formData.datetime) return;
+
       try {
-        const response = await fetch('http://localhost:8000/api/tables', {
+        const response = await fetch(`http://localhost:8000/api/tables/available?datetime=${formData.datetime.replace('T', ' ')}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Accept': 'application/json'
           }
         });
 
-        if (!response.ok) throw new Error('Error al cargar las mesas');
+        if (!response.ok) throw new Error('Error al obtener mesas disponibles');
 
         const data = await response.json();
-        setAvailableTables(data);
+        setAvailableTables(data.tables || []);
       } catch (err) {
         console.error('Error:', err);
+        setError(err.message);
       }
     };
 
-    fetchTables();
-  }, [token]);
+    fetchAvailableTables();
+  }, [formData.datetime, token]);
 
   useEffect(() => {
     const searchUsers = async () => {
@@ -409,13 +412,13 @@ export default function AdminReservationForm({ onReservationCreated, editingRese
         <div className="form-group">
           <label>Mesas Seleccionadas: {selectedTables.length > 0 ? selectedTables.join(', ') : 'Ninguna'}</label>
           <div className="tables-container">
-            {availableTables.map(table => (
+            {availableTables?.map(table => (
               <div
                 key={table.id}
                 onClick={() => toggleTable(table.id)}
                 className={`table-chip ${selectedTables.includes(table.id) ? 'selected' : ''}`}
               >
-                Mesa {table.id} ({table.capacity} pax)
+                {table.name} ({table.capacity} pax)
               </div>
             ))}
           </div>

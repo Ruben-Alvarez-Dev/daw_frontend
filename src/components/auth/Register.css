@@ -1,0 +1,42 @@
+/* Importamos los estilos base de autenticación */
+@import './Login.css';
+
+/* Estilos específicos para el registro */
+.auth__form--register .auth__input-group {
+  gap: var(--space-md);
+}
+
+.auth__input--optional::placeholder {
+  color: var(--color-text-disabled);
+}
+
+.auth__input--required {
+  border-left: 2px solid var(--color-primary);
+}
+
+.auth__requirements {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-xs);
+}
+
+.auth__requirements-list {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-xs) 0;
+}
+
+.auth__requirement {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  color: var(--color-text-secondary);
+}
+
+.auth__requirement--valid {
+  color: var(--color-success);
+}
+
+.auth__requirement--invalid {
+  color: var(--color-error);
+}

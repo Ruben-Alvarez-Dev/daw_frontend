@@ -1,0 +1,5 @@
+.customer-display {
+  flex: 1;
+  padding: var(--space-md);
+  overflow: auto;
+}

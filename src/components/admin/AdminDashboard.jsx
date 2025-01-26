@@ -1,17 +1,26 @@
 import { useState, useRef } from 'react';
-import AdminReservationForm from './AdminReservationForm';
-import AdminReservationList from './AdminReservationList';
-import AdminUserForm from './AdminUserForm';
+import { Routes, Route } from 'react-router-dom';
+import AdminAside from './AdminAside';
 import AdminUserList from './AdminUserList';
-import AdminTableForm from './AdminTableForm';
+import AdminReservationList from './AdminReservationList';
+import AdminTables from './AdminTables';
 import AdminTableList from './AdminTableList';
+import AdminTableForm from './AdminTableForm';
+import ShiftList from './shifts/ShiftList';
+import ShiftDistribution from './shifts/ShiftDistribution';
+import ShiftHistory from './shifts/ShiftHistory';
 import RestaurantProfile from './RestaurantProfile';
+import { ShiftProvider } from '../../context/ShiftContext';
+import AdminUserForm from './AdminUserForm';
+import AdminReservationForm from './AdminReservationForm';
 import AdminAssignment from './AdminAssignment';
 import Mapa from './Mapa';
 import DailyView from './DailyView';
+import AdminMaps from './AdminMaps';
+import './AdminDashboard.css';
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState('users');
+  const [activeSection, setActiveSection] = useState('users');
   const [editingReservation, setEditingReservation] = useState(null);
   const [editingTable, setEditingTable] = useState(null);
   const [editingUser, setEditingUser] = useState(null);
@@ -52,87 +61,10 @@ export default function AdminDashboard() {
     setEditingUser(user);
   };
 
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Panel de Administración</h1>
-      
-      {/* Pestañas de navegación */}
-      <div className="flex mb-8 space-x-4">
-        <button
-          className={`px-4 py-2 rounded-lg ${
-            activeTab === 'users' 
-              ? 'bg-blue-600 text-white' 
-              : 'bg-gray-200 hover:bg-gray-300'
-          }`}
-          onClick={() => setActiveTab('users')}
-        >
-          Usuarios
-        </button>
-        <button
-          className={`px-4 py-2 rounded-lg ${
-            activeTab === 'tables' 
-              ? 'bg-blue-600 text-white' 
-              : 'bg-gray-200 hover:bg-gray-300'
-          }`}
-          onClick={() => setActiveTab('tables')}
-        >
-          Mesas
-        </button>
-        <button
-          className={`px-4 py-2 rounded-lg ${
-            activeTab === 'reservations' 
-              ? 'bg-blue-600 text-white' 
-              : 'bg-gray-200 hover:bg-gray-300'
-          }`}
-          onClick={() => setActiveTab('reservations')}
-        >
-          Reservas
-        </button>
-        <button
-          className={`px-4 py-2 rounded-lg ${
-            activeTab === 'profile' 
-              ? 'bg-blue-600 text-white' 
-              : 'bg-gray-200 hover:bg-gray-300'
-          }`}
-          onClick={() => setActiveTab('profile')}
-        >
-          Configuración
-        </button>
-        <button
-          className={`px-4 py-2 rounded-lg ${
-            activeTab === 'assignment' 
-              ? 'bg-blue-600 text-white' 
-              : 'bg-gray-200 hover:bg-gray-300'
-          }`}
-          onClick={() => setActiveTab('assignment')}
-        >
-          Asignación
-        </button>
-        <button
-          className={`px-4 py-2 rounded-lg ${
-            activeTab === 'mapa' 
-              ? 'bg-blue-600 text-white' 
-              : 'bg-gray-200 hover:bg-gray-300'
-          }`}
-          onClick={() => setActiveTab('mapa')}
-        >
-          Mapa
-        </button>
-        <button
-          className={`px-4 py-2 rounded-lg ${
-            activeTab === 'diario' 
-              ? 'bg-blue-600 text-white' 
-              : 'bg-gray-200 hover:bg-gray-300'
-          }`}
-          onClick={() => setActiveTab('diario')}
-        >
-          Diario
-        </button>
-      </div>
-
-      {/* Contenido según la pestaña activa */}
-      <div className="bg-white rounded-lg shadow p-6">
-        {activeTab === 'users' && (
+  const renderContent = () => {
+    switch (activeSection) {
+      case 'users':
+        return (
           <>
             <h2 className="text-2xl font-semibold mb-4">Gestión de Usuarios</h2>
             <AdminUserForm 
@@ -144,23 +76,9 @@ export default function AdminDashboard() {
               onEdit={handleUserEdit}
             />
           </>
-        )}
-
-        {activeTab === 'tables' && (
-          <>
-            <h2 className="text-2xl font-semibold mb-4">Gestión de Mesas</h2>
-            <AdminTableForm 
-              onTableCreated={handleTableCreated}
-              editingTable={editingTable}
-            />
-            <AdminTableList 
-              ref={tableListRef}
-              onEdit={handleTableEdit}
-            />
-          </>
-        )}
-
-        {activeTab === 'reservations' && (
+        );
+      case 'reservations':
+        return (
           <>
             <h2 className="text-2xl font-semibold mb-4">Gestión de Reservas</h2>
             <AdminReservationForm 
@@ -172,35 +90,87 @@ export default function AdminDashboard() {
               onEdit={handleReservationEdit}
             />
           </>
-        )}
-
-        {activeTab === 'profile' && (
+        );
+      case 'tables':
+        return (
+          <Routes>
+            <Route path="/" element={<AdminTables />}>
+              <Route index element={<AdminTableList />} />
+              <Route path="new" element={<AdminTableForm />} />
+              <Route path=":id/edit" element={<AdminTableForm />} />
+            </Route>
+          </Routes>
+        );
+      case 'shifts':
+        return (
+          <ShiftProvider>
+            <Routes>
+              <Route path="/" element={<ShiftList />} />
+              <Route path=":shiftId/distribution" element={<ShiftDistribution />} />
+              <Route path=":shiftId/history" element={<ShiftHistory />} />
+            </Routes>
+          </ShiftProvider>
+        );
+      case 'config':
+        return (
           <>
             <h2 className="text-2xl font-semibold mb-4">Configuración del Restaurante</h2>
             <RestaurantProfile />
           </>
-        )}
-
-        {activeTab === 'assignment' && (
+        );
+      case 'assignment':
+        return (
           <>
             <h2 className="text-2xl font-semibold mb-4">Asignación de Turnos</h2>
             <AdminAssignment />
           </>
-        )}
-
-        {activeTab === 'mapa' && (
+        );
+      case 'mapa':
+        return (
           <>
             <h2 className="text-2xl font-semibold mb-4">Mapa</h2>
             <Mapa />
           </>
-        )}
-
-        {activeTab === 'diario' && (
+        );
+      case 'maps':
+        return (
+          <>
+            <h2 className="text-2xl font-semibold mb-4">Editor del Mapa</h2>
+            <AdminMaps />
+          </>
+        );
+      case 'diario':
+        return (
           <>
             <h2 className="text-2xl font-semibold mb-4">Vista Diaria</h2>
             <DailyView />
           </>
-        )}
+        );
+      default:
+        return (
+          <>
+            <h2 className="text-2xl font-semibold mb-4">Gestión de Usuarios</h2>
+            <AdminUserForm 
+              onUserCreated={handleUserCreated}
+              editingUser={editingUser}
+            />
+            <AdminUserList 
+              ref={userListRef}
+              onEdit={handleUserEdit}
+            />
+          </>
+        );
+    }
+  };
+
+  return (
+    <div className="admin-dashboard">
+      <AdminAside 
+        activeSection={activeSection}
+        onSectionChange={setActiveSection}
+      />
+      <div className="admin-dashboard__content">
+        {renderContent()}
       </div>
     </div>
   );

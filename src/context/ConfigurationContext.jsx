@@ -29,6 +29,12 @@ export function ConfigurationProvider({ children }) {
 
     const isAdmin = user?.role === 'admin';
 
+    const resetConfig = () => {
+        setConfig(defaultConfig);
+        setLoading(false);
+        setError(null);
+    };
+
     const fetchConfig = useCallback(async () => {
         if (!token) {
             setError('Usuario no autenticado');
@@ -108,13 +114,26 @@ export function ConfigurationProvider({ children }) {
         }
     }, [token, isAdmin]);
 
-    // Cargar la configuración inicial
     useEffect(() => {
+        const handleUserLoggedIn = () => {
+            fetchConfig();
+        };
+        
+        const handleUserLoggedOut = () => {
+            resetConfig();
+        };
+        
+        window.addEventListener('userLoggedIn', handleUserLoggedIn);
+        window.addEventListener('userLoggedOut', handleUserLoggedOut);
+        
         if (token) {
             fetchConfig();
-        } else {
-            setLoading(false);
         }
+        
+        return () => {
+            window.removeEventListener('userLoggedIn', handleUserLoggedIn);
+            window.removeEventListener('userLoggedOut', handleUserLoggedOut);
+        };
     }, [token, fetchConfig]);
 
     return (

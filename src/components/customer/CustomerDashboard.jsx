@@ -1,71 +1,38 @@
 import { useState } from 'react';
-import CustomerProfile from './CustomerProfile';
-import CustomerReservationList from './CustomerReservationList';
-import CustomerReservationForm from './CustomerReservationForm';
+import CustomerAside from './CustomerAside';
+import CustomerDisplay from './CustomerDisplay';
+import ReservationProcess from './ReservationProcess';
+import './CustomerDashboard.css';
 
 export default function CustomerDashboard() {
-  const [activeTab, setActiveTab] = useState('profile');
-  const [showNewReservationForm, setShowNewReservationForm] = useState(false);
+  const [activeSection, setActiveSection] = useState('profile');
+  const [showNewReservation, setShowNewReservation] = useState(false);
 
-  const renderContent = () => {
-    if (showNewReservationForm) {
-      return (
-        <CustomerReservationForm
-          onReservationCreated={() => {
-            setShowNewReservationForm(false);
-            // Si estamos en la pestaña de reservas, forzar refresh
-            if (activeTab === 'reservations') {
-              setActiveTab('refresh-reservations');
-              setTimeout(() => setActiveTab('reservations'), 0);
-            }
-          }}
-        />
-      );
-    }
+  const handleNewReservation = () => {
+    setShowNewReservation(true);
+  };
 
-    switch (activeTab) {
-      case 'profile':
-        return <CustomerProfile />;
-      case 'reservations':
-      case 'refresh-reservations':
-        return (
-          <CustomerReservationList
-            onNewReservation={() => setShowNewReservationForm(true)}
-          />
-        );
-      default:
-        return <CustomerProfile />;
-    }
+  const handleReservationComplete = () => {
+    setShowNewReservation(false);
+    setActiveSection('reservations');
   };
 
   return (
-    <div className="container mx-auto px-4">
-      <div className="flex space-x-4 mb-4">
-        <button
-          onClick={() => {
-            setActiveTab('profile');
-            setShowNewReservationForm(false);
-          }}
-          className={`px-4 py-2 ${
-            activeTab === 'profile' ? 'text-blue-600' : 'text-gray-600'
-          }`}
-        >
-          Perfil
-        </button>
-        <button
-          onClick={() => {
-            setActiveTab('reservations');
-            setShowNewReservationForm(false);
-          }}
-          className={`px-4 py-2 ${
-            activeTab === 'reservations' ? 'text-blue-600' : 'text-gray-600'
-          }`}
-        >
-          Reservas
-        </button>
-      </div>
-
-      {renderContent()}
+    <div className="customer-dashboard">
+      {showNewReservation ? (
+        <ReservationProcess onReservationComplete={handleReservationComplete} />
+      ) : (
+        <>
+          <CustomerAside 
+            activeSection={activeSection}
+            onSectionChange={setActiveSection}
+          />
+          <CustomerDisplay 
+            activeSection={activeSection}
+            onNewReservation={handleNewReservation}
+          />
+        </>
+      )}
     </div>
   );
 }

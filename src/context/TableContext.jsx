@@ -9,11 +9,11 @@ export function TableProvider({ children }) {
     const [error, setError] = useState(null);
     const { token } = useAuth();
 
-    const fetchTables = useCallback(async () => {
+    const fetchTables = useCallback(async (showInactive = false) => {
         if (!token) return;
         setLoading(true);
         try {
-            const response = await fetch('http://localhost:8000/api/tables', {
+            const response = await fetch(`http://localhost:8000/api/tables?show_inactive=${showInactive}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Accept': 'application/json'
@@ -21,7 +21,7 @@ export function TableProvider({ children }) {
             });
             if (!response.ok) throw new Error('Error fetching tables');
             const data = await response.json();
-            setTables(data);
+            setTables(data.tables);
             setError(null);
         } catch (err) {
             setError(err.message);
@@ -42,10 +42,15 @@ export function TableProvider({ children }) {
                 },
                 body: JSON.stringify(tableData)
             });
-            if (!response.ok) throw new Error('Error creating table');
-            const newTable = await response.json();
-            setTables(prev => [...prev, newTable]);
-            return newTable;
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Error creating table');
+            }
+            
+            const data = await response.json();
+            setTables(prev => [...prev, data.table]);
+            return data.table;
         } catch (err) {
             setError(err.message);
             throw err;
@@ -64,17 +69,22 @@ export function TableProvider({ children }) {
                 },
                 body: JSON.stringify(tableData)
             });
-            if (!response.ok) throw new Error('Error updating table');
-            const updatedTable = await response.json();
-            setTables(prev => prev.map(table => table.id === id ? updatedTable : table));
-            return updatedTable;
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Error updating table');
+            }
+            
+            const data = await response.json();
+            setTables(prev => prev.map(table => table.id === id ? data.table : table));
+            return data.table;
         } catch (err) {
             setError(err.message);
             throw err;
         }
     }, [token]);
 
-    const deleteTable = useCallback(async (id) => {
+    const deactivateTable = useCallback(async (id) => {
         if (!token) return;
         try {
             const response = await fetch(`http://localhost:8000/api/tables/${id}`, {
@@ -84,24 +94,33 @@ export function TableProvider({ children }) {
                     'Accept': 'application/json'
                 }
             });
-            if (!response.ok) throw new Error('Error deleting table');
-            setTables(prev => prev.filter(table => table.id !== id));
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Error deactivating table');
+            }
+
+            const data = await response.json();
+            setTables(prev => prev.map(table => table.id === id ? data.table : table));
+            return data.table;
         } catch (err) {
             setError(err.message);
             throw err;
         }
     }, [token]);
 
+    const value = {
+        tables,
+        loading,
+        error,
+        fetchTables,
+        createTable,
+        updateTable,
+        deactivateTable
+    };
+
     return (
-        <TableContext.Provider value={{
-            tables,
-            loading,
-            error,
-            fetchTables,
-            createTable,
-            updateTable,
-            deleteTable
-        }}>
+        <TableContext.Provider value={value}>
             {children}
         </TableContext.Provider>
     );

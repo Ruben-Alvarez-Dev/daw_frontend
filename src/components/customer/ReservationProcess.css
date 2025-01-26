@@ -1,0 +1,77 @@
+.reservation-process {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: var(--space-md);
+}
+
+.reservation-process__error {
+  padding: var(--space-sm) var(--space-md);
+  background-color: rgba(207, 102, 121, 0.1);
+  border: 1px solid var(--color-error);
+  color: var(--color-error);
+  border-radius: var(--border-radius-md);
+  margin-bottom: var(--space-md);
+}
+
+.reservation-process__step {
+  background-color: var(--color-surface);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-lg);
+}
+
+.reservation-process__title {
+  font-size: var(--font-size-xl);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-lg);
+}
+
+.reservation-process__summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+
+.reservation-process__summary p {
+  color: var(--color-text-secondary);
+}
+
+.reservation-process__summary strong {
+  color: var(--color-text-primary);
+  margin-right: var(--space-sm);
+}
+
+.reservation-process__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-md);
+}
+
+.reservation-process__button {
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.reservation-process__button--primary {
+  background-color: var(--color-primary);
+  color: var(--color-text-primary);
+  border: none;
+}
+
+.reservation-process__button--primary:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.reservation-process__button--secondary {
+  background-color: var(--color-surface-light);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-input-border);
+}
+
+.reservation-process__button--secondary:hover {
+  background-color: var(--color-surface);
+}

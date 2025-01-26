@@ -1,104 +1,106 @@
 import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import './AdminTableList.css';
+import { useTable } from '../../context/TableContext';
+import '../../../src/styles/admin.css';
 
-const AdminTableList = forwardRef(({ onEdit }, ref) => {
-  const [tables, setTables] = useState([]);
-  const [error, setError] = useState('');
-  const { token } = useAuth();
-
-  const fetchTables = async () => {
-    try {
-      const response = await fetch('http://localhost:8000/api/tables', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Error al cargar las mesas');
-      }
-
-      const data = await response.json();
-      setTables(data);
-      setError('');
-    } catch (err) {
-      setError('Error al cargar las mesas');
-      console.error('Error fetching tables:', err);
-    }
-  };
-
-  useImperativeHandle(ref, () => ({
-    refresh: fetchTables
-  }));
-
-  const handleDelete = async (id) => {
-    try {
-      const response = await fetch(`http://localhost:8000/api/tables/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Error al eliminar la mesa');
-      }
-
-      fetchTables();
-    } catch (err) {
-      setError(err.message);
-      setTimeout(() => setError(''), 3000);
-    }
-  };
+const AdminTableList = forwardRef(({ onEdit, selectedId }, ref) => {
+  const { tables, loading, error, fetchTables, deactivateTable } = useTable();
+  const [showInactive, setShowInactive] = useState(false);
 
   useEffect(() => {
-    if (token) {
-      fetchTables();
-    }
-  }, [token]);
+    fetchTables(showInactive);
+  }, [fetchTables, showInactive]);
 
-  const translateStatus = (status) => {
-    const statusMap = {
-      'available': 'Disponible',
-      'occupied': 'Ocupada',
-      'reserved': 'Reservada'
-    };
-    return statusMap[status] || status;
+  useImperativeHandle(ref, () => ({
+    refresh: () => fetchTables(showInactive)
+  }));
+
+  const handleDeactivate = async (id) => {
+    try {
+      await deactivateTable(id);
+      fetchTables(showInactive);
+    } catch (err) {
+      console.error('Error deactivating table:', err);
+    }
   };
 
+  const translateStatus = (activeUntil) => {
+    if (!activeUntil) return { text: 'Activa', class: 'admin-item__status--active' };
+    const now = new Date();
+    const until = new Date(activeUntil);
+    return now > until 
+      ? { text: 'Inactiva', class: 'admin-item__status--inactive' }
+      : { text: 'Activa hasta ' + until.toLocaleDateString(), class: 'admin-item__status--pending' };
+  };
+
+  const filteredTables = tables.filter(table => {
+    if (!showInactive) {
+      return !table.active_until || new Date(table.active_until) > new Date();
+    }
+    return true;
+  });
+
+  if (loading) return <div className="admin-list">Cargando mesas...</div>;
+
   return (
-    <div>
-      {error && <div className="error-message">{error}</div>}
-      <ul className="admin-tables-list">
-        {tables.map(table => (
-          <li key={table.id} className="table-item">
-            <div className="table-line">
-              <span className="table-field">ID: {table.id}</span>
-              <span className="table-field">Nombre: {table.name}</span>
-            </div>
-            <div className="table-line">
-              <span className="table-field">Capacidad: {table.capacity} personas</span>
-              <span className="table-field">Estado: {translateStatus(table.status)}</span>
-            </div>
-            <div className="table-line">
-              <div className="button-group">
-                <button className="edit-button" onClick={() => onEdit(table)}>
+    <div className="admin-list">
+      <div className="admin-list__header">
+        <h2 className="admin-list__title">Lista de Mesas</h2>
+        <div className="admin-list__controls">
+          <label className="admin-list__checkbox-label">
+            <input
+              type="checkbox"
+              checked={showInactive}
+              onChange={(e) => setShowInactive(e.target.checked)}
+              className="admin-list__checkbox"
+            />
+            Mostrar inactivas
+          </label>
+        </div>
+      </div>
+
+      {error && <div className="admin-list__error">{error}</div>}
+      
+      <ul className="admin-list__items">
+        {filteredTables.map(table => {
+          const status = translateStatus(table.active_until);
+          const isInactive = table.active_until && new Date(table.active_until) < new Date();
+          const isSelected = selectedId === table.id;
+          
+          return (
+            <li key={table.id} className={`admin-item ${isInactive ? 'admin-item--inactive' : ''} ${isSelected ? 'admin-item--selected' : ''}`}>
+              <div className="admin-item__info">
+                <h3 className="admin-item__name">
+                  {table.name} <span className="admin-item__id">(ID: {table.id})</span>
+                </h3>
+                <p className="admin-item__details">
+                  Capacidad: {table.capacity} personas |
+                  <span className={`admin-item__status ${status.class}`}> Estado: {status.text}</span>
+                </p>
+              </div>
+              <div className="admin-item__actions">
+                <button
+                  onClick={() => onEdit(table)}
+                  className="admin-item__action admin-item__action--edit"
+                >
                   Editar
                 </button>
-                <button className="delete-button" onClick={() => handleDelete(table.id)}>
-                  Eliminar
-                </button>
+                {!isInactive && (
+                  <button
+                    onClick={() => handleDeactivate(table.id)}
+                    className="admin-item__action admin-item__action--deactivate"
+                  >
+                    Desactivar
+                  </button>
+                )}
               </div>
-            </div>
-          </li>
-        ))}
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
 });
+
+AdminTableList.displayName = 'AdminTableList';
 
 export default AdminTableList;

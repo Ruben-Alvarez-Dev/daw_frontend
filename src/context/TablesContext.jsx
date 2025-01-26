@@ -28,10 +28,10 @@ export function TablesProvider({ children }) {
       }
 
       const data = await response.json();
-      setTables(data);
+      setTables(data.tables);
       
       // Calcular y actualizar la capacidad total
-      const totalCapacity = data.reduce((sum, table) => sum + table.capacity, 0);
+      const totalCapacity = data.tables.reduce((sum, table) => sum + table.capacity, 0);
       updateConfig(prev => ({
         ...prev,
         totalCapacity

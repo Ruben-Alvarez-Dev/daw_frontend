@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import './Register.css';
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -55,84 +56,69 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
-        <div>
-          <h2 className="text-center text-3xl font-bold text-gray-900">Registro</h2>
-          {error && <p className="mt-2 text-center text-sm text-red-600">{error}</p>}
+    <div className="auth">
+      <div className="auth__container">
+        <div className="auth__header">
+          <h2 className="auth__title">Registro</h2>
+          {error && <p className="auth__error">{error}</p>}
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-6" autoComplete="off">
-          <div className="space-y-4">
-            <div>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                placeholder="Nombre (opcional)"
-                autoComplete="off"
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              />
-            </div>
+        <form onSubmit={handleSubmit} className="auth__form auth__form--register" autoComplete="off">
+          <div className="auth__input-group">
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) => setFormData({...formData, name: e.target.value})}
+              placeholder="Nombre (opcional)"
+              autoComplete="off"
+              className="auth__input auth__input--optional"
+            />
             
-            <div>
-              <input
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
-                placeholder="Correo electrónico"
-                autoComplete="off"
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              />
-            </div>
+            <input
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({...formData, email: e.target.value})}
+              placeholder="Correo electrónico"
+              autoComplete="off"
+              className="auth__input auth__input--required"
+            />
 
-            <div>
-              <input
-                type="tel"
-                value={formData.phone}
-                onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                placeholder="Teléfono"
-                autoComplete="off"
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              />
-            </div>
+            <input
+              type="tel"
+              value={formData.phone}
+              onChange={(e) => setFormData({...formData, phone: e.target.value})}
+              placeholder="Teléfono"
+              autoComplete="off"
+              className="auth__input auth__input--required"
+            />
 
-            <div>
-              <input
-                type="password"
-                value={formData.password}
-                onChange={(e) => setFormData({...formData, password: e.target.value})}
-                placeholder="Contraseña"
-                required
-                autoComplete="new-password"
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              />
-            </div>
+            <input
+              type="password"
+              value={formData.password}
+              onChange={(e) => setFormData({...formData, password: e.target.value})}
+              placeholder="Contraseña"
+              required
+              autoComplete="new-password"
+              className="auth__input auth__input--required"
+            />
 
-            <div>
-              <input
-                type="password"
-                value={formData.password_confirmation}
-                onChange={(e) => setFormData({...formData, password_confirmation: e.target.value})}
-                placeholder="Confirmar contraseña"
-                required
-                autoComplete="new-password"
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              />
-            </div>
+            <input
+              type="password"
+              value={formData.password_confirmation}
+              onChange={(e) => setFormData({...formData, password_confirmation: e.target.value})}
+              placeholder="Confirmar contraseña"
+              required
+              autoComplete="new-password"
+              className="auth__input auth__input--required"
+            />
           </div>
 
-          <div>
-            <button
-              type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Registrarse
-            </button>
-          </div>
+          <button type="submit" className="auth__button">
+            Registrarse
+          </button>
 
-          <div className="text-sm text-center">
-            <Link to="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
+          <div className="auth__link-container">
+            <Link to="/login" className="auth__link">
               ¿Ya tienes una cuenta? Inicia sesión
             </Link>
           </div>

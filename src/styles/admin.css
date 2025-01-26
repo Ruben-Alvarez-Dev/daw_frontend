@@ -1,0 +1,173 @@
+/* Estilos comunes para páginas de administración */
+.admin-page {
+  padding: 1rem;
+  background-color: var(--background-primary);
+}
+
+.admin-page__title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
+}
+
+/* Estilos comunes para listas */
+.admin-list {
+  padding: 1rem;
+}
+
+.admin-list__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.admin-list__title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.admin-list__controls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.admin-list__checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  color: var(--text-primary);
+}
+
+.admin-list__checkbox {
+  cursor: pointer;
+}
+
+.admin-list__new-button {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.admin-list__new-button:hover {
+  background-color: var(--primary-color-dark);
+}
+
+.admin-list__error {
+  background-color: var(--error-bg);
+  border: 1px solid var(--error-border);
+  color: var(--error-text);
+  padding: 0.75rem 1rem;
+  border-radius: 0.375rem;
+  margin-bottom: 1rem;
+}
+
+.admin-list__items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Estilos comunes para items de lista */
+.admin-item {
+  background-color: var(--background-secondary);
+  border: 2px solid transparent;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.2s ease-in-out;
+}
+
+.admin-item:hover {
+  background-color: var(--background-hover);
+}
+
+.admin-item--selected {
+  background-color: var(--background-selected);
+  border-color: var(--primary-color);
+}
+
+.admin-item--inactive {
+  opacity: 0.7;
+}
+
+.admin-item__info {
+  flex: 1;
+}
+
+.admin-item__name {
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  color: var(--text-primary);
+}
+
+.admin-item__id {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: normal;
+}
+
+.admin-item__details {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.admin-item__status {
+  font-weight: 500;
+}
+
+.admin-item__status--active {
+  color: var(--success);
+}
+
+.admin-item__status--inactive {
+  color: var(--error);
+}
+
+.admin-item__status--pending {
+  color: var(--warning);
+}
+
+.admin-item__actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.admin-item__action {
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.admin-item__action--edit {
+  color: var(--primary-color);
+}
+
+.admin-item__action--edit:hover {
+  color: var(--primary-color-dark);
+}
+
+.admin-item__action--deactivate {
+  color: var(--error);
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.admin-item__action--deactivate:hover {
+  color: var(--error-dark);
+}

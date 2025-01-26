@@ -20,8 +20,8 @@ export default function AdminUsers() {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6">Gestión de Usuarios</h1>
+    <div className="admin-page">
+      <h1 className="admin-page__title">Gestión de Usuarios</h1>
       
       <AdminUserForm
         user={selectedUser}
@@ -32,6 +32,7 @@ export default function AdminUsers() {
       <AdminUserList
         ref={listRef}
         onEdit={handleEdit}
+        selectedId={selectedUser?.id}
       />
     </div>
   );

@@ -1,26 +1,83 @@
-.reservations-list {
+.reservation-list {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: var(--space-md);
+}
+
+.reservation-list__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-lg);
+}
+
+.reservation-list__title {
+  font-size: var(--font-size-xl);
+  color: var(--color-text-primary);
+}
+
+.reservation-list__new-button {
+  padding: var(--space-sm) var(--space-lg);
+  background-color: var(--color-primary);
+  color: var(--color-text-primary);
+  border: none;
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.reservation-list__new-button:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.reservation-list__error {
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--border-radius-md);
+  margin-bottom: var(--space-md);
+  background-color: rgba(207, 102, 121, 0.1);
+  border: 1px solid var(--color-error);
+  color: var(--color-error);
+}
+
+.reservation-list__empty {
+  text-align: center;
+  padding: var(--space-lg);
+  color: var(--color-text-secondary);
+}
+
+.reservation-list__grid {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  margin-top: 1rem;
+  gap: var(--space-md);
 }
 
-.reservation-item {
-  padding: 1rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.5rem;
-  background-color: #f8fafc;
+.reservation-list__item {
+  background-color: var(--color-surface);
+  padding: var(--space-md);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-sm);
 }
 
-.reservation-item p {
-  margin: 0.5rem 0;
+.reservation-list__item-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md);
 }
 
-.error {
-  color: #dc2626;
-  padding: 0.5rem;
-  margin: 1rem 0;
-  border-radius: 0.25rem;
-  background-color: #fef2f2;
-  border: 1px solid #fee2e2;
+.reservation-list__item-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.reservation-list__item-label {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.reservation-list__item-value {
+  color: var(--color-text-primary);
+  font-weight: 500;
 }

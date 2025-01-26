@@ -9,11 +9,11 @@ export function UserProvider({ children }) {
     const [error, setError] = useState(null);
     const { token } = useAuth();
 
-    const fetchUsers = useCallback(async () => {
+    const fetchUsers = useCallback(async (showInactive = false) => {
         if (!token) return;
         setLoading(true);
         try {
-            const response = await fetch('http://localhost:8000/api/users', {
+            const response = await fetch(`http://localhost:8000/api/users?show_inactive=${showInactive}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Accept': 'application/json'
@@ -42,7 +42,12 @@ export function UserProvider({ children }) {
                 },
                 body: JSON.stringify(userData)
             });
-            if (!response.ok) throw new Error('Error creating user');
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.errors ? Object.values(errorData.errors).join(', ') : 'Error creating user');
+            }
+            
             const newUser = await response.json();
             setUsers(prev => [...prev, newUser]);
             return newUser;
@@ -64,7 +69,12 @@ export function UserProvider({ children }) {
                 },
                 body: JSON.stringify(userData)
             });
-            if (!response.ok) throw new Error('Error updating user');
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.errors ? Object.values(errorData.errors).join(', ') : 'Error updating user');
+            }
+
             const updatedUser = await response.json();
             setUsers(prev => prev.map(user => user.id === id ? updatedUser : user));
             return updatedUser;
@@ -74,7 +84,7 @@ export function UserProvider({ children }) {
         }
     }, [token]);
 
-    const deleteUser = useCallback(async (id) => {
+    const deactivateUser = useCallback(async (id) => {
         if (!token) return;
         try {
             const response = await fetch(`http://localhost:8000/api/users/${id}`, {
@@ -84,24 +94,33 @@ export function UserProvider({ children }) {
                     'Accept': 'application/json'
                 }
             });
-            if (!response.ok) throw new Error('Error deleting user');
-            setUsers(prev => prev.filter(user => user.id !== id));
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Error deactivating user');
+            }
+
+            const data = await response.json();
+            setUsers(prev => prev.map(user => user.id === id ? data.user : user));
+            return data.user;
         } catch (err) {
             setError(err.message);
             throw err;
         }
     }, [token]);
 
+    const value = {
+        users,
+        loading,
+        error,
+        fetchUsers,
+        createUser,
+        updateUser,
+        deactivateUser
+    };
+
     return (
-        <UserContext.Provider value={{
-            users,
-            loading,
-            error,
-            fetchUsers,
-            createUser,
-            updateUser,
-            deleteUser
-        }}>
+        <UserContext.Provider value={value}>
             {children}
         </UserContext.Provider>
     );

@@ -1,96 +1,115 @@
 import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import './AdminUserList.css';
+import { Link } from 'react-router-dom';
+import { useUser } from '../../context/UserContext';
+import '../../../src/styles/admin.css';
 
-const AdminUserList = forwardRef(({ onEdit }, ref) => {
-  const [users, setUsers] = useState([]);
-  const [error, setError] = useState('');
-  const { token } = useAuth();
-
-  const fetchUsers = async () => {
-    try {
-      const response = await fetch('http://localhost:8000/api/users', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Error al cargar los usuarios');
-      }
-
-      const data = await response.json();
-      setUsers(data);
-      setError('');
-    } catch (err) {
-      setError('Error al cargar los usuarios');
-      console.error('Error fetching users:', err);
-    }
-  };
-
-  useImperativeHandle(ref, () => ({
-    refresh: fetchUsers
-  }));
-
-  const handleDelete = async (id) => {
-    try {
-      const response = await fetch(`http://localhost:8000/api/users/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Error al eliminar el usuario');
-      }
-
-      fetchUsers();
-    } catch (err) {
-      setError(err.message);
-      setTimeout(() => setError(''), 3000);
-    }
-  };
+const AdminUserList = forwardRef(({ onEdit, selectedId }, ref) => {
+  const { users, loading, error, fetchUsers, deactivateUser } = useUser();
+  const [showInactive, setShowInactive] = useState(false);
 
   useEffect(() => {
-    if (token) {
-      fetchUsers();
+    fetchUsers(showInactive);
+  }, [fetchUsers, showInactive]);
+
+  useImperativeHandle(ref, () => ({
+    refresh: () => fetchUsers(showInactive)
+  }));
+
+  const handleDeactivate = async (id) => {
+    try {
+      await deactivateUser(id);
+      fetchUsers(showInactive);
+    } catch (err) {
+      console.error('Error deactivating user:', err);
     }
-  }, [token]);
+  };
+
+  const translateStatus = (activeUntil) => {
+    if (!activeUntil) return { text: 'Activo', class: 'admin-item__status--active' };
+    const now = new Date();
+    const until = new Date(activeUntil);
+    return now > until 
+      ? { text: 'Inactivo', class: 'admin-item__status--inactive' }
+      : { text: 'Activo hasta ' + until.toLocaleDateString(), class: 'admin-item__status--pending' };
+  };
+
+  const filteredUsers = users.filter(user => {
+    if (!showInactive) {
+      return !user.active_until || new Date(user.active_until) > new Date();
+    }
+    return true;
+  });
+
+  if (loading) return <div className="admin-list">Cargando usuarios...</div>;
 
   return (
-    <div>
-      {error && <div className="error-message">{error}</div>}
-      <ul className="admin-users-list">
-        {users.map(user => (
-          <li key={user.id} className="user-item">
-            <div className="user-line">
-              <span className="user-field">ID: {user.id}</span>
-              <span className="user-field">Nombre: {user.name}</span>
-            </div>
-            <div className="user-line">
-              <span className="user-field">Email: {user.email}</span>
-              <span className="user-field">Teléfono: {user.phone}</span>
-            </div>
-            <div className="user-line">
-              <span className="user-field">Rol: {user.role === 'admin' ? 'Administrador' : 'Cliente'}</span>
-              <div className="button-group">
-                <button className="edit-button" onClick={() => onEdit(user)}>
-                  Editar
-                </button>
-                <button className="delete-button" onClick={() => handleDelete(user.id)}>
-                  Eliminar
-                </button>
+    <div className="admin-list">
+      <div className="admin-list__header">
+        <h2 className="admin-list__title">Lista de Usuarios</h2>
+        <div className="admin-list__controls">
+          <label className="admin-list__checkbox-label">
+            <input
+              type="checkbox"
+              checked={showInactive}
+              onChange={(e) => setShowInactive(e.target.checked)}
+              className="admin-list__checkbox"
+            />
+            Mostrar inactivos
+          </label>
+          <Link
+            to="new"
+            className="admin-list__new-button"
+          >
+            Nuevo Usuario
+          </Link>
+        </div>
+      </div>
+
+      {error && <div className="admin-list__error">{error}</div>}
+      
+      <ul className="admin-list__items">
+        {filteredUsers.map(user => {
+          const status = translateStatus(user.active_until);
+          const isInactive = user.active_until && new Date(user.active_until) < new Date();
+          const isSelected = selectedId === user.id;
+          
+          return (
+            <li key={user.id} className={`admin-item ${isInactive ? 'admin-item--inactive' : ''} ${isSelected ? 'admin-item--selected' : ''}`}>
+              <div className="admin-item__info">
+                <h3 className="admin-item__name">
+                  {user.name} <span className="admin-item__id">(ID: {user.id})</span>
+                </h3>
+                <p className="admin-item__details">
+                  {user.email && `Email: ${user.email} | `}
+                  {user.phone && `Teléfono: ${user.phone} | `}
+                  Rol: {user.role} |
+                  <span className={`admin-item__status ${status.class}`}> Estado: {status.text}</span>
+                </p>
               </div>
-            </div>
-          </li>
-        ))}
+              <div className="admin-item__actions">
+                <Link
+                  to={`edit/${user.id}`}
+                  className="admin-item__action admin-item__action--edit"
+                >
+                  Editar
+                </Link>
+                {(!user.active_until || new Date(user.active_until) > new Date()) && (
+                  <button
+                    onClick={() => handleDeactivate(user.id)}
+                    className="admin-item__action admin-item__action--deactivate"
+                  >
+                    Desactivar
+                  </button>
+                )}
+              </div>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
 });
+
+AdminUserList.displayName = 'AdminUserList';
 
 export default AdminUserList;

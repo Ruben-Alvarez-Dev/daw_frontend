@@ -3,28 +3,36 @@ import AdminTableList from './AdminTableList';
 import AdminTableForm from './AdminTableForm';
 
 export default function AdminTables() {
-  const [editingTable, setEditingTable] = useState(null);
+  const [selectedTable, setSelectedTable] = useState(null);
   const listRef = useRef();
 
-  const handleTableCreated = () => {
-    if (listRef.current) {
-      listRef.current.refresh();
-    }
-    setEditingTable(null);
+  const handleEdit = (table) => {
+    setSelectedTable(table);
+  };
+
+  const handleSave = () => {
+    setSelectedTable(null);
+    listRef.current?.refresh();
+  };
+
+  const handleCancel = () => {
+    setSelectedTable(null);
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6">Gestión de Mesas</h1>
+    <div className="admin-page">
+      <h1 className="admin-page__title">Gestión de Mesas</h1>
       
       <AdminTableForm
-        editingTable={editingTable}
-        onTableCreated={handleTableCreated}
+        table={selectedTable}
+        onSave={handleSave}
+        onCancel={handleCancel}
       />
 
       <AdminTableList
         ref={listRef}
-        onEdit={setEditingTable}
+        onEdit={handleEdit}
+        selectedId={selectedTable?.id}
       />
     </div>
   );

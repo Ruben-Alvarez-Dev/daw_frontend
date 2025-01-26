@@ -1,0 +1,78 @@
+.admin-aside {
+  background-color: var(--color-surface);
+  border-right: 1px solid var(--color-input-border);
+  display: flex;
+  flex-direction: column;
+  transition: width var(--transition-fast);
+  position: relative;
+}
+
+.admin-aside--expanded {
+  width: 200px;
+}
+
+.admin-aside--collapsed {
+  width: 60px;
+}
+
+.admin-aside__toggle {
+  position: absolute;
+  right: -12px;
+  top: 20px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-input-border);
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.admin-aside__nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+}
+
+.admin-aside__button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  border: none;
+  background: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  border-radius: var(--border-radius-md);
+  transition: all var(--transition-fast);
+  width: 100%;
+  text-align: left;
+}
+
+.admin-aside__button:hover {
+  background-color: var(--color-surface-light);
+  color: var(--color-text-primary);
+}
+
+.admin-aside__button--active {
+  background-color: var(--color-primary);
+  color: var(--color-text-primary);
+}
+
+.admin-aside__icon {
+  font-size: var(--font-size-xl);
+  min-width: 24px;
+  text-align: center;
+}
+
+.admin-aside__label {
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

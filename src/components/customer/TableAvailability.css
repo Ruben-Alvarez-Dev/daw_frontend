@@ -1,0 +1,111 @@
+.availability {
+  padding: var(--space-md);
+}
+
+.availability__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.availability__filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  flex: 1;
+  min-width: 200px;
+}
+
+.availability__label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.availability__input {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  background-color: var(--color-input-background);
+  border: 1px solid var(--color-input-border);
+  border-radius: var(--border-radius-md);
+  color: var(--color-text-primary);
+  transition: border-color var(--transition-fast);
+}
+
+.availability__input:focus {
+  border-color: var(--color-input-focus-border);
+  outline: none;
+}
+
+.availability__input[type="date"],
+.availability__input[type="time"] {
+  color-scheme: dark;
+}
+
+.availability__input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.availability__input[type="number"]::-webkit-outer-spin-button,
+.availability__input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.availability__error {
+  padding: var(--space-sm) var(--space-md);
+  background-color: rgba(207, 102, 121, 0.1);
+  border: 1px solid var(--color-error);
+  color: var(--color-error);
+  border-radius: var(--border-radius-md);
+  margin-bottom: var(--space-md);
+}
+
+.availability__empty {
+  text-align: center;
+  color: var(--color-text-secondary);
+  padding: var(--space-xl);
+}
+
+.availability__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-md);
+}
+
+.availability__table {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-md);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-input-border);
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.availability__table--suitable {
+  border-color: var(--color-success);
+}
+
+.availability__table--suitable:hover {
+  background-color: rgba(76, 175, 80, 0.1);
+}
+
+.availability__table--unsuitable {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.availability__table-number {
+  font-size: var(--font-size-lg);
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.availability__table-capacity {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}

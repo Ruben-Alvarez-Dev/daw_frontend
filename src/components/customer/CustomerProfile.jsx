@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import './CustomerProfile.css';
 
 export default function CustomerProfile() {
   const { user, token } = useAuth();
@@ -27,7 +28,7 @@ export default function CustomerProfile() {
     setSuccess('');
 
     try {
-      const response = await fetch(`http://localhost:8000/api/users/${user.id}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/${user.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -56,24 +57,24 @@ export default function CustomerProfile() {
   };
 
   return (
-    <div className="max-w-md mx-auto">
-      <h2 className="text-xl font-bold mb-4">Mi Perfil</h2>
+    <div className="profile">
+      <h2 className="profile__title">Mi Perfil</h2>
       
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <div className="profile__message profile__message--error">
           {error}
         </div>
       )}
       
       {success && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+        <div className="profile__message profile__message--success">
           {success}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
+      <form onSubmit={handleSubmit} className="profile__form">
+        <div className="profile__form-group">
+          <label className="profile__label">
             Nombre
           </label>
           <input
@@ -81,13 +82,13 @@ export default function CustomerProfile() {
             name="name"
             value={formData.name}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+            className="profile__input"
             required
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
+        <div className="profile__form-group">
+          <label className="profile__label">
             Email
           </label>
           <input
@@ -95,12 +96,12 @@ export default function CustomerProfile() {
             name="email"
             value={formData.email}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+            className="profile__input"
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
+        <div className="profile__form-group">
+          <label className="profile__label">
             Teléfono
           </label>
           <input
@@ -108,15 +109,12 @@ export default function CustomerProfile() {
             name="phone"
             value={formData.phone}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+            className="profile__input"
             required
           />
         </div>
 
-        <button
-          type="submit"
-          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
-        >
+        <button type="submit" className="profile__button">
           Actualizar Perfil
         </button>
       </form>

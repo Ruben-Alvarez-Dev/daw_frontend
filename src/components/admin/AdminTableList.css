@@ -53,3 +53,148 @@
   border-radius: 0.25rem;
   margin-bottom: 1rem;
 }
+
+.table-list {
+  padding: 1rem;
+}
+
+.table-list__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.table-list__title {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.table-list__controls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.table-list__checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.table-list__checkbox {
+  cursor: pointer;
+}
+
+.table-list__new-button {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.table-list__new-button:hover {
+  background-color: var(--primary-color-dark);
+}
+
+.table-list__error {
+  background-color: var(--error-bg);
+  border: 1px solid var(--error-border);
+  color: var(--error-text);
+  padding: 0.75rem 1rem;
+  border-radius: 0.375rem;
+  margin-bottom: 1rem;
+}
+
+.table-list__items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.table-item {
+  background-color: white;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.table-item--inactive {
+  opacity: 0.7;
+}
+
+.table-item__info {
+  flex: 1;
+}
+
+.table-item__name {
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.table-item__id {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: normal;
+}
+
+.table-item__details {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.table-item__status {
+  font-weight: 500;
+}
+
+.table-item__status--active {
+  color: var(--success);
+}
+
+.table-item__status--inactive {
+  color: var(--error);
+}
+
+.table-item__status--pending {
+  color: var(--warning);
+}
+
+.table-item__actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.table-item__action {
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.table-item__action--edit {
+  color: var(--primary-color);
+}
+
+.table-item__action--edit:hover {
+  color: var(--primary-color-dark);
+}
+
+.table-item__action--deactivate {
+  color: var(--error);
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.table-item__action--deactivate:hover {
+  color: var(--error-dark);
+}

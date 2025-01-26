@@ -7,7 +7,7 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
 
   const register = async (userData) => {
-    const response = await fetch('http://localhost:8000/api/register', {
+    const response = await fetch('http://0.0.0.0:8000/api/register', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -36,6 +36,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (token, userData) => {
     setUser(userData);
     setToken(token);
+    window.dispatchEvent(new CustomEvent('userLoggedIn'));
     return { user: userData, token };
   };
 
@@ -50,11 +51,10 @@ export const AuthProvider = ({ children }) => {
           'Accept': 'application/json'
         }
       });
-    } catch (error) {
-      console.error('Error during logout:', error);
     } finally {
       setUser(null);
       setToken(null);
+      window.dispatchEvent(new CustomEvent('userLoggedOut'));
     }
   };
 

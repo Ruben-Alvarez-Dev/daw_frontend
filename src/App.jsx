@@ -1,7 +1,8 @@
 import { BrowserRouter as Router } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ConfigurationProvider } from './context/ConfigurationContext';
-import { TablesProvider } from './context/TablesContext';
+import { TableProvider } from './context/TableContext';
+import { UserProvider } from './context/UserContext';
 import AppRoutes from './AppRoutes';
 import './App.css';
 
@@ -10,9 +11,11 @@ function App() {
     <Router>
       <AuthProvider>
         <ConfigurationProvider>
-          <TablesProvider>
-            <AppRoutes />
-          </TablesProvider>
+          <TableProvider>
+            <UserProvider>
+              <AppRoutes />
+            </UserProvider>
+          </TableProvider>
         </ConfigurationProvider>
       </AuthProvider>
     </Router>

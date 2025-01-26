@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import './CustomerReservationForm.css';
 
 export default function CustomerReservationForm({ onReservationCreated }) {
   const [formData, setFormData] = useState({
@@ -28,7 +29,7 @@ export default function CustomerReservationForm({ onReservationCreated }) {
         status: 'pending'
       };
 
-      const response = await fetch('http://localhost:8000/api/reservations', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/reservations`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -53,7 +54,6 @@ export default function CustomerReservationForm({ onReservationCreated }) {
       if (err.message) {
         setError(err.message);
       } else if (err.errors) {
-        // Mostrar todos los errores de validación
         const errorMessages = Object.values(err.errors)
           .flat()
           .join(', ');
@@ -65,54 +65,54 @@ export default function CustomerReservationForm({ onReservationCreated }) {
   };
 
   return (
-    <div className="max-w-md mx-auto">
-      <h2 className="text-xl font-bold mb-4">Nueva Reserva</h2>
+    <div className="reservation-form">
+      <h2 className="reservation-form__title">Nueva Reserva</h2>
       
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <div className="reservation-form__error">
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
+      <form onSubmit={handleSubmit} className="reservation-form__form">
+        <div className="reservation-form__group">
+          <label className="reservation-form__label">
             Fecha y hora
           </label>
           <input
             type="datetime-local"
             value={formData.datetime}
             onChange={(e) => setFormData({ ...formData, datetime: e.target.value })}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+            className="reservation-form__input"
             required
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
+        <div className="reservation-form__group">
+          <label className="reservation-form__label">
             Número de personas
           </label>
           <input
             type="number"
             value={formData.guests}
             onChange={(e) => setFormData({ ...formData, guests: e.target.value })}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+            className="reservation-form__input"
             required
             min="1"
           />
         </div>
 
-        <div className="flex justify-end space-x-3">
+        <div className="reservation-form__actions">
           <button
             type="button"
             onClick={onReservationCreated}
-            className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+            className="reservation-form__button reservation-form__button--secondary"
           >
             Cancelar
           </button>
           <button
             type="submit"
-            className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+            className="reservation-form__button reservation-form__button--primary"
           >
             Crear Reserva
           </button>

@@ -1,0 +1,73 @@
+.map-editor {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    background-color: var(--background-primary);
+}
+
+.map-editor__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.map-editor__title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.map-editor__save-button {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.map-editor__save-button:hover:not(:disabled) {
+    background-color: var(--primary-color-dark);
+}
+
+.map-editor__save-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.map-editor__content {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    padding: 1rem;
+    gap: 1rem;
+}
+
+.map-editor__tools {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 200px;
+    background-color: var(--background-secondary);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.map-editor__canvas-container {
+    flex: 1;
+    position: relative;
+    min-height: 0;
+    background-color: var(--background-secondary);
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.map-editor--error {
+    color: var(--error);
+    padding: 1rem;
+    background-color: var(--error-bg);
+    border: 1px solid var(--error-border);
+    border-radius: 0.5rem;
+}
