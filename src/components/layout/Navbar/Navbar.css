@@ -1,0 +1,32 @@
+.navbar {
+  height: 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem;
+  background-color: #1a1a1a;
+}
+
+.navbar-brand {
+  font-size: 1.5rem;
+}
+
+.navbar-logo {
+  color: antiquewhite;
+  text-decoration: none;
+}
+
+.navbar-user {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.user-info {
+  font-size: 0.9rem;
+  color: white;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 500px;
+}
