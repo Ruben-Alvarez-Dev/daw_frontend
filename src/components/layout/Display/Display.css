@@ -1,16 +1,16 @@
 .display {
-  flex: 1;
-  position: relative;
-  overflow: hidden;
-  width: 100%;
-  padding: 20px;
-  background-color: #3c3c3c;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    background-color: #3c3c3c;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
 }
 
-.display > *:not(.modal-overlay) {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+.display > * {
+    width: 100%;
+    min-height: 0; /* Importante para que flex child pueda hacer scroll */
+    flex: 1;
 }

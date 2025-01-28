@@ -3,7 +3,7 @@ import CustomerProfile from './CustomerProfile';
 import CustomerReservationList from './CustomerReservationList';
 import CustomerReservationForm from './CustomerReservationForm';
 
-export default function CustomerDashboard() {
+export default function CustomerDisplay() {
   const [activeTab, setActiveTab] = useState('profile');
   const [showNewReservationForm, setShowNewReservationForm] = useState(false);
 
