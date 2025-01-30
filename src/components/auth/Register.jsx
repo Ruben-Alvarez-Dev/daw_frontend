@@ -1,142 +1,98 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import Modal from '../layout/Modal/Modal';
-import Button from '../layout/Button/Button';
-import './Register.css';
+import Modal from '../common/Modal/Modal';
+import Form from '../common/Form/Form';
 
 export default function Register() {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    password: '',
-    password_confirmation: ''
-  });
-  const [error, setError] = useState('');
-  const navigate = useNavigate();
-  const { register } = useAuth();
+    const navigate = useNavigate();
+    const { register } = useAuth();
+    const [error, setError] = useState('');
 
-  useEffect(() => {
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      password: '',
-      password_confirmation: ''
-    });
-  }, []);
+    const fields = [
+        {
+            name: 'name',
+            type: 'text',
+            placeholder: 'Nombre',
+            required: true
+        },
+        {
+            name: 'email',
+            type: 'email',
+            placeholder: 'Email',
+            required: true
+        },
+        {
+            name: 'phone',
+            type: 'tel',
+            placeholder: 'Teléfono',
+            required: true
+        },
+        {
+            name: 'password',
+            type: 'password',
+            placeholder: 'Contraseña',
+            required: true
+        },
+        {
+            name: 'confirmPassword',
+            type: 'password',
+            placeholder: 'Confirmar contraseña',
+            required: true
+        }
+    ];
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
+    const handleSubmit = async (data) => {
+        if (data.password !== data.confirmPassword) {
+            setError('Las contraseñas no coinciden');
+            return;
+        }
 
-    if (!formData.email && !formData.phone) {
-      setError('Debes proporcionar un email o un teléfono');
-      return;
-    }
-
-    if (formData.password !== formData.password_confirmation) {
-      setError('Las contraseñas no coinciden');
-      return;
-    }
-
-    try {
-      const data = await register(formData);
-      navigate('/reservations');
-    } catch (err) {
-      console.error('Registration error:', err);
-      if (err.errors) {
-        const firstError = Object.values(err.errors)[0];
-        setError(firstError[0]);
-      } else if (err.message) {
-        setError(err.message);
-      } else {
-        setError('Error en el registro');
-      }
-    }
-  };
-
-  return (
-    <Modal
-      isOpen={true}
-      onClose={() => navigate('/')}
-      title="Registro"
-    >
-      <div className="modal-body">
-        {error && <p className="register-error">{error}</p>}
-        
-        <form onSubmit={handleSubmit} className="register-form" autoComplete="off">
-          <div className="register-input-group">
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) => setFormData({...formData, name: e.target.value})}
-              placeholder="Nombre (opcional)"
-              className="register-input"
-              autoComplete="off"
-            />
+        try {
+            const { user } = await register(data);
             
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({...formData, email: e.target.value})}
-              placeholder="Correo electrónico"
-              className="register-input"
-              autoComplete="off"
+            if (!user) {
+                setError('Error al obtener la información del usuario');
+                return;
+            }
+
+            // Redirigir basado en el rol, igual que en Login
+            switch (user.role) {
+                case 'admin':
+                    navigate('/admin');
+                    break;
+                case 'customer':
+                    navigate('/customer');
+                    break;
+                default:
+                    setError('Rol de usuario no reconocido');
+            }
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
+    return (
+        <Modal
+            isOpen={true}
+            onClose={() => navigate('/')}
+            title="Registro"
+            footer={
+                <div className="modal-footer-links">
+                    <span>¿Ya tienes cuenta?</span>
+                    <Link to="/login">Inicia sesión</Link>
+                </div>
+            }
+        >
+            <Form
+                fields={fields}
+                error={error}
+                onSubmit={handleSubmit}
+                submitButton={{
+                    label: 'Registrar usuario',
+                    variant: 'primary'
+                }}
             />
-
-            <input
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => setFormData({...formData, phone: e.target.value})}
-              placeholder="Teléfono"
-              className="register-input"
-              autoComplete="off"
-            />
-
-            <input
-              type="password"
-              value={formData.password}
-              onChange={(e) => setFormData({...formData, password: e.target.value})}
-              placeholder="Contraseña"
-              required
-              className="register-input"
-              autoComplete="new-password"
-            />
-
-            <input
-              type="password"
-              value={formData.password_confirmation}
-              onChange={(e) => setFormData({...formData, password_confirmation: e.target.value})}
-              placeholder="Confirmar contraseña"
-              required
-              className="register-input"
-              autoComplete="new-password"
-            />
-          </div>
-
-          <p className="register-info">
-            Debes proporcionar al menos un email o un teléfono
-          </p>
-
-          <div className="modal-footer">
-            <Button
-              type="submit"
-              variant="primary"
-              fullWidth
-              label="Registrarse"
-            />
-          </div>
-        </form>
-
-        <div className="register-footer">
-          <span>¿Ya tienes una cuenta?</span>
-          <Link to="/login" className="register-link">
-            Inicia sesión
-          </Link>
-        </div>
-      </div>
-    </Modal>
-  );
+        </Modal>
+    );
 }

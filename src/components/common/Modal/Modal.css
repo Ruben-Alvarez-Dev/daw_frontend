@@ -15,8 +15,8 @@
 .modal-container {
     background-color: #1a1a1a;
     border-radius: 0.5rem;
-    min-width: 300px;
-    max-width: 600px;
+    min-width: 500px;
+    max-width: 900px;
     min-height: 200px;
     max-height: 80vh;
     display: flex;
@@ -25,8 +25,8 @@
 }
 
 .modal-header {
-    height: 3.5rem;
-    padding: 1rem;
+    min-height: 2.5rem;
+    padding: 1.5rem 2rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -36,22 +36,48 @@
 .modal-header h2 {
     margin: 0;
     font-size: 1.25rem;
+    font-weight: 600;
     color: #fff;
 }
 
 .modal-body {
-    padding: 1rem;
-    overflow-y: auto;
     flex: 1;
+    padding: 1.5rem;
+    overflow-y: auto;
     color: #e2e8f0;
 }
 
 .modal-footer {
-    height: 3rem;
-    padding: 0.5rem 1rem;
+    min-height: 2rem;
+    padding: 1rem 1rem 1.5rem 1rem;
     display: flex;
-    align-items: center;
-    justify-content: flex-end;
+    flex-direction: column;
     gap: 0.5rem;
     border-top: 1px solid #333;
+    background-color: #1a1a1a;
+    border-radius: 0 0 0.5rem 0.5rem;
+}
+
+.modal-footer-links {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: #888;
+}
+
+.modal-footer-links span {
+    font-size: 0.875rem;
+}
+
+.modal-footer-links a {
+    color: #1f6feb;
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: color 0.2s;
+}
+
+.modal-footer-links a:hover {
+    color: #388bfd;
+    text-decoration: underline;
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useTables } from '../../context/TablesContext';
 import { useAuth } from '../../context/AuthContext';
+import { useConfiguration } from '../../context/ConfigurationContext';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import es from 'date-fns/locale/es';
 import TimeSlotGrid from './TimeSlotGrid';
@@ -16,11 +16,14 @@ export default function AdminAssignment() {
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { tables } = useTables();
+  const [tables, setTables] = useState([]);
   const { token } = useAuth();
+  const { config } = useConfiguration();
 
   useEffect(() => {
     fetchReservations();
+    // TODO: Implementar carga de mesas cuando tengamos el contexto apropiado
+    setTables([]);
   }, [selectedDate]);
 
   const fetchReservations = async () => {

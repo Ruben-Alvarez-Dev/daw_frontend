@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useRestaurantConfig } from '../../context/RestaurantConfigContext';
+import { useConfiguration } from '../../context/ConfigurationContext';
 import './RestaurantProfile.css';
 
 const defaultConfig = {
@@ -21,7 +21,7 @@ const defaultConfig = {
 };
 
 export default function RestaurantProfile() {
-  const { config, updateConfig, loading } = useRestaurantConfig();
+  const { config, updateConfig, loading } = useConfiguration();
   const [localConfig, setLocalConfig] = useState(defaultConfig);
   const [error, setError] = useState('');
 

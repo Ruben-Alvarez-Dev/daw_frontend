@@ -1,5 +1,5 @@
-import Button from '../../layout/Button/Button';
-import Card from '../../layout/Card/Card';
+import Button from '../../common/Button/Button';
+import Card from '../../common/Card/Card';
 import './AdminDashboard.css';
 
 export default function AdminDashboard({ onActionClick }) {

@@ -1,43 +1,18 @@
-import { useState, useRef } from 'react';
-import AdminReservationForm from '../AdminReservationForm';
-import AdminReservationList from '../AdminReservationList';
-import AdminTableForm from '../AdminTableForm';
-import AdminTableList from '../AdminTableList';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../context/AuthContext';
+import { useConfiguration } from '../../../context/ConfigurationContext';
 import RestaurantProfile from '../RestaurantProfile';
 import AdminAssignment from '../AdminAssignment';
 import AdminDashboard from '../AdminDashboard/AdminDashboard';
 import AdminUsers from '../AdminUsers/AdminUsers';
-import Button from '../../layout/Button/Button';
+import AdminTables from '../AdminTables/AdminTables';
+import AdminReservations from '../AdminReservations/AdminReservations';
+import Button from '../../common/Button/Button';
 import './AdminDisplay.css';
 
 export default function AdminDisplay() {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [editingReservation, setEditingReservation] = useState(null);
-  const [editingTable, setEditingTable] = useState(null);
-  const reservationListRef = useRef();
-  const tableListRef = useRef();
-
-  const handleReservationCreated = () => {
-    if (reservationListRef.current) {
-      reservationListRef.current.refresh();
-    }
-    setEditingReservation(null);
-  };
-
-  const handleReservationEdit = (reservation) => {
-    setEditingReservation(reservation);
-  };
-
-  const handleTableCreated = () => {
-    if (tableListRef.current) {
-      tableListRef.current.refresh();
-    }
-    setEditingTable(null);
-  };
-
-  const handleTableEdit = (table) => {
-    setEditingTable(table);
-  };
 
   return (
     <div className="admin-display">
@@ -63,61 +38,24 @@ export default function AdminDisplay() {
           label="Reservas"
         />
         <Button
-          variant={activeTab === 'profile' ? 'primary' : 'secondary'}
-          onClick={() => setActiveTab('profile')}
-          label="Configuración"
-        />
-        <Button
           variant={activeTab === 'assignment' ? 'primary' : 'secondary'}
           onClick={() => setActiveTab('assignment')}
           label="Asignación"
         />
+        <Button
+          variant={activeTab === 'profile' ? 'primary' : 'secondary'}
+          onClick={() => setActiveTab('profile')}
+          label="Perfil"
+        />
       </div>
 
       <div className="admin-display__content">
-        {activeTab === 'dashboard' && (
-          <AdminDashboard onActionClick={setActiveTab} />
-        )}
-
-        {activeTab === 'users' && (
-          <AdminUsers />
-        )}
-
-        {activeTab === 'tables' && (
-          <>
-            <h2 className="admin-display__section-title">Gestión de Mesas</h2>
-            <AdminTableForm
-              onTableCreated={handleTableCreated}
-              editingTable={editingTable}
-            />
-            <AdminTableList
-              ref={tableListRef}
-              onEdit={handleTableEdit}
-            />
-          </>
-        )}
-
-        {activeTab === 'reservations' && (
-          <>
-            <h2 className="admin-display__section-title">Gestión de Reservas</h2>
-            <AdminReservationForm
-              onReservationCreated={handleReservationCreated}
-              editingReservation={editingReservation}
-            />
-            <AdminReservationList
-              ref={reservationListRef}
-              onEdit={handleReservationEdit}
-            />
-          </>
-        )}
-
-        {activeTab === 'profile' && (
-          <RestaurantProfile />
-        )}
-
-        {activeTab === 'assignment' && (
-          <AdminAssignment />
-        )}
+        {activeTab === 'dashboard' && <AdminDashboard />}
+        {activeTab === 'users' && <AdminUsers />}
+        {activeTab === 'tables' && <AdminTables />}
+        {activeTab === 'reservations' && <AdminReservations />}
+        {activeTab === 'assignment' && <AdminAssignment />}
+        {activeTab === 'profile' && <RestaurantProfile />}
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import Card from '../../layout/Card/Card';
+import Card from '../../common/Card/Card';
 import AdminUserList from './AdminUserList';
 import AdminUserForm from './AdminUserForm';
 import './AdminUsers.css';
@@ -21,7 +21,6 @@ export default function AdminUsers() {
 
   return (
     <>
-      <h2 className="admin-display__section-title">Gestión de Usuarios</h2>
       <div className="admin-users">
         <Card header={<h3>Nuevo Usuario</h3>}>
           <AdminUserForm

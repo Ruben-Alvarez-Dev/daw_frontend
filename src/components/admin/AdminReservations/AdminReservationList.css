@@ -1,0 +1,74 @@
+.admin-reservation-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem;
+}
+
+.reservation-header,
+.reservation-row {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr 2fr 1.5fr 1fr;
+    gap: 1rem;
+    align-items: center;
+    padding: 0.5rem;
+}
+
+.reservation-header {
+    font-weight: 600;
+    color: #e6edf3;
+    border-bottom: 1px solid #30363d;
+}
+
+.reservation-row {
+    border-bottom: 1px solid #21262d;
+}
+
+.reservation-row:last-child {
+    border-bottom: none;
+}
+
+.customer-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.customer-info small {
+    color: #8b949e;
+    font-size: 0.875rem;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.status-confirmed {
+    background-color: #238636;
+    color: #fff;
+}
+
+.status-pending {
+    background-color: #9e6a03;
+    color: #fff;
+}
+
+.status-cancelled {
+    background-color: #da3633;
+    color: #fff;
+}
+
+.status-completed {
+    background-color: #1f6feb;
+    color: #fff;
+}
+
+.reservation-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}

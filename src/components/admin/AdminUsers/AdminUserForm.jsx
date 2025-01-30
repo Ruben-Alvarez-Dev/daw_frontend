@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
-import Button from '../../layout/Button/Button';
+import Button from '../../common/Button/Button';
 import './AdminUserForm.css';
 
 export default function AdminUserForm({ user, onSave, onCancel }) {
@@ -9,19 +9,21 @@ export default function AdminUserForm({ user, onSave, onCancel }) {
     email: '',
     phone: '',
     password: '',
+    password_confirmation: '',
     role: 'customer'
   });
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState({});
   const { token } = useAuth();
 
   useEffect(() => {
     if (user) {
       setFormData({
-        name: user.name,
-        email: user.email,
+        name: user.name || '',
+        email: user.email || '',
         phone: user.phone || '',
         password: '',
-        role: user.role
+        password_confirmation: '',
+        role: user.role || 'customer'
       });
     } else {
       setFormData({
@@ -29,14 +31,52 @@ export default function AdminUserForm({ user, onSave, onCancel }) {
         email: '',
         phone: '',
         password: '',
+        password_confirmation: '',
         role: 'customer'
       });
     }
+    setErrors({});
   }, [user]);
+
+  const validateForm = () => {
+    const newErrors = {};
+    
+    if (!formData.name.trim()) {
+      newErrors.name = 'El nombre es requerido';
+    }
+    
+    if (!user) { // Solo validar email y contraseña para nuevos usuarios
+      if (!formData.email.trim()) {
+        newErrors.email = 'El email es requerido';
+      } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+        newErrors.email = 'Email inválido';
+      }
+      
+      if (!formData.password) {
+        newErrors.password = 'La contraseña es requerida';
+      } else if (formData.password.length < 6) {
+        newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
+      }
+      
+      if (formData.password !== formData.password_confirmation) {
+        newErrors.password_confirmation = 'Las contraseñas no coinciden';
+      }
+    }
+
+    if (formData.phone && !/^\d{9}$/.test(formData.phone)) {
+      newErrors.phone = 'El teléfono debe tener 9 dígitos';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    
+    if (!validateForm()) {
+      return;
+    }
 
     try {
       const url = user 
@@ -45,31 +85,39 @@ export default function AdminUserForm({ user, onSave, onCancel }) {
       
       const method = user ? 'PUT' : 'POST';
       
+      // Solo incluir la contraseña si se ha proporcionado una nueva
+      const dataToSend = {
+        ...formData,
+        password: formData.password || undefined,
+        password_confirmation: formData.password_confirmation || undefined
+      };
+
       const response = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(dataToSend)
       });
 
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || 'Error al guardar el usuario');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al guardar el usuario');
       }
 
+      onSave();
       setFormData({
         name: '',
         email: '',
         phone: '',
         password: '',
+        password_confirmation: '',
         role: 'customer'
       });
-      
-      onSave();
-    } catch (err) {
-      setError(err.message);
+      setErrors({});
+    } catch (error) {
+      setErrors({ submit: error.message });
     }
   };
 
@@ -79,67 +127,101 @@ export default function AdminUserForm({ user, onSave, onCancel }) {
       ...prev,
       [name]: value
     }));
+    // Limpiar error del campo cuando el usuario empiece a escribir
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} className="admin-user-form">
-      {error && <div className="error-message">{error}</div>}
-      
+      {errors.submit && (
+        <div className="error-message">{errors.submit}</div>
+      )}
+
       <div className="form-group">
-        <label htmlFor="name">Nombre:</label>
+        <label htmlFor="name">Nombre</label>
         <input
           type="text"
           id="name"
           name="name"
           value={formData.name}
           onChange={handleChange}
-          required
+          className={errors.name ? 'error' : ''}
         />
+        {errors.name && <span className="field-error">{errors.name}</span>}
       </div>
 
       <div className="form-group">
-        <label htmlFor="email">Email:</label>
+        <label htmlFor="email">Email</label>
         <input
           type="email"
           id="email"
           name="email"
           value={formData.email}
           onChange={handleChange}
-          required
+          className={errors.email ? 'error' : ''}
+          disabled={user}
         />
+        {errors.email && <span className="field-error">{errors.email}</span>}
       </div>
 
       <div className="form-group">
-        <label htmlFor="phone">Teléfono:</label>
+        <label htmlFor="phone">Teléfono</label>
         <input
           type="tel"
           id="phone"
           name="phone"
           value={formData.phone}
           onChange={handleChange}
+          className={errors.phone ? 'error' : ''}
+          placeholder="123456789"
         />
+        {errors.phone && <span className="field-error">{errors.phone}</span>}
       </div>
 
-      <div className="form-group">
-        <label htmlFor="password">Contraseña:</label>
-        <input
-          type="password"
-          id="password"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          required={!user}
-        />
-      </div>
+      {!user && (
+        <>
+          <div className="form-group">
+            <label htmlFor="password">Contraseña</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              className={errors.password ? 'error' : ''}
+            />
+            {errors.password && <span className="field-error">{errors.password}</span>}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="password_confirmation">Confirmar Contraseña</label>
+            <input
+              type="password"
+              id="password_confirmation"
+              name="password_confirmation"
+              value={formData.password_confirmation}
+              onChange={handleChange}
+              className={errors.password_confirmation ? 'error' : ''}
+            />
+            {errors.password_confirmation && (
+              <span className="field-error">{errors.password_confirmation}</span>
+            )}
+          </div>
+        </>
+      )}
 
       <div className="form-group">
-        <label htmlFor="role">Rol:</label>
+        <label htmlFor="role">Rol</label>
         <select
           id="role"
           name="role"
           value={formData.role}
           onChange={handleChange}
-          required
         >
           <option value="customer">Cliente</option>
           <option value="admin">Administrador</option>
@@ -148,14 +230,14 @@ export default function AdminUserForm({ user, onSave, onCancel }) {
 
       <div className="form-actions">
         <Button 
-          type="submit"
-          variant="primary"
-          label={user ? "Actualizar" : "Crear"}
+          type="submit" 
+          variant="success" 
+          label={user ? "Actualizar Usuario" : "Crear Usuario"}
         />
         {user && (
-          <Button
-            type="button"
-            variant="secondary"
+          <Button 
+            type="button" 
+            variant="secondary" 
             onClick={onCancel}
             label="Cancelar"
           />

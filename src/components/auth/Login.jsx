@@ -1,118 +1,77 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { useRestaurantConfig } from '../../context/RestaurantConfigContext';
-import Modal from '../layout/Modal/Modal';
-import Button from '../layout/Button/Button';
-import './Login.css';
+import Modal from '../common/Modal/Modal';
+import Form from '../common/Form/Form';
 
 export default function Login() {
-  const [formData, setFormData] = useState({ identifier: '', password: '' });
-  const [error, setError] = useState('');
-  const navigate = useNavigate();
-  const { login: loginFn } = useAuth();
-  const { fetchConfig } = useRestaurantConfig();
+    const navigate = useNavigate();
+    const { login } = useAuth();
+    const [error, setError] = useState('');
 
-  useEffect(() => {
-    setFormData({
-      identifier: '',
-      password: ''
-    });
-  }, []);
-
-  const validateIdentifier = (identifier) => {
-    return identifier.includes('@') ? { type: 'email' } : { type: 'phone' };
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-
-    const { type } = validateIdentifier(formData.identifier);
-    
-    try {
-      const credentials = {
-        password: formData.password,
-        [type]: formData.identifier
-      };
-
-      const endpoint = type === 'email' ? 'login/email' : 'login/phone';
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/${endpoint}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
+    const fields = [
+        {
+            name: 'identifier',
+            type: 'text',
+            placeholder: 'Email o Teléfono',
+            required: true
         },
-        body: JSON.stringify(credentials)
-      });
+        {
+            name: 'password',
+            type: 'password',
+            placeholder: 'Contraseña',
+            required: true
+        }
+    ];
 
-      const data = await response.json();
+    const handleSubmit = async (data) => {
+        try {
+            // Si el identifier contiene @, es un email
+            const { user } = await login(data.identifier, data.password);
+            
+            if (!user) {
+                setError('Error al obtener la información del usuario');
+                return;
+            }
 
-      if (!response.ok) {
-        throw new Error(data.message || 'Error al iniciar sesión');
-      }
+            // Redirigir basado en el rol
+            switch (user.role) {
+                case 'admin':
+                    navigate('/admin');
+                    break;
+                case 'customer':
+                    navigate('/customer');
+                    break;
+                default:
+                    setError('Rol de usuario no reconocido');
+            }
+        } catch (err) {
+            console.error('Error en login:', err);
+            setError(err.message || 'Error al iniciar sesión. Por favor, verifica tus credenciales.');
+        }
+    };
 
-      await loginFn(data.authorisation.token, data.user);
-      await fetchConfig();
-      
-      if (data.user.role === 'admin') {
-        navigate('/admin');
-      } else {
-        navigate('/dashboard');
-      }
-    } catch (err) {
-      setError(err.message || 'Error al iniciar sesión');
-    }
-  };
-
-  return (
-    <Modal
-      isOpen={true}
-      onClose={() => navigate('/')}
-      title="Iniciar Sesión"
-    >
-      <div className="modal-body">
-        {error && <p className="login-error">{error}</p>}
-        
-        <form onSubmit={handleSubmit} className="login-form" autoComplete="off">
-          <div className="login-input-group">
-            <input
-              type="text"
-              name="identifier"
-              value={formData.identifier}
-              onChange={(e) => setFormData({...formData, identifier: e.target.value})}
-              placeholder="Email o teléfono"
-              required
-              className="login-input"
+    return (
+        <Modal
+            isOpen={true}
+            onClose={() => navigate('/')}
+            title="Iniciar Sesión"
+            footer={
+                <div className="modal-footer-links">
+                    <span>¿No tienes cuenta?</span>
+                    <Link to="/register">Regístrate</Link>
+                </div>
+            }
+        >
+            <Form
+                fields={fields}
+                error={error}
+                onSubmit={handleSubmit}
+                submitButton={{
+                    label: 'Iniciar sesión',
+                    variant: 'primary'
+                }}
             />
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={(e) => setFormData({...formData, password: e.target.value})}
-              placeholder="Contraseña"
-              required
-              className="login-input"
-            />
-          </div>
-
-          <div className="modal-footer">
-            <Button
-              type="submit"
-              variant="primary"
-              fullWidth
-              label="Iniciar Sesión"
-            />
-          </div>
-        </form>
-
-        <div className="login-footer">
-          <span>¿No tienes una cuenta?</span>
-          <Link to="/register" className="login-link">
-            Regístrate
-          </Link>
-        </div>
-      </div>
-    </Modal>
-  );
+        </Modal>
+    );
 }
