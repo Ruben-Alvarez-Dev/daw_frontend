@@ -16,15 +16,15 @@ export default function List({
     onDelete
 }) {
     if (loading) {
-        return <div className="list-loading">Cargando...</div>;
+        return <div className="list-message list-loading">Cargando...</div>;
     }
 
     if (error) {
-        return <div className="list-error">{error}</div>;
+        return <div className="list-message list-error">{error}</div>;
     }
 
     if (!items || items.length === 0) {
-        return <div className="list-empty">{emptyMessage}</div>;
+        return <div className="list-message list-empty">{emptyMessage}</div>;
     }
 
     return (

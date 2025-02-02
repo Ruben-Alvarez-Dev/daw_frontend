@@ -1,26 +1,29 @@
 .list {
     display: flex;
     flex-direction: column;
+    gap: 1rem;
     height: 100%;
     overflow: hidden;
     background: var(--color-background);
     border-radius: var(--border-radius);
 }
 
-.list-loading,
-.list-error,
-.list-empty {
+.list-message {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 3rem;
-    color: var(--color-text-muted);
+    height: 100%;
+    padding: 2rem;
     text-align: center;
-    font-style: italic;
+    color: #888;
 }
 
 .list-error {
-    color: var(--color-danger);
+    color: #ff4444;
+}
+
+.list-loading {
+    color: #4488ff;
 }
 
 .list-item {

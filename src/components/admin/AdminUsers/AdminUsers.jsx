@@ -30,26 +30,29 @@ export default function AdminUsers() {
             <Card
                 header="Nuevo Usuario"
                 body={
-                    <AdminUserForm
-                        user={selectedUser}
-                        onSave={handleSave}
-                        onCancel={handleCancel}
-                    />
+                        <AdminUserForm
+                            user={selectedUser}
+                            onSave={handleSave}
+                            onCancel={handleCancel}
+                        />
+
                 }
-                footer={"Nuevo usuario"}
+                footer="Nuevo usuario"
             />
             <Card
                 header="Lista de Usuarios"
                 body={
-                    <AdminUserList
-                        onEdit={handleEdit}
-                        onDelete={handleDelete}
-                        refresh={refreshList}
-                    />
-                }
-                footer={"Lista de usuarios"}
 
+                        <AdminUserList
+                            onEdit={handleEdit}
+                            onDelete={handleDelete}
+                            refresh={refreshList}
+                        />
+
+                }
+                footer="Lista de usuarios"
             />
         </div>
     );
 }
+
