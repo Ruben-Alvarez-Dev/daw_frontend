@@ -14,13 +14,15 @@ export default function Login() {
             name: 'identifier',
             type: 'text',
             placeholder: 'Email o Teléfono',
-            required: true
+            required: true,
+            value: ''
         },
         {
             name: 'password',
             type: 'password',
             placeholder: 'Contraseña',
-            required: true
+            required: true,
+            value: ''
         }
     ];
 

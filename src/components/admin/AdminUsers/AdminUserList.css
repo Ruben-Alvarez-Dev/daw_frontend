@@ -57,15 +57,16 @@
 }
 
 .user-list-search {
-    padding: 0 1rem;
+    padding: 1.5rem 1.5rem 1rem;
+    margin-bottom: 1rem;
 }
 
 .search-input {
     width: 100%;
-    padding: 0.5rem;
-    border: 1px solid #444;
-    border-radius: 4px;
-    background: #333;
+    padding: 1.25rem 2rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: #2a2a2a;
     color: white;
 }
 
@@ -80,9 +81,19 @@
     justify-content: space-between;
     align-items: center;
     padding: 1rem;
-    background: #2a2a2a;
     border-radius: 8px;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
+    background-color: rgba(255, 255, 255, 0.1);
+    transition: all 0.2s ease;
+}
+
+.user-list-item:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+.user-list-item.selected {
+    background-color: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
 .user-info {

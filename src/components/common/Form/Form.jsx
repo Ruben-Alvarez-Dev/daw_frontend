@@ -19,17 +19,18 @@ export default function Form({
         return acc;
     }, {});
 
-    const [formData, setFormData] = useState(initialFormData);
+    const [formData, setFormData] = useState({});
+
+    // Limpiar campos al montar el componente
+    useEffect(() => {
+        setFormData({});
+    }, []);
 
     // Actualizar formData cuando cambien los valores de los campos
     useEffect(() => {
-        const newFormData = fields.reduce((acc, field) => {
-            if ('value' in field) {
-                acc[field.name] = field.value;
-            }
-            return acc;
-        }, {});
-        setFormData(newFormData);
+        if (Object.keys(initialFormData).length > 0) {
+            setFormData(initialFormData);
+        }
     }, [fields]);
     
     const handleChange = (e) => {
@@ -37,9 +38,10 @@ export default function Form({
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        onSubmit(formData);
+        await onSubmit(formData);
+        setFormData({}); // Limpiar después del submit
     };
 
     return (
@@ -63,6 +65,7 @@ export default function Form({
                                 onChange={handleChange}
                                 required={field.required}
                                 disabled={field.disabled}
+                                autoComplete="off"
                             >
                                 {field.options?.map(option => (
                                     <option key={option.value} value={option.value}>
@@ -76,6 +79,7 @@ export default function Form({
                                 value={formData[field.name] || ''}
                                 className="form__input"
                                 onChange={handleChange}
+                                autoComplete="new-password"
                             />
                         )}
                     </div>

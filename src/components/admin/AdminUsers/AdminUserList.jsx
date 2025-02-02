@@ -2,16 +2,15 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import './AdminUserList.css';
 
-export default function AdminUserList({ onEdit, onDelete }) {
+export default function AdminUserList({ onEdit, onDelete, refresh, users, setUsers, selectedUser, onSelect, onFilteredCountChange }) {
     const { token } = useAuth();
-    const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
         fetchUsers();
-    }, [token]);
+    }, [token, refresh]);
 
     const fetchUsers = async () => {
         setLoading(true);
@@ -39,8 +38,12 @@ export default function AdminUserList({ onEdit, onDelete }) {
         const term = searchTerm.toLowerCase();
         return user.name.toLowerCase().includes(term) ||
                user.email.toLowerCase().includes(term) ||
-               (user.phone && user.phone.includes(term));
+               (user.phone && user.phone.toLowerCase().includes(term));
     });
+
+    useEffect(() => {
+        onFilteredCountChange(filteredUsers.length);
+    }, [filteredUsers.length, onFilteredCountChange]);
 
     if (loading) return <div className="user-list-message">Cargando usuarios...</div>;
     if (error) return <div className="user-list-message error">{error}</div>;
@@ -59,7 +62,12 @@ export default function AdminUserList({ onEdit, onDelete }) {
             </div>
             <div className="user-list-items">
                 {filteredUsers.map(user => (
-                    <div key={user.id} className="user-list-item">
+                    <div 
+                        key={user.id} 
+                        className={`user-list-item ${selectedUser?.id === user.id ? 'selected' : ''}`}
+                        onClick={() => onSelect(user)}
+                        style={{ cursor: 'pointer' }}
+                    >
                         <div className="user-info">
                             <div className="user-name">{user.name}</div>
                             <div className="user-details">
@@ -72,10 +80,22 @@ export default function AdminUserList({ onEdit, onDelete }) {
                                 {user.role === 'admin' ? 'Administrador' : 'Cliente'}
                             </span>
                             <div className="user-actions">
-                                <button onClick={() => onEdit(user)} className="action-button">
+                                <button 
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onEdit(user);
+                                    }} 
+                                    className="action-button"
+                                >
                                     Editar
                                 </button>
-                                <button onClick={() => onDelete(user)} className="action-button delete">
+                                <button 
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onDelete(user);
+                                    }} 
+                                    className="action-button delete"
+                                >
                                     Eliminar
                                 </button>
                             </div>
