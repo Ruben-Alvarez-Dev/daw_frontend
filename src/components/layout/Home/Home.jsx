@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './Home.css';
+import Carousel from './Carousel/Carousel';
 
 const Home = () => {
     const [currentSlide, setCurrentSlide] = useState(0);
@@ -52,47 +53,17 @@ const Home = () => {
                 </p>
                 <p>
                     Nuestro restaurante combina la tradición de la cocina local con toques 
-                    modernos e innovadores, creando platos que deleitarán todos tus sentidos.                </p>
+                    modernos e innovadores, creando platos que deleitarán todos tus sentidos.
+                </p>
             </div>
 
-            <div className="carousel">
-                <div 
-                    className="carousel-inner" 
-                    style={{ transform: `translateX(-${currentSlide * 100}%)` }}
-                >
-                    {images.map((image, index) => (
-                        <div key={index} className="carousel-item">
-                            <img src={image.url} alt={image.alt} />
-                        </div>
-                    ))}
-                </div>
-
-                <button 
-                    className="carousel-control prev" 
-                    onClick={prevSlide}
-                    aria-label="Anterior"
-                >
-                    &#10094;
-                </button>
-                <button 
-                    className="carousel-control next" 
-                    onClick={nextSlide}
-                    aria-label="Siguiente"
-                >
-                    &#10095;
-                </button>
-
-                <div className="carousel-indicators">
-                    {images.map((_, index) => (
-                        <button
-                            key={index}
-                            className={`carousel-indicator ${index === currentSlide ? 'active' : ''}`}
-                            onClick={() => goToSlide(index)}
-                            aria-label={`Ir a imagen ${index + 1}`}
-                        />
-                    ))}
-                </div>
-            </div>
+            <Carousel 
+                images={images}
+                currentSlide={currentSlide}
+                onNext={nextSlide}
+                onPrev={prevSlide}
+                onSelect={goToSlide}
+            />
         </div>
     );
 };

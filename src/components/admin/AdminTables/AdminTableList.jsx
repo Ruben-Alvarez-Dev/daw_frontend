@@ -1,56 +1,131 @@
 import { useState, useEffect } from 'react';
-import Button from '../../common/Button/Button';
+import { useAuth } from '../../../context/AuthContext';
+import Card from '../../common/Card/Card';
+import List from '../../common/List/List';
+import Searchbar from '../../common/Searchbar/Searchbar';
 import './AdminTableList.css';
 
 export default function AdminTableList({ onEdit }) {
-  // Temporary mock data - replace with actual API call
-  const [tables] = useState([
-    { id: 1, number: 1, capacity: 4, status: 'available' },
-    { id: 2, number: 2, capacity: 2, status: 'occupied' },
-    { id: 3, number: 3, capacity: 6, status: 'reserved' },
-  ]);
+    const [tables, setTables] = useState([]);
+    const [filteredTables, setFilteredTables] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const { token } = useAuth();
 
-  const getStatusLabel = (status) => {
-    const statusMap = {
-      available: 'Disponible',
-      occupied: 'Ocupada',
-      reserved: 'Reservada',
-      maintenance: 'Mantenimiento'
+    const fetchTables = async () => {
+        try {
+            setLoading(true);
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tables`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error ${response.status}: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            const tablesList = Array.isArray(data) ? data : [];
+            setTables(tablesList);
+            setFilteredTables(tablesList);
+            setError('');
+        } catch (err) {
+            console.error('Error fetching tables:', err);
+            setError('Error al cargar mesas: ' + err.message);
+            setTables([]);
+            setFilteredTables([]);
+        } finally {
+            setLoading(false);
+        }
     };
-    return statusMap[status] || status;
-  };
 
-  const getStatusClass = (status) => {
-    return `status-badge status-${status}`;
-  };
+    useEffect(() => {
+        if (token) {
+            fetchTables();
+        }
+    }, [token]);
 
-  return (
-    <div className="admin-table-list">
-      <div className="table-header">
-        <div>Número</div>
-        <div>Capacidad</div>
-        <div>Estado</div>
-        <div>Acciones</div>
-      </div>
-      {tables.map(table => (
-        <div key={table.id} className="table-row">
-          <div>{table.number}</div>
-          <div>{table.capacity} personas</div>
-          <div>
-            <span className={getStatusClass(table.status)}>
-              {getStatusLabel(table.status)}
-            </span>
-          </div>
-          <div className="table-actions">
-            <Button
-              variant="secondary"
-              size="small"
-              label="Editar"
-              onClick={() => onEdit(table)}
+    const handleSearch = (value) => {
+        setSearchTerm(value);
+        const term = value.toLowerCase().trim();
+        
+        if (!term) {
+            setFilteredTables(tables);
+            return;
+        }
+
+        const filtered = tables.filter(table => 
+            table.name.toLowerCase().includes(term) ||
+            table.capacity.toString().includes(term) ||
+            table.status.toLowerCase().includes(term)
+        );
+        setFilteredTables(filtered);
+    };
+
+    const handleDelete = async (table) => {
+        if (!window.confirm(`¿Estás seguro de que quieres eliminar la mesa ${table.name}?`)) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tables/${table.id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error ${response.status}: ${response.statusText}`);
+            }
+
+            await fetchTables();
+            setError('');
+        } catch (err) {
+            console.error('Error deleting table:', err);
+            setError('Error al eliminar mesa: ' + err.message);
+        }
+    };
+
+    const renderItem = (table) => (
+        <>
+            <div className="table-header">
+                <span>#{table.id}</span>
+                <span className={`table-status status-${table.status}`}>
+                    {table.status}
+                </span>
+            </div>
+            <div className="table-details">
+                <div><strong>Nombre:</strong> {table.name}</div>
+                <div><strong>Capacidad:</strong> {table.capacity} personas</div>
+            </div>
+        </>
+    );
+
+    return (
+        <Card
+            title="Mesas"
+            actions={
+                <Searchbar 
+                    placeholder="Buscar mesas..." 
+                    onSearch={handleSearch}
+                    value={searchTerm}
+                />
+            }
+        >
+            <List
+                items={filteredTables}
+                renderItem={renderItem}
+                onEdit={onEdit}
+                onDelete={handleDelete}
+                loading={loading}
+                error={error}
+                emptyMessage="No hay mesas registradas"
             />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
+        </Card>
+    );
 }

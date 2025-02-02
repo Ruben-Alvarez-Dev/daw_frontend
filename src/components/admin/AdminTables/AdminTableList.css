@@ -15,6 +15,10 @@
 }
 
 .table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
     font-weight: 600;
     color: #e6edf3;
     border-bottom: 1px solid #30363d;
@@ -37,18 +41,18 @@
 }
 
 .status-available {
-    background-color: #238636;
-    color: #fff;
+    background-color: var(--color-success-transparent);
+    color: var(--color-success);
 }
 
 .status-occupied {
-    background-color: #da3633;
-    color: #fff;
+    background-color: var(--color-danger-transparent);
+    color: var(--color-danger);
 }
 
 .status-reserved {
-    background-color: #9e6a03;
-    color: #fff;
+    background-color: var(--color-warning-transparent);
+    color: var(--color-warning);
 }
 
 .status-maintenance {
@@ -60,4 +64,40 @@
     display: flex;
     gap: 0.5rem;
     justify-content: flex-end;
+}
+
+.table-status {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--border-radius);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.status-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.status-label {
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.status-value {
+    font-weight: 600;
+    color: var(--text-primary);
+    background-color: var(--background-light);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+.table-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }

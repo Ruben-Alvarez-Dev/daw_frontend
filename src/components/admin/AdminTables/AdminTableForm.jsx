@@ -1,101 +1,102 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useAuth } from '../../../context/AuthContext';
+import Card from '../../common/Card/Card';
+import Form from '../../common/Form/Form';
 import Button from '../../common/Button/Button';
 import './AdminTableForm.css';
 
 export default function AdminTableForm({ table, onSave, onCancel }) {
-  const [formData, setFormData] = useState({
-    number: '',
-    capacity: '',
-    status: 'available'
-  });
+    const [error, setError] = useState('');
+    const { token } = useAuth();
 
-  useEffect(() => {
-    if (table) {
-      setFormData(table);
-    } else {
-      setFormData({
-        number: '',
-        capacity: '',
-        status: 'available'
-      });
-    }
-  }, [table]);
+    const fields = [
+        {
+            name: 'name',
+            type: 'text',
+            placeholder: 'Nombre de la Mesa',
+            required: true,
+            value: table?.name || ''
+        },
+        {
+            name: 'capacity',
+            type: 'number',
+            placeholder: 'Capacidad',
+            required: true,
+            value: table?.capacity || ''
+        },
+        {
+            name: 'status',
+            type: 'select',
+            required: true,
+            value: table?.status || 'available',
+            defaultValue: 'available',
+            options: [
+                { value: 'available', label: 'Disponible' },
+                { value: 'blocked', label: 'Bloqueada' },
+                { value: 'unavailable', label: 'No disponible' }
+            ]
+        }
+    ];
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSave(formData);
-    setFormData({
-      number: '',
-      capacity: '',
-      status: 'available'
-    });
-  };
+    const handleSubmit = async (formData) => {
+        try {
+            setError('');
+            const url = table 
+                ? `${import.meta.env.VITE_API_URL}/api/tables/${table.id}`
+                : `${import.meta.env.VITE_API_URL}/api/tables`;
+            
+            const method = table ? 'PUT' : 'POST';
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+            const response = await fetch(url, {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
 
-  return (
-    <form onSubmit={handleSubmit} className="admin-table-form">
-      <div className="form-group">
-        <label htmlFor="number">Número de Mesa</label>
-        <input
-          type="number"
-          id="number"
-          name="number"
-          value={formData.number}
-          onChange={handleChange}
-          required
-        />
-      </div>
+            const data = await response.json();
 
-      <div className="form-group">
-        <label htmlFor="capacity">Capacidad</label>
-        <input
-          type="number"
-          id="capacity"
-          name="capacity"
-          value={formData.capacity}
-          onChange={handleChange}
-          required
-        />
-      </div>
+            if (!response.ok) {
+                throw new Error(data.message || 'Error al guardar mesa');
+            }
 
-      <div className="form-group">
-        <label htmlFor="status">Estado</label>
-        <select
-          id="status"
-          name="status"
-          value={formData.status}
-          onChange={handleChange}
-          required
+            onSave(data);
+        } catch (err) {
+            console.error('Error saving table:', err);
+            setError(err.message);
+        }
+    };
+
+    return (
+        <Card
+            header={<h3>{table ? 'Editar Mesa' : 'Nueva Mesa'}</h3>}
+            footer={
+                <div className="form__actions">
+                    <Button
+                        variant="primary"
+                        onClick={() => document.getElementById('tableForm').requestSubmit()}
+                    >
+                        {table ? 'Actualizar' : 'Crear'}
+                    </Button>
+                    <Button
+                        variant="secondary"
+                        onClick={onCancel}
+                    >
+                        Cancelar
+                    </Button>
+                </div>
+            }
         >
-          <option value="available">Disponible</option>
-          <option value="occupied">Ocupada</option>
-          <option value="reserved">Reservada</option>
-          <option value="maintenance">Mantenimiento</option>
-        </select>
-      </div>
-
-      <div className="form-actions">
-        <Button 
-          type="submit" 
-          variant="success" 
-          label={table ? "Actualizar Mesa" : "Crear Mesa"}
-        />
-        {table && (
-          <Button 
-            type="button" 
-            variant="secondary" 
-            onClick={onCancel}
-            label="Cancelar"
-          />
-        )}
-      </div>
-    </form>
-  );
+            <Form
+                id="tableForm"
+                fields={fields}
+                error={error}
+                onSubmit={handleSubmit}
+                hideActions
+            />
+        </Card>
+    );
 }

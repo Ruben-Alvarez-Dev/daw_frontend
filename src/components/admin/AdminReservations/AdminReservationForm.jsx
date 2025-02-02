@@ -1,157 +1,241 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from '../../../context/AuthContext';
 import Button from '../../common/Button/Button';
 import './AdminReservationForm.css';
 
 export default function AdminReservationForm({ reservation, onSave, onCancel }) {
-  const [formData, setFormData] = useState({
-    date: '',
-    time: '',
-    guests: '',
-    name: '',
-    phone: '',
-    email: '',
-    notes: ''
-  });
-
-  useEffect(() => {
-    if (reservation) {
-      setFormData(reservation);
-    } else {
-      setFormData({
-        date: '',
-        time: '',
+    const { token } = useAuth();
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [users, setUsers] = useState([]);
+    const [tables, setTables] = useState([]);
+    const [formData, setFormData] = useState({
+        id: '',
+        user_id: '',
+        table_id: '',
         guests: '',
-        name: '',
-        phone: '',
-        email: '',
-        notes: ''
-      });
-    }
-  }, [reservation]);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSave(formData);
-    setFormData({
-      date: '',
-      time: '',
-      guests: '',
-      name: '',
-      phone: '',
-      email: '',
-      notes: ''
+        datetime: '',
+        status: 'pending'
     });
-  };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+    // Cargar usuarios
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                });
+                if (!response.ok) throw new Error('Error cargando usuarios');
+                const data = await response.json();
+                setUsers(data);
+            } catch (err) {
+                console.error('Error fetching users:', err);
+                setError('Error al cargar usuarios');
+            }
+        };
+        fetchUsers();
+    }, [token]);
 
-  return (
-    <form onSubmit={handleSubmit} className="admin-reservation-form">
-      <div className="form-group">
-        <label htmlFor="date">Fecha</label>
-        <input
-          type="date"
-          id="date"
-          name="date"
-          value={formData.date}
-          onChange={handleChange}
-          required
-        />
-      </div>
+    // Cargar mesas
+    useEffect(() => {
+        const fetchTables = async () => {
+            try {
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tables`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                });
+                if (!response.ok) throw new Error('Error cargando mesas');
+                const data = await response.json();
+                setTables(data);
+            } catch (err) {
+                console.error('Error fetching tables:', err);
+                setError('Error al cargar mesas');
+            }
+        };
+        fetchTables();
+    }, [token]);
 
-      <div className="form-group">
-        <label htmlFor="time">Hora</label>
-        <input
-          type="time"
-          id="time"
-          name="time"
-          value={formData.time}
-          onChange={handleChange}
-          required
-        />
-      </div>
+    useEffect(() => {
+        if (reservation) {
+            // Convertir datetime a formato local para el input
+            const localDateTime = new Date(reservation.datetime)
+                .toISOString()
+                .slice(0, 16); // Formato YYYY-MM-DDTHH:mm
 
-      <div className="form-group">
-        <label htmlFor="guests">Número de Comensales</label>
-        <input
-          type="number"
-          id="guests"
-          name="guests"
-          value={formData.guests}
-          onChange={handleChange}
-          min="1"
-          required
-        />
-      </div>
+            setFormData({
+                ...reservation,
+                datetime: localDateTime
+            });
+        } else {
+            setFormData({
+                id: '',
+                user_id: '',
+                table_id: '',
+                guests: '',
+                datetime: '',
+                status: 'pending'
+            });
+        }
+    }, [reservation]);
 
-      <div className="form-group">
-        <label htmlFor="name">Nombre</label>
-        <input
-          type="text"
-          id="name"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          required
-        />
-      </div>
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
 
-      <div className="form-group">
-        <label htmlFor="phone">Teléfono</label>
-        <input
-          type="tel"
-          id="phone"
-          name="phone"
-          value={formData.phone}
-          onChange={handleChange}
-          required
-        />
-      </div>
+        try {
+            const url = `${import.meta.env.VITE_API_URL}/api/reservations${reservation ? `/${reservation.id}` : ''}`;
+            const method = reservation ? 'PUT' : 'POST';
 
-      <div className="form-group">
-        <label htmlFor="email">Email</label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-        />
-      </div>
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
 
-      <div className="form-group">
-        <label htmlFor="notes">Notas</label>
-        <textarea
-          id="notes"
-          name="notes"
-          value={formData.notes}
-          onChange={handleChange}
-          rows="3"
-        />
-      </div>
+            if (!response.ok) {
+                throw new Error(`Error ${response.status}: ${response.statusText}`);
+            }
 
-      <div className="form-actions">
-        <Button 
-          type="submit" 
-          variant="success" 
-          label={reservation ? "Actualizar Reserva" : "Crear Reserva"}
-        />
-        {reservation && (
-          <Button 
-            type="button" 
-            variant="secondary" 
-            onClick={onCancel}
-            label="Cancelar"
-          />
-        )}
-      </div>
-    </form>
-  );
+            const data = await response.json();
+            onSave(data);
+            setFormData({
+                id: '',
+                user_id: '',
+                table_id: '',
+                guests: '',
+                datetime: '',
+                status: 'pending'
+            });
+        } catch (err) {
+            console.error('Error saving reservation:', err);
+            setError('Error al guardar la reserva: ' + err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="admin-form">
+            {error && <div className="error-message">{error}</div>}
+            
+            {reservation && (
+                <div className="form-group">
+                    <input
+                        type="text"
+                        value={`ID: ${formData.id}`}
+                        disabled
+                        className="form-control"
+                    />
+                </div>
+            )}
+
+            <div className="form-group">
+                <select
+                    name="user_id"
+                    value={formData.user_id}
+                    onChange={handleChange}
+                    required
+                    className="form-control"
+                >
+                    <option value="">Seleccionar Usuario</option>
+                    {users.map(user => (
+                        <option key={user.id} value={user.id}>
+                            {user.name} ({user.email})
+                        </option>
+                    ))}
+                </select>
+            </div>
+
+            <div className="form-group">
+                <select
+                    name="table_id"
+                    value={formData.table_id}
+                    onChange={handleChange}
+                    required
+                    className="form-control"
+                >
+                    <option value="">Seleccionar Mesa</option>
+                    {tables.map(table => (
+                        <option key={table.id} value={table.id}>
+                            Mesa {table.name} (Capacidad: {table.capacity})
+                        </option>
+                    ))}
+                </select>
+            </div>
+
+            <div className="form-group">
+                <input
+                    type="number"
+                    name="guests"
+                    value={formData.guests}
+                    onChange={handleChange}
+                    placeholder="Número de Comensales"
+                    required
+                    min="1"
+                    className="form-control"
+                />
+            </div>
+
+            <div className="form-group">
+                <input
+                    type="datetime-local"
+                    name="datetime"
+                    value={formData.datetime}
+                    onChange={handleChange}
+                    required
+                    className="form-control"
+                />
+            </div>
+
+            <div className="form-group">
+                <select
+                    name="status"
+                    value={formData.status}
+                    onChange={handleChange}
+                    required
+                    className="form-control"
+                >
+                    <option value="pending">Pendiente</option>
+                    <option value="confirmed">Confirmada</option>
+                    <option value="cancelled">Cancelada</option>
+                    <option value="seated">Sentados</option>
+                    <option value="no-show">No presentado</option>
+                </select>
+            </div>
+
+            <div className="form-actions">
+                <Button
+                    type="submit"
+                    variant="primary"
+                    label={reservation ? "Actualizar" : "Crear"}
+                    disabled={loading}
+                />
+                <Button
+                    type="button"
+                    variant="secondary"
+                    label="Cancelar"
+                    onClick={onCancel}
+                    disabled={loading}
+                />
+            </div>
+        </form>
+    );
 }

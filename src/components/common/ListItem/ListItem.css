@@ -1,0 +1,71 @@
+.list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 1rem;
+    background-color: blue;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+}
+
+.list-item:hover {
+    background-color: var(--color-background-lighter);
+    border-color: var(--color-primary);
+    transition: all 0.2s ease;
+}
+
+.list-item-content {
+    flex: 1;
+    margin-right: 1rem;
+}
+
+.list-item-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.item-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.status-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.status-pending {
+    background-color: var(--color-warning-bg);
+    color: var(--color-warning);
+}
+
+.status-confirmed {
+    background-color: var(--color-success-bg);
+    color: var(--color-success);
+}
+
+.status-cancelled {
+    background-color: var(--color-danger-bg);
+    color: var(--color-danger);
+}
+
+.status-seated {
+    background-color: var(--color-info-bg);
+    color: var(--color-info);
+}
+
+.status-no-show {
+    background-color: var(--color-danger-bg);
+    color: var(--color-danger);
+}

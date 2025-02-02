@@ -1,108 +1,90 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
-import Button from '../../common/Button/Button';
+import List from '../../common/List/List';
+import Card from '../../common/Card/Card';
 import './AdminUserList.css';
 
-export default function AdminUserList({ onEdit }) {
-  const [users, setUsers] = useState([]);
-  const [error, setError] = useState('');
-  const { token } = useAuth();
+export default function AdminUserList({ onEdit, onDelete }) {
+    const { token } = useAuth();
+    const [users, setUsers] = useState([]);
+    const [filteredUsers, setFilteredUsers] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
 
-  const fetchUsers = async () => {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/users`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
+    useEffect(() => {
+        fetchUsers();
+    }, [token]);
+
+    const fetchUsers = async () => {
+        setLoading(true);
+        setError('');
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
+            if (!response.ok) throw new Error('Error cargando usuarios');
+            const data = await response.json();
+            setUsers(data);
+            setFilteredUsers(data);
+        } catch (err) {
+            console.error('Error fetching users:', err);
+            setError('Error al cargar usuarios');
+        } finally {
+            setLoading(false);
         }
-      });
+    };
 
-      if (!response.ok) {
-        throw new Error('Error al cargar usuarios');
-      }
+    const handleSearch = (term) => {
+        if (!term.trim()) {
+            setFilteredUsers(users);
+            return;
+        }
 
-      const data = await response.json();
-      setUsers(data);
-    } catch (err) {
-      setError(err.message);
-    }
-  };
+        const searchTerm = term.toLowerCase();
+        const filtered = users.filter(user => 
+            user.name.toLowerCase().includes(searchTerm) ||
+            user.email.toLowerCase().includes(searchTerm) ||
+            (user.phone && user.phone.includes(searchTerm))
+        );
+        setFilteredUsers(filtered);
+    };
 
-  useEffect(() => {
-    fetchUsers();
-  }, [token]);
-
-  const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  return (
-    <div className="admin-user-list">
-      {error && <div className="error-message">{error}</div>}
-      
-      <div className="user-list-header">
-        <div className="header-item">Usuario</div>
-        <div className="header-item">Contacto</div>
-        <div className="header-item">Estado</div>
-        <div className="header-item">Acciones</div>
-      </div>
-
-      {users.length === 0 ? (
-        <div className="no-users">No hay usuarios registrados</div>
-      ) : (
-        <div className="user-list">
-          {users.map(user => (
-            <div key={user.id} className="user-item">
-              <div className="user-info">
-                <div className="user-name">
-                  <h4>{user.name}</h4>
-                  <span className={`user-role ${user.role}`}>
-                    {user.role === 'admin' ? 'Administrador' : 'Cliente'}
-                  </span>
-                </div>
-              </div>
-
-              <div className="user-contact">
-                <div className="contact-item">
-                  <i className="fas fa-envelope"></i>
-                  {user.email || 'Sin email'}
-                </div>
-                <div className="contact-item">
-                  <i className="fas fa-phone"></i>
-                  {user.phone || 'Sin teléfono'}
-                </div>
-              </div>
-
-              <div className="user-status">
-                <div className="status-item">
-                  <span className="status-label">Registro:</span>
-                  <span className="status-value">{formatDate(user.created_at)}</span>
-                </div>
-                <div className="status-item">
-                  <span className="status-label">Última visita:</span>
-                  <span className="status-value">{user.last_login || 'Nunca'}</span>
-                </div>
-              </div>
-
-              <div className="user-actions">
-                <Button
-                  variant="secondary"
-                  size="small"
-                  label="Editar"
-                  onClick={() => onEdit(user)}
-                />
-              </div>
+    const renderContent = (user) => (
+        <div className="user-info">
+            <div className="user-name">{user.name}</div>
+            <div className="user-details">
+                <span>{user.email}</span>
+                <span>{user.phone || 'Sin teléfono'}</span>
             </div>
-          ))}
         </div>
-      )}
-    </div>
-  );
+    );
+
+    const renderIds = (user) => (
+        <div className="user-meta">
+            <span className={`user-role role-${user.role}`}>
+                {user.role === 'admin' ? 'Administrador' : 'Cliente'}
+            </span>
+            <span className="user-id">#{user.id}</span>
+        </div>
+    );
+
+    return (
+        
+            <List
+                items={filteredUsers}
+                renderContent={renderContent}
+                renderIds={renderIds}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                loading={loading}
+                error={error}
+                searchPlaceholder="Buscar por nombre, email o teléfono..."
+                onSearch={handleSearch}
+                emptyMessage="No hay usuarios registrados"
+            />
+        
+    );
 }

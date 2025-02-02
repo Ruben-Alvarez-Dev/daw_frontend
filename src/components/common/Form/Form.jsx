@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Button from '../Button/Button';
 import './Form.css';
 
@@ -8,23 +8,33 @@ export default function Form({
     onSubmit,
     error,
     submitButton = { label: 'Submit', variant: 'primary' },
-    secondaryAction
+    cancelButton,
+    hideActions
 }) {
-    const [formData, setFormData] = useState({});
+    // Inicializar formData con los valores de los campos
+    const initialFormData = fields.reduce((acc, field) => {
+        if ('value' in field) {
+            acc[field.name] = field.value;
+        }
+        return acc;
+    }, {});
+
+    const [formData, setFormData] = useState(initialFormData);
+
+    // Actualizar formData cuando cambien los valores de los campos
+    useEffect(() => {
+        const newFormData = fields.reduce((acc, field) => {
+            if ('value' in field) {
+                acc[field.name] = field.value;
+            }
+            return acc;
+        }, {});
+        setFormData(newFormData);
+    }, [fields]);
     
     const handleChange = (e) => {
         const { name, value } = e.target;
-        if (name === 'identifier') {
-            // Detect if input is email or phone
-            const isEmail = value.includes('@');
-            setFormData({
-                ...formData,
-                identifierType: isEmail ? 'email' : 'phone',
-                [name]: value
-            });
-        } else {
-            setFormData({ ...formData, [name]: value });
-        }
+        setFormData(prev => ({ ...prev, [name]: value }));
     };
 
     const handleSubmit = (e) => {
@@ -45,34 +55,53 @@ export default function Form({
             <div className="form-input-group">
                 {fields.map(field => (
                     <div key={field.name} className="form__field">
-                        <input
-                            {...field}
-                            className="form__input"
-                            onChange={handleChange}
-                            value={formData[field.name] || ''}
-                            required={field.required}
-                            autoComplete="new-password"
-                        />
+                        {field.type === 'select' ? (
+                            <select
+                                name={field.name}
+                                className="form__input"
+                                value={formData[field.name] || field.defaultValue || ''}
+                                onChange={handleChange}
+                                required={field.required}
+                                disabled={field.disabled}
+                            >
+                                {field.options?.map(option => (
+                                    <option key={option.value} value={option.value}>
+                                        {option.label}
+                                    </option>
+                                ))}
+                            </select>
+                        ) : (
+                            <input
+                                {...field}
+                                value={formData[field.name] || ''}
+                                className="form__input"
+                                onChange={handleChange}
+                            />
+                        )}
                     </div>
                 ))}
             </div>
 
-            <div className="form-actions">
-                <Button
-                    type="submit"
-                    variant={submitButton.variant}
-                    label={submitButton.label}
-                />
-                
-                {secondaryAction && (
+            {!hideActions && (
+                <div className="form__actions">
                     <Button
-                        type="button"
-                        variant={secondaryAction.variant || 'secondary'}
-                        label={secondaryAction.label}
-                        onClick={secondaryAction.onClick}
-                    />
-                )}
-            </div>
+                        type="submit"
+                        variant={submitButton.variant}
+                    >
+                        {submitButton.label}
+                    </Button>
+
+                    {cancelButton && (
+                        <Button
+                            type="button"
+                            variant={cancelButton.variant}
+                            onClick={cancelButton.onClick}
+                        >
+                            {cancelButton.label}
+                        </Button>
+                    )}
+                </div>
+            )}
         </form>
     );
 }

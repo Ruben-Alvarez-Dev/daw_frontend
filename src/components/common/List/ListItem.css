@@ -1,0 +1,85 @@
+.list-item {
+    display: flex;
+    background: var(--color-background-lighter);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.list-item:hover {
+    border-color: var(--color-primary);
+    background: var(--color-background-lightest);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.list-item-content {
+    flex: 1;
+    padding: 1.25rem;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.list-item-ids {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1.25rem;
+    background: var(--color-background-dark);
+    width: 200px;
+    border-left: 1px solid var(--color-border);
+    gap: 0.5rem;
+}
+
+.list-item-line {
+    padding: 0.25rem 0;
+    min-height: 1.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.list-item-line:not(:last-child) {
+    border-bottom: 1px dashed var(--color-border);
+}
+
+.list-item-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: auto;
+    justify-content: flex-end;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border);
+}
+
+.icon-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: none;
+    border-radius: var(--border-radius);
+    background: var(--color-background-lighter);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.icon-button:hover {
+    background: var(--color-primary-transparent);
+    color: var(--color-primary);
+    transform: translateY(-1px);
+}
+
+.icon-button.delete:hover {
+    background: var(--color-danger-transparent);
+    color: var(--color-danger);
+}
+
+.icon-button svg {
+    width: 1.2rem;
+    height: 1.2rem;
+}

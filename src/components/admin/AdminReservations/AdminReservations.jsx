@@ -1,41 +1,40 @@
 import { useState } from 'react';
-import Card from '../../common/Card/Card';
-import AdminReservationList from './AdminReservationList';
 import AdminReservationForm from './AdminReservationForm';
-import './AdminReservations.css';
+import AdminReservationList from './AdminReservationList';
+import Card from '../../common/Card/Card';
 
 export default function AdminReservations() {
-  const [selectedReservation, setSelectedReservation] = useState(null);
+    const [selectedReservation, setSelectedReservation] = useState(null);
+    const [refreshList, setRefreshList] = useState(0);
 
-  const handleEdit = (reservation) => {
-    setSelectedReservation(reservation);
-  };
+    const handleSave = () => {
+        setSelectedReservation(null);
+        setRefreshList(prev => prev + 1);
+    };
 
-  const handleSave = () => {
-    setSelectedReservation(null);
-  };
+    const handleEdit = (reservation) => {
+        setSelectedReservation(reservation);
+    };
 
-  const handleCancel = () => {
-    setSelectedReservation(null);
-  };
+    const handleCancel = () => {
+        setSelectedReservation(null);
+    };
 
-  return (
-    <>
-      <div className="admin-reservations">
-        <Card header={<h3>Nueva Reserva</h3>}>
-          <AdminReservationForm
-            reservation={selectedReservation}
-            onSave={handleSave}
-            onCancel={handleCancel}
-          />
-        </Card>
-
-        <Card header={<h3>Lista de Reservas</h3>}>
-          <AdminReservationList
-            onEdit={handleEdit}
-          />
-        </Card>
-      </div>
-    </>
-  );
+    return (
+        <>
+            <Card title="Nueva Reserva">
+                <AdminReservationForm
+                    reservation={selectedReservation}
+                    onSave={handleSave}
+                    onCancel={handleCancel}
+                />
+            </Card>
+            <Card title="Reservas">
+                <AdminReservationList 
+                    onEdit={handleEdit}
+                    key={refreshList}
+                />
+            </Card>
+        </>
+    );
 }

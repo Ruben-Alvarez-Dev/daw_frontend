@@ -1,21 +1,59 @@
-import Button from '../../common/Button/Button';
-import Card from '../../common/Card/Card';
-import './AdminDashboard.css';
+import React from "react";
+import Card from "../../common/Card/Card";
+import "./AdminDashboard.css";
 
-export default function AdminDashboard({ onActionClick }) {
-  return (
-    <>
-      <div className="admin-dashboard">
-
-        <Card header={<h3>Izquierda</h3>}>
-          <h3>hola izquierda</h3>
-        </Card>
-
-        <Card header={<h3>Derecha</h3>}>
-          <h3>hola derecha</h3>
-        </Card>
-
-      </div>
-    </>
-  );
+export default function AdminDashboard() {
+    return (
+        <div className="admin-dashboard">
+            <Card
+                header="Card Izquierda"
+                body={
+                    <p>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do 
+                    eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut 
+                    enim ad minim veniam, quis nostrud exercitation ullamco laboris 
+                    nisi ut aliquip ex ea commodo consequat.
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do 
+                    eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut 
+                    enim ad minim veniam, quis nostrud exercitation ullamco laboris 
+                    nisi ut aliquip ex ea commodo consequat.
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do 
+                    eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do 
+                    eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut 
+                    enim ad minim veniam, quis nostrud exercitation ullamco laboris 
+                    nisi ut aliquip ex ea commodo consequat.
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do 
+                    eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut 
+                    enim ad minim veniam, quis nostrud exercitation ullamco laboris 
+                    nisi ut aliquip ex ea commodo consequat.
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do 
+                    eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                </p>
+                }
+                footer={<span>Footer izquierda</span>}
+            >
+            
+            </Card>
+            
+            <Card
+                header="Card Derecha"
+                body={        <p>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do 
+                    eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut 
+                    enim ad minim veniam, quis nostrud exercitation ullamco laboris 
+                    nisi ut aliquip ex ea commodo consequat.
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do 
+                    eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut 
+                    enim ad minim veniam, quis nostrud exercitation ullamco laboris 
+                    nisi ut aliquip ex ea commodo consequat.
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do 
+                    eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                </p>}
+                footer={<span>Footer derecha</span>}
+            >
+                
+            </Card>
+        </div>
+    );
 }
