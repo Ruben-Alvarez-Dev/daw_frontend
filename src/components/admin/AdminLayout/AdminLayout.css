@@ -1,10 +1,12 @@
 /* Layout base para las secciones admin */
 .admin-layout {
+    height: 100%;
+    width: 100%;
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    flex: 1;
     min-height: 0;
+    box-sizing: border-box;
 }
 
 /* Tabs de navegación */
@@ -37,10 +39,12 @@
 
 /* Grid base para el contenido admin */
 .admin-layout__content {
-    flex: 1;
+    height: 100%;
+    width: 100%;
+    display: flex;
     min-height: 0;
     overflow: hidden;
-    display: flex;
+    box-sizing: border-box;
 }
 
 /* Asegurar que las Cards ocupen todo el espacio disponible */
