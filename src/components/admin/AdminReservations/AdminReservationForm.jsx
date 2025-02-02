@@ -1,24 +1,40 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
+import PropTypes from 'prop-types';
 import Button from '../../common/Button/Button';
-import './AdminReservationForm.css';
+import UserSearchDropdown from '../../common/UserSearchDropdown/UserSearchDropdown';
 
-export default function AdminReservationForm({ reservation, onSave, onCancel }) {
-    const { token } = useAuth();
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
+export default function AdminReservationForm({ reservation, onSave, onCancel, onReset, isEditing, readOnly }) {
     const [users, setUsers] = useState([]);
     const [tables, setTables] = useState([]);
-    const [formData, setFormData] = useState({
-        id: '',
+    const [reset, setReset] = useState(false);
+    const initialFormData = {
         user_id: '',
         table_id: '',
         guests: '',
         datetime: '',
         status: 'pending'
-    });
+    };
+    const [formData, setFormData] = useState(initialFormData);
+    const [error, setError] = useState(null);
+    const { token } = useAuth();
 
-    // Cargar usuarios
+    useEffect(() => {
+        if (reservation) {
+            setFormData({
+                user_id: reservation.user_id,
+                table_id: reservation.table_id || '',
+                guests: reservation.guests,
+                datetime: new Date(reservation.datetime).toISOString().slice(0, 16),
+                status: reservation.status
+            });
+            setReset(false);
+        } else {
+            setFormData(initialFormData);
+            setReset(true);
+        }
+    }, [reservation]);
+
     useEffect(() => {
         const fetchUsers = async () => {
             try {
@@ -28,19 +44,15 @@ export default function AdminReservationForm({ reservation, onSave, onCancel }) 
                         'Accept': 'application/json'
                     }
                 });
-                if (!response.ok) throw new Error('Error cargando usuarios');
+                if (!response.ok) throw new Error('Error al cargar usuarios');
                 const data = await response.json();
                 setUsers(data);
             } catch (err) {
                 console.error('Error fetching users:', err);
-                setError('Error al cargar usuarios');
+                setError(err.message);
             }
         };
-        fetchUsers();
-    }, [token]);
 
-    // Cargar mesas
-    useEffect(() => {
         const fetchTables = async () => {
             try {
                 const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tables`, {
@@ -49,82 +61,59 @@ export default function AdminReservationForm({ reservation, onSave, onCancel }) 
                         'Accept': 'application/json'
                     }
                 });
-                if (!response.ok) throw new Error('Error cargando mesas');
+                if (!response.ok) throw new Error('Error al cargar mesas');
                 const data = await response.json();
                 setTables(data);
             } catch (err) {
                 console.error('Error fetching tables:', err);
-                setError('Error al cargar mesas');
+                setError(err.message);
             }
         };
+
+        fetchUsers();
         fetchTables();
     }, [token]);
 
-    useEffect(() => {
-        if (reservation) {
-            // Convertir datetime a formato local para el input
-            const localDateTime = new Date(reservation.datetime)
-                .toISOString()
-                .slice(0, 16); // Formato YYYY-MM-DDTHH:mm
-
-            setFormData({
-                ...reservation,
-                datetime: localDateTime
-            });
-        } else {
-            setFormData({
-                id: '',
-                user_id: '',
-                table_id: '',
-                guests: '',
-                datetime: '',
-                status: 'pending'
-            });
-        }
-    }, [reservation]);
-
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
-        setError('');
+        setError(null);
 
         try {
-            const url = `${import.meta.env.VITE_API_URL}/api/reservations${reservation ? `/${reservation.id}` : ''}`;
-            const method = reservation ? 'PUT' : 'POST';
+            const url = isEditing 
+                ? `${import.meta.env.VITE_API_URL}/api/reservations/${reservation.id}`
+                : `${import.meta.env.VITE_API_URL}/api/reservations`;
 
             const response = await fetch(url, {
-                method: method,
+                method: isEditing ? 'PUT' : 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
                 body: JSON.stringify(formData)
             });
 
             if (!response.ok) {
-                throw new Error(`Error ${response.status}: ${response.statusText}`);
+                throw new Error(isEditing ? 'Error al actualizar la reserva' : 'Error al crear la reserva');
             }
 
-            const data = await response.json();
-            onSave(data);
-            setFormData({
-                id: '',
-                user_id: '',
-                table_id: '',
-                guests: '',
-                datetime: '',
-                status: 'pending'
-            });
+            onSave();
+            setFormData(initialFormData);
+            setReset(true);
         } catch (err) {
-            console.error('Error saving reservation:', err);
-            setError('Error al guardar la reserva: ' + err.message);
-        } finally {
-            setLoading(false);
+            console.error('Error submitting reservation:', err);
+            setError(err.message);
         }
     };
 
+    const handleReset = () => {
+        setFormData(initialFormData);
+        setReset(true);
+        onReset();
+    };
+
     const handleChange = (e) => {
+        setReset(false);
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
@@ -132,110 +121,119 @@ export default function AdminReservationForm({ reservation, onSave, onCancel }) 
         }));
     };
 
+    if (error) {
+        return <div className="form-error">{error}</div>;
+    }
+
     return (
-        <form onSubmit={handleSubmit} className="admin-form">
-            {error && <div className="error-message">{error}</div>}
-            
-            {reservation && (
-                <div className="form-group">
-                    <input
-                        type="text"
-                        value={`ID: ${formData.id}`}
-                        disabled
-                        className="form-control"
-                    />
-                </div>
-            )}
-
+        <form onSubmit={handleSubmit} className="reservation-form">
             <div className="form-group">
-                <select
-                    name="user_id"
+                <label htmlFor="user_id">Usuario</label>
+                <UserSearchDropdown
+                    users={users}
                     value={formData.user_id}
-                    onChange={handleChange}
-                    required
-                    className="form-control"
-                >
-                    <option value="">Seleccionar Usuario</option>
-                    {users.map(user => (
-                        <option key={user.id} value={user.id}>
-                            {user.name} ({user.email})
-                        </option>
-                    ))}
-                </select>
-            </div>
-
-            <div className="form-group">
-                <select
-                    name="table_id"
-                    value={formData.table_id}
-                    onChange={handleChange}
-                    required
-                    className="form-control"
-                >
-                    <option value="">Seleccionar Mesa</option>
-                    {tables.map(table => (
-                        <option key={table.id} value={table.id}>
-                            Mesa {table.name} (Capacidad: {table.capacity})
-                        </option>
-                    ))}
-                </select>
-            </div>
-
-            <div className="form-group">
-                <input
-                    type="number"
-                    name="guests"
-                    value={formData.guests}
-                    onChange={handleChange}
-                    placeholder="Número de Comensales"
-                    required
-                    min="1"
-                    className="form-control"
+                    onChange={(value) => {
+                        setReset(false);
+                        setFormData(prev => ({ ...prev, user_id: value }));
+                    }}
+                    placeholder="Buscar usuario por nombre, email o teléfono..."
+                    disabled={readOnly}
+                    reset={reset}
                 />
             </div>
 
             <div className="form-group">
+                <label htmlFor="table_id">Mesa</label>
+                <select
+                    id="table_id"
+                    name="table_id"
+                    value={formData.table_id}
+                    onChange={handleChange}
+                    className="form-control"
+                    disabled={readOnly}
+                >
+                    <option value="">Seleccionar mesa</option>
+                    {tables.map(table => (
+                        <option key={table.id} value={table.id}>
+                            {table.name} (Capacidad: {table.capacity})
+                        </option>
+                    ))}
+                </select>
+            </div>
+
+            <div className="form-group">
+                <label htmlFor="guests">Número de comensales</label>
+                <input
+                    type="number"
+                    id="guests"
+                    name="guests"
+                    value={formData.guests}
+                    onChange={handleChange}
+                    required
+                    min="1"
+                    className="form-control"
+                    disabled={readOnly}
+                />
+            </div>
+
+            <div className="form-group">
+                <label htmlFor="datetime">Fecha y hora</label>
                 <input
                     type="datetime-local"
+                    id="datetime"
                     name="datetime"
                     value={formData.datetime}
                     onChange={handleChange}
                     required
                     className="form-control"
+                    disabled={readOnly}
                 />
             </div>
 
             <div className="form-group">
+                <label htmlFor="status">Estado</label>
                 <select
+                    id="status"
                     name="status"
                     value={formData.status}
                     onChange={handleChange}
                     required
                     className="form-control"
+                    disabled={readOnly}
                 >
                     <option value="pending">Pendiente</option>
                     <option value="confirmed">Confirmada</option>
                     <option value="cancelled">Cancelada</option>
-                    <option value="seated">Sentados</option>
-                    <option value="no-show">No presentado</option>
+                    <option value="completed">Completada</option>
                 </select>
             </div>
 
             <div className="form-actions">
-                <Button
-                    type="submit"
-                    variant="primary"
-                    label={reservation ? "Actualizar" : "Crear"}
-                    disabled={loading}
-                />
-                <Button
-                    type="button"
-                    variant="secondary"
-                    label="Cancelar"
-                    onClick={onCancel}
-                    disabled={loading}
-                />
+                {!readOnly && (
+                    <Button type="submit" variant="primary">
+                        {isEditing ? 'Actualizar' : 'Crear'}
+                    </Button>
+                )}
+                {isEditing && (
+                    <Button type="button" onClick={onCancel} variant="secondary">
+                        Cancelar
+                    </Button>
+                )}
+                {!readOnly && (
+                    <Button type="button" onClick={handleReset} variant="secondary">
+                        Resetear
+                    </Button>
+                )}
             </div>
         </form>
     );
 }
+
+AdminReservationForm.propTypes = {
+    reservation: PropTypes.object,
+    onSave: PropTypes.func.isRequired,
+    onCancel: PropTypes.func.isRequired,
+    onReset: PropTypes.func.isRequired,
+    isEditing: PropTypes.bool.isRequired,
+    readOnly: PropTypes.bool
+};

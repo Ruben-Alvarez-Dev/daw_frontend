@@ -1,88 +1,102 @@
-.admin-reservation-list {
+.reservation-list {
     display: flex;
     flex-direction: column;
-    height: 100%;
     gap: 1rem;
-    padding: 1rem;
+    height: 100%;
+    width: 100%;
 }
 
-.list-item {
+.reservation-list-content {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.reservation-list-item {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     padding: 1rem;
-    margin-bottom: 1rem;
-    background-color: var(--color-background-darker);
-    border: 1px solid var(--color-border);
+    background: #2a2a2a;
+    border: 1px solid var(--border-color);
     border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-.item-content {
+.reservation-list-item:hover {
+    background: #333;
+    border-color: #444;
+}
+
+.reservation-list-item.selected {
+    background: var(--color-primary-transparent);
+    border-color: var(--color-primary);
+}
+
+.reservation-info {
     flex: 1;
-    margin-right: 1rem;
+    min-width: 0;
 }
 
-.item-header {
+.reservation-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 1rem;
     margin-bottom: 0.5rem;
 }
 
-.customer-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+.reservation-id {
+    font-weight: 600;
 }
 
-.customer-info small {
-    color: #8b949e;
-    font-size: 0.875rem;
-}
-
-.item-actions {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.status-badge {
+.reservation-status {
     padding: 0.25rem 0.5rem;
     border-radius: 4px;
-    font-size: 0.875rem;
-    font-weight: 500;
+    font-size: 0.8rem;
 }
 
 .status-pending {
-    background-color: var(--color-warning-bg);
+    background: var(--color-warning-transparent);
     color: var(--color-warning);
 }
 
 .status-confirmed {
-    background-color: var(--color-success-bg);
+    background: var(--color-success-transparent);
     color: var(--color-success);
 }
 
 .status-cancelled {
-    background-color: var(--color-danger-bg);
+    background: var(--color-danger-transparent);
     color: var(--color-danger);
 }
 
 .status-completed {
-    background-color: var(--color-info-bg);
-    color: var(--color-info);
+    background: var(--color-primary-transparent);
+    color: var(--color-primary);
 }
 
-.list-footer {
-    margin-top: auto;
-    padding: 1rem;
-    border-top: 1px solid var(--color-border);
-    text-align: right;
-    color: var(--color-text-muted);
+.reservation-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    color: #888;
+    font-size: 0.9rem;
 }
 
-.error-message {
+.reservation-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.reservation-list-message {
+    padding: 2rem;
+    text-align: center;
+    color: #888;
+}
+
+.reservation-list-message.error {
     color: var(--color-danger);
-    padding: 0.5rem;
-    border-radius: 4px;
-    background-color: var(--color-danger-bg);
 }

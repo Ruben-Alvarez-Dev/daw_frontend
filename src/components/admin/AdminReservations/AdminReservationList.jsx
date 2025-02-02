@@ -1,71 +1,29 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../../../context/AuthContext';
-import List from '../../common/List/List';
+import PropTypes from 'prop-types';
+import Button from '../../common/Button/Button';
+import ListItemSearchbar from '../../common/List/ListItemSearchbar';
 import './AdminReservationList.css';
 
-export default function AdminReservationList({ onEdit, onDelete }) {
+export default function AdminReservationList({ 
+    onEdit, 
+    onDelete, 
+    refresh,
+    reservations,
+    setReservations,
+    selectedReservation,
+    onSelect,
+    onFilteredCountChange 
+}) {
+    const [error, setError] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
     const { token } = useAuth();
-    const [reservations, setReservations] = useState([]);
-    const [users, setUsers] = useState({});
-    const [tables, setTables] = useState({});
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
 
-    // Cargar usuarios y crear un mapa para acceso rápido
-    useEffect(() => {
-        const fetchUsers = async () => {
-            try {
-                const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Accept': 'application/json'
-                    }
-                });
-                if (!response.ok) throw new Error('Error cargando usuarios');
-                const data = await response.json();
-                const usersMap = {};
-                data.forEach(user => {
-                    usersMap[user.id] = user;
-                });
-                setUsers(usersMap);
-            } catch (err) {
-                console.error('Error fetching users:', err);
-                setError('Error al cargar usuarios');
-            }
-        };
-        fetchUsers();
-    }, [token]);
-
-    // Cargar mesas y crear un mapa para acceso rápido
-    useEffect(() => {
-        const fetchTables = async () => {
-            try {
-                const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tables`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Accept': 'application/json'
-                    }
-                });
-                if (!response.ok) throw new Error('Error cargando mesas');
-                const data = await response.json();
-                const tablesMap = {};
-                data.forEach(table => {
-                    tablesMap[table.id] = table;
-                });
-                setTables(tablesMap);
-            } catch (err) {
-                console.error('Error fetching tables:', err);
-                setError('Error al cargar mesas');
-            }
-        };
-        fetchTables();
-    }, [token]);
-
-    // Cargar reservas
     useEffect(() => {
         const fetchReservations = async () => {
-            setLoading(true);
-            setError('');
+            setIsLoading(true);
+            setError(null);
             try {
                 const response = await fetch(`${import.meta.env.VITE_API_URL}/api/reservations`, {
                     headers: {
@@ -73,89 +31,106 @@ export default function AdminReservationList({ onEdit, onDelete }) {
                         'Accept': 'application/json'
                     }
                 });
-                if (!response.ok) throw new Error('Error cargando reservas');
+
+                if (!response.ok) {
+                    throw new Error('Error al cargar las reservas');
+                }
+
                 const data = await response.json();
-                // Ordenar por fecha y mostrar solo las 5 más recientes
-                const sortedReservations = data.sort((a, b) => 
-                    new Date(b.datetime) - new Date(a.datetime)
-                ).slice(0, 5);
-                setReservations(sortedReservations);
+                setReservations(data);
             } catch (err) {
                 console.error('Error fetching reservations:', err);
-                setError('Error al cargar reservas');
+                setError(err.message);
             } finally {
-                setLoading(false);
+                setIsLoading(false);
             }
         };
+
         fetchReservations();
-    }, [token]);
+    }, [token, refresh, setReservations]);
 
-    const formatDateTime = (datetime) => {
-        const date = new Date(datetime);
-        return new Intl.DateTimeFormat('es-ES', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        }).format(date);
-    };
-
-    const handleDelete = async (reservation) => {
-        if (!window.confirm('¿Estás seguro de que quieres eliminar esta reserva?')) return;
-
-        try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/reservations/${reservation.id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Accept': 'application/json'
-                }
-            });
-
-            if (!response.ok) throw new Error('Error eliminando reserva');
-            
-            setReservations(prev => prev.filter(item => item.id !== reservation.id));
-            onDelete && onDelete(reservation.id);
-        } catch (err) {
-            console.error('Error deleting reservation:', err);
-            setError('Error al eliminar la reserva');
-        }
-    };
-
-    const renderItem = (reservation) => {
-        const user = users[reservation.user_id] || {};
-        const table = tables[reservation.table_id] || {};
-        
+    const filteredReservations = reservations.filter(reservation => {
+        const searchString = searchTerm.toLowerCase();
         return (
-            <>
-                <div className="item-header">
-                    <span>#{reservation.id}</span>
-                    <span className={`status-badge status-${reservation.status}`}>
-                        {reservation.status}
-                    </span>
-                </div>
-                <div className="item-details">
-                    <div><strong>Usuario:</strong> {user.name} ({user.email})</div>
-                    <div><strong>Mesa:</strong> {table.name} (Cap: {table.capacity})</div>
-                    <div><strong>Comensales:</strong> {reservation.guests}</div>
-                    <div><strong>Fecha y Hora:</strong> {formatDateTime(reservation.datetime)}</div>
-                </div>
-            </>
+            reservation.id.toString().includes(searchString) ||
+            reservation.user_name.toLowerCase().includes(searchString) ||
+            reservation.table_name.toLowerCase().includes(searchString) ||
+            reservation.status.toLowerCase().includes(searchString)
         );
-    };
+    });
+
+    useEffect(() => {
+        onFilteredCountChange(filteredReservations.length);
+    }, [filteredReservations.length, onFilteredCountChange]);
+
+    if (error) {
+        return <div className="reservation-list-message error">{error}</div>;
+    }
+
+    if (isLoading) {
+        return <div className="reservation-list-message">Cargando reservas...</div>;
+    }
 
     return (
-        <div className="list-container">
-            <List
-                items={reservations}
-                renderItem={renderItem}
-                onEdit={onEdit}
-                onDelete={handleDelete}
-                loading={loading}
-                error={error}
-                emptyMessage="No hay reservas disponibles"
+        <div className="reservation-list">
+            <ListItemSearchbar
+                value={searchTerm}
+                onChange={setSearchTerm}
+                placeholder="Buscar por ID, usuario, mesa o estado..."
             />
+            <div className="reservation-list-content">
+                {filteredReservations.length === 0 ? (
+                    <div className="reservation-list-message">No se encontraron reservas</div>
+                ) : (
+                    filteredReservations.map(reservation => (
+                        <div 
+                            key={reservation.id}
+                            className={`reservation-list-item ${selectedReservation?.id === reservation.id ? 'selected' : ''}`}
+                            onClick={() => onSelect(reservation)}
+                        >
+                            <div className="reservation-info">
+                                <div className="reservation-header">
+                                    <span className="reservation-id">#{reservation.id}</span>
+                                    <span className={`reservation-status status-${reservation.status.toLowerCase()}`}>
+                                        {reservation.status}
+                                    </span>
+                                </div>
+                                <div className="reservation-details">
+                                    <div>Usuario: {reservation.user_name}</div>
+                                    <div>Mesa: {reservation.table_name}</div>
+                                    <div>Fecha: {new Date(reservation.datetime).toLocaleString()}</div>
+                                    <div>Comensales: {reservation.guests}</div>
+                                </div>
+                            </div>
+                            <div className="reservation-actions">
+                                <Button onClick={(e) => {
+                                    e.stopPropagation();
+                                    onEdit(reservation);
+                                }} variant="primary">
+                                    Editar
+                                </Button>
+                                <Button onClick={(e) => {
+                                    e.stopPropagation();
+                                    onDelete(reservation);
+                                }} variant="danger">
+                                    Eliminar
+                                </Button>
+                            </div>
+                        </div>
+                    ))
+                )}
+            </div>
         </div>
     );
 }
+
+AdminReservationList.propTypes = {
+    onEdit: PropTypes.func.isRequired,
+    onDelete: PropTypes.func.isRequired,
+    refresh: PropTypes.number.isRequired,
+    reservations: PropTypes.array.isRequired,
+    setReservations: PropTypes.func.isRequired,
+    selectedReservation: PropTypes.object,
+    onSelect: PropTypes.func.isRequired,
+    onFilteredCountChange: PropTypes.func.isRequired
+};
