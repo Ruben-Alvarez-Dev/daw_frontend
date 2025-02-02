@@ -1,103 +1,129 @@
-.admin-table-list {
+.table-list {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    padding: 1rem;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
 }
 
-.table-header,
-.table-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1.5fr 1fr;
-    gap: 1rem;
-    align-items: center;
-    padding: 0.5rem;
+.table-list-search {
+    padding: 1.5rem 1.5rem 1rem;
+    margin-bottom: 1rem;
 }
 
-.table-header {
+.table-list-search .search-input {
+    width: 100%;
+    padding: 1.25rem 2rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: #2a2a2a;
+    color: white;
+}
+
+.table-list-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 1.5rem 1.5rem;
+}
+
+.table-list-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
     margin-bottom: 0.5rem;
+    background-color: #2a2a2a;
+    transition: all 0.2s ease;
+}
+
+.table-list-item:hover {
+    background-color: #333;
+    border-color: #444;
+}
+
+.table-list-item.selected {
+    background-color: #1f6feb22;
+    border-color: #1f6feb;
+}
+
+.table-list-item .table-info {
+    flex: 1;
+}
+
+.table-list-item .table-name {
     font-weight: 600;
-    color: #e6edf3;
-    border-bottom: 1px solid #30363d;
+    margin-bottom: 0.5rem;
 }
 
-.table-row {
-    border-bottom: 1px solid #21262d;
+.table-list-item .table-details {
+    display: flex;
+    gap: 1rem;
+    color: #888;
+    font-size: 0.9rem;
 }
 
-.table-row:last-child {
-    border-bottom: none;
-}
-
-.status-badge {
-    display: inline-block;
+.table-list-item .table-status {
     padding: 0.25rem 0.5rem;
-    border-radius: 1rem;
-    font-size: 0.875rem;
-    font-weight: 500;
+    border-radius: 4px;
+    font-size: 0.8rem;
 }
 
-.status-available {
+.table-list-item .table-status.status-available {
     background-color: var(--color-success-transparent);
     color: var(--color-success);
 }
 
-.status-occupied {
+.table-list-item .table-status.status-occupied {
     background-color: var(--color-danger-transparent);
     color: var(--color-danger);
 }
 
-.status-reserved {
+.table-list-item .table-status.status-reserved {
     background-color: var(--color-warning-transparent);
     color: var(--color-warning);
 }
 
-.status-maintenance {
+.table-list-item .table-status.status-maintenance {
     background-color: #484f58;
     color: #fff;
 }
 
-.table-actions {
+.table-list-item .table-actions {
     display: flex;
     gap: 0.5rem;
-    justify-content: flex-end;
 }
 
-.table-status {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 1rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: var(--border-radius);
-    font-size: 0.9rem;
-    font-weight: 500;
-}
-
-.status-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.status-label {
-    font-weight: 500;
-    color: var(--text-secondary);
-}
-
-.status-value {
-    font-weight: 600;
-    color: var(--text-primary);
-    background-color: var(--background-light);
-    padding: 0.25rem 0.5rem;
+.table-list-item .table-actions .action-button {
+    padding: 0.5rem 1rem;
+    border: none;
     border-radius: 4px;
+    background-color: #373737;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
 }
 
-.table-details {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+.table-list-item .table-actions .action-button:hover {
+    background-color: #444;
+}
+
+.table-list-item .table-actions .action-button.delete {
+    background-color: #da363333;
+    color: #ff7b72;
+}
+
+.table-list-item .table-actions .action-button.delete:hover {
+    background-color: #da363366;
+}
+
+.table-list-message {
+    padding: 2rem;
+    text-align: center;
+    color: #888;
+}
+
+.table-list-message.error {
+    color: #ff7b72;
 }

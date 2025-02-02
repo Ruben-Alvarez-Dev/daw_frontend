@@ -1,11 +1,9 @@
 import { useState } from 'react';
 import { useAuth } from '../../../context/AuthContext';
-import Card from '../../common/Card/Card';
 import Form from '../../common/Form/Form';
-import Button from '../../common/Button/Button';
 import './AdminTableForm.css';
 
-export default function AdminTableForm({ table, onSave, onCancel }) {
+export default function AdminTableForm({ table, onSave, onCancel, isEditing }) {
     const [error, setError] = useState('');
     const { token } = useAuth();
 
@@ -15,21 +13,24 @@ export default function AdminTableForm({ table, onSave, onCancel }) {
             type: 'text',
             placeholder: 'Nombre de la Mesa',
             required: true,
-            value: table?.name || ''
+            value: table?.name || '',
+            disabled: table && !isEditing
         },
         {
             name: 'capacity',
             type: 'number',
             placeholder: 'Capacidad',
             required: true,
-            value: table?.capacity || ''
+            value: table?.capacity || '',
+            disabled: table && !isEditing
         },
         {
             name: 'status',
             type: 'select',
+            placeholder: 'Estado',
             required: true,
             value: table?.status || 'available',
-            defaultValue: 'available',
+            disabled: table && !isEditing,
             options: [
                 { value: 'available', label: 'Disponible' },
                 { value: 'blocked', label: 'Bloqueada' },
@@ -57,13 +58,12 @@ export default function AdminTableForm({ table, onSave, onCancel }) {
                 body: JSON.stringify(formData)
             });
 
-            const data = await response.json();
-
             if (!response.ok) {
+                const data = await response.json();
                 throw new Error(data.message || 'Error al guardar mesa');
             }
 
-            onSave(data);
+            onSave();
         } catch (err) {
             console.error('Error saving table:', err);
             setError(err.message);
@@ -71,32 +71,19 @@ export default function AdminTableForm({ table, onSave, onCancel }) {
     };
 
     return (
-        <Card
-            header={<h3>{table ? 'Editar Mesa' : 'Nueva Mesa'}</h3>}
-            footer={
-                <div className="form__actions">
-                    <Button
-                        variant="primary"
-                        onClick={() => document.getElementById('tableForm').requestSubmit()}
-                    >
-                        {table ? 'Actualizar' : 'Crear'}
-                    </Button>
-                    <Button
-                        variant="secondary"
-                        onClick={onCancel}
-                    >
-                        Cancelar
-                    </Button>
-                </div>
-            }
-        >
-            <Form
-                id="tableForm"
-                fields={fields}
-                error={error}
-                onSubmit={handleSubmit}
-                hideActions
-            />
-        </Card>
+        <Form
+            fields={fields}
+            error={error}
+            onSubmit={handleSubmit}
+            submitButton={{
+                label: table ? 'Actualizar' : 'Crear',
+                variant: 'primary'
+            }}
+            secondaryButton={{
+                label: 'Cancelar',
+                variant: 'secondary',
+                onClick: onCancel
+            }}
+        />
     );
 }
