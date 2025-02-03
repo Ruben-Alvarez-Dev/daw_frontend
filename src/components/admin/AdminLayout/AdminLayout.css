@@ -9,32 +9,13 @@
     box-sizing: border-box;
 }
 
-/* Tabs de navegación */
-.admin-layout__tabs {
+/* Nav de navegación */
+.admin-layout__nav {
     display: flex;
-    gap: 0.5rem;
-    padding: 0.5rem;
-    background-color: #373737;
-    border: 1px solid var(--color-border);
-    overflow-x: auto;
-    overflow-y: hidden;
-    flex-shrink: 0;
-}
-
-.admin-layout__tabs::-webkit-scrollbar {
-    height: 4px;
-}
-
-.admin-layout__tabs::-webkit-scrollbar-track {
-    background: #373737;
-}
-
-.admin-layout__tabs::-webkit-scrollbar-thumb {
-    background: var(--color-border);
-}
-
-.admin-layout__tabs::-webkit-scrollbar-thumb:hover {
-    background: var(--color-border-hover);
+    justify-content: center;
+    gap: 1rem;
+    background-color: var(--bg-color-secondary);
+    border-bottom: 1px solid var(--border-color);
 }
 
 /* Grid base para el contenido admin */
@@ -45,6 +26,8 @@
     min-height: 0;
     overflow: hidden;
     box-sizing: border-box;
+    flex: 1;
+    overflow-y: auto;
 }
 
 /* Asegurar que las Cards ocupen todo el espacio disponible */
