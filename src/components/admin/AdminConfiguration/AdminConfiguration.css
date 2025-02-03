@@ -1,1 +1,64 @@
 /* AdminConfiguration specific styles */
+
+.admin-configuration {
+    padding: 20px;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.admin-configuration .card {
+    width: 100%;
+}
+
+/* Estilos específicos para el formulario de configuración */
+.admin-configuration .form .form-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 600px;
+    margin: 0 auto;
+}
+
+.admin-configuration .form .form__field {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    align-items: center;
+    gap: 20px;
+    margin: 0;
+    background: none;
+    flex-direction: row;
+}
+
+.admin-configuration .form .form__label {
+    text-align: right;
+    font-weight: 500;
+    margin: 0;
+}
+
+.admin-configuration .form .form__input {
+    margin: 0;
+    width: 100%;
+    max-width: 200px;
+}
+
+.admin-configuration .form-actions {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.admin-configuration__buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.admin-configuration__buttons button:last-child {
+    margin-left: auto;
+}
+
+/* Centrar el botón de submit */
+.admin-configuration .form > button[type="submit"] {
+    margin: 20px auto 0;
+}

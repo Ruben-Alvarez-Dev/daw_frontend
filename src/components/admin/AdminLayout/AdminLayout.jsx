@@ -44,7 +44,7 @@ export default function AdminLayout() {
         <Button
           variant={activeTab === 'configuration' ? 'primary' : 'secondary'}
           onClick={() => setActiveTab('configuration')}
-          label="Perfil"
+          label="Configuración"
         />
       </div>
 
@@ -59,4 +59,3 @@ export default function AdminLayout() {
     </div>
   );
 }
-

@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import React from 'react';
+import { BrowserRouter } from 'react-router-dom';
+import { ConfigurationProvider } from '../context/ConfigurationContext';
 import { AuthProvider, useAuth } from '../context/AuthContext';
-import { ConfigurationProvider, useConfiguration } from '../context/ConfigurationContext';
 
 // Este componente gestiona los efectos secundarios de la autenticación
-function AuthManager({ children }) {
-    const { token } = useAuth();
+function AuthManager({ children, token }) {
     const { loadConfig, resetConfig } = useConfiguration();
     const [configLoaded, setConfigLoaded] = useState(false);
 
@@ -32,12 +32,23 @@ function AuthManager({ children }) {
 // Este es el provider principal que configura todos los contextos
 export default function AppProvider({ children }) {
     return (
-        <ConfigurationProvider>
+        <BrowserRouter>
             <AuthProvider>
-                <AuthManager>
-                    {children}
-                </AuthManager>
+                <AuthConsumer>
+                    {(token) => (
+                        <ConfigurationProvider token={token}>
+                            <AuthManager token={token}>
+                                {children}
+                            </AuthManager>
+                        </ConfigurationProvider>
+                    )}
+                </AuthConsumer>
             </AuthProvider>
-        </ConfigurationProvider>
+        </BrowserRouter>
     );
+}
+
+function AuthConsumer({ children }) {
+    const { token } = useAuth();
+    return children(token);
 }

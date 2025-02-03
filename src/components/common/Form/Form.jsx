@@ -7,30 +7,19 @@ export default function Form({
     fields,
     onSubmit,
     error,
-    submitButton = { label: 'Submit', variant: 'primary' },
+    submitButton = { label: 'Guardar cambios', variant: 'primary' },
     cancelButton,
     hideActions
 }) {
-    // Inicializar formData con los valores de los campos
     const initialFormData = fields.reduce((acc, field) => {
-        if ('value' in field) {
-            acc[field.name] = field.value;
-        }
+        acc[field.name] = field.value || '';
         return acc;
     }, {});
 
-    const [formData, setFormData] = useState({});
+    const [formData, setFormData] = useState(initialFormData);
 
-    // Limpiar campos al montar el componente
     useEffect(() => {
-        setFormData({});
-    }, []);
-
-    // Actualizar formData cuando cambien los valores de los campos
-    useEffect(() => {
-        if (Object.keys(initialFormData).length > 0) {
-            setFormData(initialFormData);
-        }
+        setFormData(initialFormData);
     }, [fields]);
     
     const handleChange = (e) => {
@@ -41,7 +30,6 @@ export default function Form({
     const handleSubmit = async (e) => {
         e.preventDefault();
         await onSubmit(formData);
-        setFormData({}); // Limpiar después del submit
     };
 
     return (
@@ -57,16 +45,23 @@ export default function Form({
             <div className="form-input-group">
                 {fields.map(field => (
                     <div key={field.name} className="form__field">
+                        {field.label && (
+                            <label htmlFor={field.name} className="form__label">
+                                {field.label}
+                            </label>
+                        )}
                         {field.type === 'select' ? (
                             <select
+                                id={field.name}
                                 name={field.name}
                                 className="form__input"
-                                value={formData[field.name] || field.defaultValue || ''}
+                                value={formData[field.name] || ''}
                                 onChange={handleChange}
                                 required={field.required}
                                 disabled={field.disabled}
                                 autoComplete="off"
                             >
+                                <option value="">Seleccionar...</option>
                                 {field.options?.map(option => (
                                     <option key={option.value} value={option.value}>
                                         {option.label}
@@ -75,10 +70,17 @@ export default function Form({
                             </select>
                         ) : (
                             <input
-                                {...field}
+                                id={field.name}
+                                name={field.name}
+                                type={field.type}
                                 value={formData[field.name] || ''}
                                 className="form__input"
                                 onChange={handleChange}
+                                required={field.required}
+                                disabled={field.disabled}
+                                placeholder={field.placeholder}
+                                min={field.min}
+                                max={field.max}
                                 autoComplete="new-password"
                             />
                         )}

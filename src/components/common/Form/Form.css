@@ -9,26 +9,32 @@
 .form-input-group {
     display: flex;
     flex-direction: column;
-    gap: 0rem;
+    gap: 1rem;
     width: 100%;
 }
 
 .form__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
     position: relative;
     margin-bottom: 1rem;
     width: 100%;
-    display: flex;
-    justify-content: center;
     background-color: rgba(255, 255, 255, 0.05);
+}
+
+.form__label {
+    font-weight: 500;
+    color: var(--text-color);
 }
 
 .form__input {
     width: 100%;
     max-width: 400px;
-    padding: 0.75rem;
+    padding: 0.5rem;
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
-    background-color: var(--input-background);
+    background-color: var(--input-bg-color);
     color: var(--text-color);
     font-size: 1rem;
     transition: all 0.2s ease;
@@ -40,11 +46,16 @@
     box-shadow: 0 0 0 2px rgba(31, 111, 235, 0.2);
 }
 
+.form__input:disabled {
+    background-color: var(--disabled-bg-color);
+    cursor: not-allowed;
+}
+
 .form__input[type="select"],
 .form__input:is(select) {
     appearance: auto;
     color: var(--text-color);
-    background-color: var(--input-background);
+    background-color: var(--input-bg-color);
     cursor: pointer;
 }
 
@@ -60,16 +71,19 @@
 .form__error {
     color: var(--error-color);
     margin-bottom: 1rem;
+    padding: 0.5rem;
+    border-radius: var(--border-radius);
+    background-color: var(--error-bg-color);
     font-size: 0.9rem;
     text-align: center;
     width: 100%;
 }
 
 .form-actions {
+    margin-top: 2rem;
     display: flex;
-    gap: 0.5rem;
-    justify-content: center;
-    margin-top: 1rem;
+    gap: 1rem;
+    justify-content: flex-end;
 }
 
 .form-footer {
