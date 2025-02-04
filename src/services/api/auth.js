@@ -79,11 +79,33 @@ export const authService = {
     },
 
     profile: async (token) => {
-        const response = await fetch(`${API_URL}/api/profile`, {
-            headers: getHeaders(token)
-        });
+        if (!token) {
+            throw new Error('No se proporcionó token de autenticación');
+        }
 
-        const data = await handleResponse(response);
-        return data.user;
+        try {
+            const response = await fetch(`${API_URL}/api/profile`, {
+                headers: getHeaders(token)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                console.error('Error en profile:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    errorData
+                });
+                throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            if (!data.user) {
+                throw new Error('Respuesta inválida: no se encontró información del usuario');
+            }
+            return data.user;
+        } catch (error) {
+            console.error('Error al obtener perfil:', error);
+            throw error;
+        }
     }
 };

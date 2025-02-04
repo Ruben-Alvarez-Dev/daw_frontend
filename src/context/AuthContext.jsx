@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState } from 'react';
 import { authService } from '../services/api/auth';
 
 const AuthContext = createContext();
@@ -14,31 +14,7 @@ export const useAuth = () => {
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(null);
-    const [loading, setLoading] = useState(true);
-
-    // Verificar sesión al inicio
-    useEffect(() => {
-        const verifySession = async () => {
-            const savedToken = localStorage.getItem('token');
-            if (!savedToken) {
-                setLoading(false);
-                return;
-            }
-
-            try {
-                const user = await authService.profile(savedToken);
-                setUser(user);
-                setToken(savedToken);
-            } catch (error) {
-                console.error('Error verificando sesión:', error);
-                localStorage.removeItem('token');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        verifySession();
-    }, []);
+    const [loading, setLoading] = useState(false);
 
     const login = async (identifier, password) => {
         try {
@@ -46,8 +22,6 @@ export function AuthProvider({ children }) {
             const { user: newUser, token: newToken } = await authService.login(identifier, password);
             setUser(newUser);
             setToken(newToken);
-            localStorage.setItem('token', newToken);
-            await new Promise(resolve => setTimeout(resolve, 0)); // Esperar a que el estado se actualice
             return { user: newUser, token: newToken };
         } catch (error) {
             console.error('Error en login:', error);
@@ -57,25 +31,7 @@ export function AuthProvider({ children }) {
         }
     };
 
-    const register = async (userData) => {
-        try {
-            setLoading(true);
-            const { user: newUser, token: newToken } = await authService.register(userData);
-            setUser(newUser);
-            setToken(newToken);
-            localStorage.setItem('token', newToken);
-            await new Promise(resolve => setTimeout(resolve, 0)); // Esperar a que el estado se actualice
-            return { user: newUser, token: newToken };
-        } catch (error) {
-            console.error('Error en registro:', error);
-            throw error;
-        } finally {
-            setLoading(false);
-        }
-    };
-
     const logout = async () => {
-        setLoading(true);
         try {
             if (token) {
                 await authService.logout(token);
@@ -85,25 +41,35 @@ export function AuthProvider({ children }) {
         } finally {
             setUser(null);
             setToken(null);
-            localStorage.removeItem('token');
+        }
+    };
+
+    const register = async (userData) => {
+        try {
+            setLoading(true);
+            const response = await authService.register(userData);
+            return response;
+        } catch (error) {
+            console.error('Error en registro:', error);
+            throw error;
+        } finally {
             setLoading(false);
         }
     };
 
-    const isAdmin = () => user?.role === 'admin';
-    const isCustomer = () => user?.role === 'customer';
+    const value = {
+        user,
+        token,
+        loading,
+        login,
+        logout,
+        register,
+        isAuthenticated: !!token,
+        isAdmin: user?.role === 'admin'
+    };
 
     return (
-        <AuthContext.Provider value={{
-            user,
-            token,
-            loading,
-            login,
-            register,
-            logout,
-            isAdmin,
-            isCustomer
-        }}>
+        <AuthContext.Provider value={value}>
             {children}
         </AuthContext.Provider>
     );

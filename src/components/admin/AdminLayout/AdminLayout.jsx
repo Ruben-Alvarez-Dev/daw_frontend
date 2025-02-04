@@ -5,7 +5,6 @@ import AdminDashboard from '../AdminDashboard/AdminDashboard';
 import AdminUsers from '../AdminUsers/AdminUsers';
 import AdminTables from '../AdminTables/AdminTables';
 import AdminReservations from '../AdminReservations/AdminReservations';
-import AdminMaps from '../AdminMaps/AdminMaps';
 import AdminConfiguration from '../AdminConfiguration/AdminConfiguration';
 import Button from '../../common/Button/Button';
 import './AdminLayout.css';
@@ -37,11 +36,6 @@ export default function AdminLayout() {
                     label="Reservas"
                 />
                 <Button
-                    variant={activeTab === 'maps' ? 'primary' : 'secondary'}
-                    onClick={() => setActiveTab('maps')}
-                    label="Mapas"
-                />
-                <Button
                     variant={activeTab === 'configuration' ? 'primary' : 'secondary'}
                     onClick={() => setActiveTab('configuration')}
                     label="Configuración"
@@ -52,7 +46,6 @@ export default function AdminLayout() {
                 {activeTab === 'users' && <AdminUsers />}
                 {activeTab === 'tables' && <AdminTables />}
                 {activeTab === 'reservations' && <AdminReservations />}
-                {activeTab === 'maps' && <AdminMaps />}
                 {activeTab === 'configuration' && <AdminConfiguration />}
             </div>
         </div>
