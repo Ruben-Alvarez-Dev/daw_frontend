@@ -24,6 +24,7 @@ export default function AdminReservationList({
         const fetchReservations = async () => {
             setIsLoading(true);
             setError(null);
+            setSearchTerm(''); // Reset search term on refresh
             try {
                 const response = await fetch(`${import.meta.env.VITE_API_URL}/api/reservations`, {
                     headers: {

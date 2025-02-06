@@ -4,8 +4,9 @@
     gap: 1rem;
     height: 100%;
     overflow: hidden;
-    background: var(--color-background);
-    border-radius: var(--border-radius);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 20px;
 }
 
 .list-message {
@@ -31,11 +32,11 @@
     justify-content: space-between;
     align-items: flex-start;
     padding: 1rem;
-    background: var(--color-background-lighter);
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius);
-    transition: all 0.2s ease;
-}
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    border-radius: 20px;
+/*     transition: all 0.2s ease;
+ */}
 
 .list-item:hover {
     border-color: var(--color-primary);

@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { ConfigurationProvider } from '../context/ConfigurationContext';
 import { AuthProvider, useAuth } from '../context/AuthContext';
+import { DashboardProvider } from '../context/DashboardContext';
 
 // Este componente gestiona los efectos secundarios de la autenticación
 function AuthManager({ children, token }) {
@@ -38,7 +39,9 @@ export default function AppProvider({ children }) {
                     {(token) => (
                         <ConfigurationProvider token={token}>
                             <AuthManager token={token}>
-                                {children}
+                                <DashboardProvider>
+                                    {children}
+                                </DashboardProvider>
                             </AuthManager>
                         </ConfigurationProvider>
                     )}
