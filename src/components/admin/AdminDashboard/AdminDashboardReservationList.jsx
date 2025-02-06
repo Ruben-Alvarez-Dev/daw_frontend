@@ -1,9 +1,15 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useDashboard } from '../../../context/DashboardContext';
 import './AdminDashboardReservationList.css';
 
-export default function AdminDashboardReservationList({ status = 'all' }) {
-    const { reservations, selectedReservation, setSelectedReservation } = useDashboard();
+export default function AdminDashboardReservationList({ status = 'all', selectedDate, selectedShift }) {
+    const { reservations, selectedReservation, setSelectedReservation, fetchReservations } = useDashboard();
+
+    useEffect(() => {
+        if (selectedDate && selectedShift) {
+            fetchReservations(selectedDate, selectedShift);
+        }
+    }, [selectedDate, selectedShift, fetchReservations]);
 
     const handleReservationClick = (reservationId) => {
         setSelectedReservation(selectedReservation === reservationId ? null : reservationId);

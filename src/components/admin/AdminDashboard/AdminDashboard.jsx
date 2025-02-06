@@ -26,18 +26,20 @@ export default function AdminDashboard() {
 
                 const data = await response.json();
                 const stats = {
-                    lunch: data.find(shift => shift.type === 'lunch') || { pending_reservations: 0, confirmed_reservations: 0 },
-                    dinner: data.find(shift => shift.type === 'dinner') || { pending_reservations: 0, confirmed_reservations: 0 }
+                    lunch: data.find(shift => shift.type === 'lunch') || { pending_reservations: 0, confirmed_reservations: 0, total_guests: 0 },
+                    dinner: data.find(shift => shift.type === 'dinner') || { pending_reservations: 0, confirmed_reservations: 0, total_guests: 0 }
                 };
 
                 setShiftStats({
                     lunch: {
                         pending: stats.lunch.pending_reservations,
-                        confirmed: stats.lunch.confirmed_reservations
+                        confirmed: stats.lunch.confirmed_reservations,
+                        total_guests: stats.lunch.total_guests
                     },
                     dinner: {
                         pending: stats.dinner.pending_reservations,
-                        confirmed: stats.dinner.confirmed_reservations
+                        confirmed: stats.dinner.confirmed_reservations,
+                        total_guests: stats.dinner.total_guests
                     }
                 });
             } catch (error) {
@@ -50,7 +52,10 @@ export default function AdminDashboard() {
 
     return (
         <div className="admin-dashboard">
-            <AdminDashboardReservations />
+            <AdminDashboardReservations 
+                selectedDate={selectedDate}
+                selectedShift={selectedShift}
+            />
             <AdminDashboardDistribution
                 selectedDate={selectedDate}
                 selectedShift={selectedShift}

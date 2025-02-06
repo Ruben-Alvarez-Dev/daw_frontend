@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Card from '../../common/Card/Card';
-import ShiftSelector from './AdminDashboardShiftSelector.jsx';
+import ShiftSelector from './AdminDashboardDistributionShiftSelector';
+import AdminDashboardDistributionGrid from './AdminDashboardDistributionGrid';
+import { useShifts } from '../../../context/ShiftsContext';
 import './AdminDashboardDistribution.css';
 
 export default function AdminDashboardDistribution({ 
@@ -10,6 +12,15 @@ export default function AdminDashboardDistribution({
     onShiftChange,
     shiftStats
 }) {
+    const { fetchShiftConfiguration, isLoading, error } = useShifts();
+
+    // Solo se ejecuta cuando cambia la fecha o el turno
+    useEffect(() => {
+        if (selectedDate && selectedShift) {
+            fetchShiftConfiguration(selectedDate, selectedShift);
+        }
+    }, [selectedDate, selectedShift]); // Quitamos fetchShiftConfiguration de las dependencias
+
     return (
         <Card
             header={
@@ -23,10 +34,12 @@ export default function AdminDashboardDistribution({
             }
             body={
                 <div className="admin-dashboard-distribution">
-                    {/* Distribution content will be implemented later */}
-                    <div className="distribution-placeholder">
-                        Distribution view coming soon
-                    </div>
+                    {error && <div className="error-message">{error}</div>}
+                    {isLoading ? (
+                        <div className="loading-message">Cargando...</div>
+                    ) : (
+                        <AdminDashboardDistributionGrid />
+                    )}
                 </div>
             }
         />

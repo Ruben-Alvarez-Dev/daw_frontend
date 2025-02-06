@@ -1,0 +1,40 @@
+.admin-dashboard-distribution-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    padding: 0.5rem;
+    list-style: none;
+}
+
+.table-item {
+    padding: 0.5rem;
+    background: #2d333b;
+    border: 1px solid #444c56;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.table-item.available {
+    border-color: #238636;
+}
+
+.table-item.occupied {
+    border-color: #da3633;
+}
+
+.table-name {
+    color: #adbac7;
+}
+
+.table-capacity {
+    color: #768390;
+    font-size: 0.9rem;
+}
+
+.table-grid-message {
+    color: #768390;
+    text-align: center;
+    padding: 2rem;
+}

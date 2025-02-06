@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useAuth } from './AuthContext';
 
 const DashboardContext = createContext();
@@ -8,9 +8,15 @@ export function DashboardProvider({ children }) {
     const [selectedReservation, setSelectedReservation] = useState(null);
     const { token } = useAuth();
 
-    const fetchReservations = async () => {
+    const fetchReservations = useCallback(async (date, shift) => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/reservations`, {
+            const url = new URL(`${import.meta.env.VITE_API_URL}/api/reservations`);
+            if (date && shift) {
+                url.searchParams.append('date', date);
+                url.searchParams.append('shift', shift);
+            }
+
+            const response = await fetch(url, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Accept': 'application/json'
@@ -26,13 +32,13 @@ export function DashboardProvider({ children }) {
         } catch (error) {
             console.error('Error fetching reservations:', error);
         }
-    };
+    }, [token]);
 
     useEffect(() => {
         if (token) {
             fetchReservations();
         }
-    }, [token]);
+    }, [token, fetchReservations]);
 
     const value = {
         reservations,

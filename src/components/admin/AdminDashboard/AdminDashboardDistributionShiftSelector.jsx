@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import Button from '../../common/Button/Button';
-import './AdminDashboardShiftSelector.css';
+import './AdminDashboardDistributionShiftSelector.css';
 
-export default function AdminDashboardShiftSelector({
+export default function AdminDashboardDistributionShiftSelector({
     selectedDate,
     selectedShift,
     onDateChange,
