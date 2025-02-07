@@ -1,0 +1,48 @@
+.reservation-datetime {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    width: 100%;
+    align-items: flex-start;
+}
+
+.reservation-datetime-field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 120px;
+}
+
+.reservation-datetime-field label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.reservation-datetime-field input,
+.reservation-datetime-field select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--background-secondary);
+    color: var(--text-primary);
+}
+
+.reservation-datetime-field input:focus,
+.reservation-datetime-field select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.reservation-datetime-field input:disabled,
+.reservation-datetime-field select:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.reservation-datetime-field select option {
+    background-color: var(--background-primary);
+    color: var(--text-primary);
+}

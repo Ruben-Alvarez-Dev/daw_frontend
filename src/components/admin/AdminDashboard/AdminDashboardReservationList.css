@@ -1,156 +1,121 @@
 .admin-dashboard-reservation-list {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    background-color: rgba(255, 255, 255, 0.05);
+    gap: 1rem;
+    padding: 1rem;
 }
 
 .admin-dashboard-reservation-item {
-    display: flex;
-    width: 100%;
-    min-height: 2.5rem;
-    background-color: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    transition: all 0.2s ease;
+    background-color: #2a2a2a;
+    border-radius: 8px;
+    padding: 1rem;
     cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.admin-dashboard-reservation-item:hover {
+    background-color: #333;
+}
+
+.admin-dashboard-reservation-item.selected {
+    background-color: #383838;
+    border: 1px solid #4a4a4a;
 }
 
 .admin-dashboard-reservation-content {
-    flex: 1;
     display: flex;
-    align-items: center;
-    padding: 0 0.75rem;
-    background-color: rgba(255, 255, 255, 0.05);
-    border-radius: 10px 0 0 0;
     justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
 }
 
 .admin-dashboard-reservation-left {
     display: flex;
-    gap: 1rem;
-    align-items: center;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
 }
 
-.admin-dashboard-reservation-right {
-    text-align: right;
+.admin-dashboard-reservation-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.admin-dashboard-reservation-id {
+    font-size: 0.9rem;
+    color: #888;
 }
 
 .admin-dashboard-reservation-pax {
-    flex-shrink: 0;
+    background-color: #444;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.admin-dashboard-reservation-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
 }
 
 .admin-dashboard-reservation-name {
     font-weight: 500;
 }
 
-/* Status container and states */
+.admin-dashboard-reservation-date {
+    font-size: 0.9rem;
+    color: #888;
+}
+
+.admin-dashboard-reservation-right {
+    text-align: right;
+    font-size: 0.9rem;
+    color: #888;
+}
+
+.admin-dashboard-reservation-tables {
+    white-space: nowrap;
+}
+
 .admin-dashboard-reservation-status-container {
-    min-width: 8rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 1rem;
-    border-radius: 0 10px 10px 0;
-    transition: all 0.2s ease;
+    margin-top: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    display: inline-block;
 }
 
-/* Pending - Yellow */
-.admin-dashboard-reservation-item.status-pending {
-    border-color: rgba(255, 193, 7, 0.6);
-}
-.admin-dashboard-reservation-item.status-pending:hover {
-    border-color: rgba(255, 193, 7, 0.8);
-    background-color: rgba(255, 193, 7, 0.1);
-}
-.admin-dashboard-reservation-item.status-pending.selected {
-    border-color: rgba(255, 193, 7, 1);
-    background-color: rgba(255, 193, 7, 0.15);
-}
-.admin-dashboard-reservation-status-container.status-pending {
-    background-color: rgba(255, 193, 7, 0.2);
-}
-.admin-dashboard-reservation-item:hover .admin-dashboard-reservation-status-container.status-pending,
-.admin-dashboard-reservation-item.selected .admin-dashboard-reservation-status-container.status-pending {
-    background-color: rgba(255, 193, 7, 0.4);
+.status-pending {
+    background-color: #2c2c54;
+    color: #ffd700;
 }
 
-/* Confirmed - Green */
-.admin-dashboard-reservation-item.status-confirmed {
-    border-color: rgba(40, 167, 69, 0.6);
-}
-.admin-dashboard-reservation-item.status-confirmed:hover {
-    border-color: rgba(40, 167, 69, 0.8);
-    background-color: rgba(40, 167, 69, 0.1);
-}
-.admin-dashboard-reservation-item.status-confirmed.selected {
-    border-color: rgba(40, 167, 69, 1);
-    background-color: rgba(40, 167, 69, 0.15);
-}
-.admin-dashboard-reservation-status-container.status-confirmed {
-    background-color: rgba(40, 167, 69, 0.2);
-}
-.admin-dashboard-reservation-item:hover .admin-dashboard-reservation-status-container.status-confirmed,
-.admin-dashboard-reservation-item.selected .admin-dashboard-reservation-status-container.status-confirmed {
-    background-color: rgba(40, 167, 69, 0.4);
+.status-confirmed {
+    background-color: #1b4332;
+    color: #90ee90;
 }
 
-/* Seated - Pink */
-.admin-dashboard-reservation-item.status-seated {
-    border-color: rgba(232, 62, 140, 0.6);
-}
-.admin-dashboard-reservation-item.status-seated:hover {
-    border-color: rgba(232, 62, 140, 0.8);
-    background-color: rgba(232, 62, 140, 0.1);
-}
-.admin-dashboard-reservation-item.status-seated.selected {
-    border-color: rgba(232, 62, 140, 1);
-    background-color: rgba(232, 62, 140, 0.15);
-}
-.admin-dashboard-reservation-status-container.status-seated {
-    background-color: rgba(232, 62, 140, 0.2);
-}
-.admin-dashboard-reservation-item:hover .admin-dashboard-reservation-status-container.status-seated,
-.admin-dashboard-reservation-item.selected .admin-dashboard-reservation-status-container.status-seated {
-    background-color: rgba(232, 62, 140, 0.4);
+.status-cancelled {
+    background-color: #4a1c1c;
+    color: #ff6b6b;
 }
 
-/* No-show - Purple */
-.admin-dashboard-reservation-item.status-no-show {
-    border-color: rgba(111, 66, 193, 0.6);
-}
-.admin-dashboard-reservation-item.status-no-show:hover {
-    border-color: rgba(111, 66, 193, 0.8);
-    background-color: rgba(111, 66, 193, 0.1);
-}
-.admin-dashboard-reservation-item.status-no-show.selected {
-    border-color: rgba(111, 66, 193, 1);
-    background-color: rgba(111, 66, 193, 0.15);
-}
-.admin-dashboard-reservation-status-container.status-no-show {
-    background-color: rgba(111, 66, 193, 0.2);
-}
-.admin-dashboard-reservation-item:hover .admin-dashboard-reservation-status-container.status-no-show,
-.admin-dashboard-reservation-item.selected .admin-dashboard-reservation-status-container.status-no-show {
-    background-color: rgba(111, 66, 193, 0.4);
+.status-seated {
+    background-color: #1a472a;
+    color: #98fb98;
 }
 
-/* Cancelled - Red */
-.admin-dashboard-reservation-item.status-cancelled {
-    border-color: rgba(220, 53, 69, 0.6);
+.status-no-show {
+    background-color: #4a1c1c;
+    color: #ff6b6b;
 }
-.admin-dashboard-reservation-item.status-cancelled:hover {
-    border-color: rgba(220, 53, 69, 0.8);
-    background-color: rgba(220, 53, 69, 0.1);
-}
-.admin-dashboard-reservation-item.status-cancelled.selected {
-    border-color: rgba(220, 53, 69, 1);
-    background-color: rgba(220, 53, 69, 0.15);
-}
-.admin-dashboard-reservation-status-container.status-cancelled {
-    background-color: rgba(220, 53, 69, 0.2);
-}
-.admin-dashboard-reservation-item:hover .admin-dashboard-reservation-status-container.status-cancelled,
-.admin-dashboard-reservation-item.selected .admin-dashboard-reservation-status-container.status-cancelled {
-    background-color: rgba(220, 53, 69, 0.4);
+
+.admin-dashboard-reservation-empty {
+    text-align: center;
+    padding: 2rem;
+    color: #888;
+    font-style: italic;
 }

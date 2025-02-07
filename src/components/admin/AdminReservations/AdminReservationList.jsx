@@ -54,8 +54,7 @@ export default function AdminReservationList({
         const searchString = searchTerm.toLowerCase();
         return (
             reservation.id.toString().includes(searchString) ||
-            reservation.user_name.toLowerCase().includes(searchString) ||
-            reservation.table_name.toLowerCase().includes(searchString) ||
+            (reservation.user?.name || '').toLowerCase().includes(searchString) ||
             reservation.status.toLowerCase().includes(searchString)
         );
     });
@@ -77,7 +76,7 @@ export default function AdminReservationList({
             <ListItemSearchbar
                 value={searchTerm}
                 onChange={setSearchTerm}
-                placeholder="Buscar por ID, usuario, mesa o estado..."
+                placeholder="Buscar por ID, usuario o estado..."
             />
             <div className="reservation-list-content">
                 {filteredReservations.length === 0 ? (
@@ -97,10 +96,12 @@ export default function AdminReservationList({
                                     </span>
                                 </div>
                                 <div className="reservation-details">
-                                    <div>Usuario: {reservation.user_name}</div>
-                                    <div>Mesa: {reservation.table_name}</div>
-                                    <div>Fecha: {new Date(reservation.datetime).toLocaleString()}</div>
+                                    <div>Usuario: {reservation.user?.name || 'N/A'}</div>
                                     <div>Comensales: {reservation.guests}</div>
+                                    <div>Fecha: {reservation.date && reservation.time ? 
+                                        `${new Date(reservation.date).toLocaleDateString('es-ES')} ${reservation.time}` : 
+                                        'Fecha y hora no disponibles'
+                                    }</div>
                                 </div>
                             </div>
                             <div className="reservation-actions">

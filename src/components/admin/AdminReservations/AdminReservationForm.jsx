@@ -6,13 +6,13 @@ import UserSearchDropdown from '../../common/UserSearchDropdown/UserSearchDropdo
 
 export default function AdminReservationForm({ reservation, onSave, onCancel, onReset, isEditing, readOnly }) {
     const [users, setUsers] = useState([]);
-    const [tables, setTables] = useState([]);
     const [reset, setReset] = useState(false);
     const initialFormData = {
         user_id: '',
-        table_id: '',
         guests: '',
-        datetime: '',
+        date: '',
+        time: '',
+        shift: '',
         status: 'pending'
     };
     const [formData, setFormData] = useState(initialFormData);
@@ -21,11 +21,13 @@ export default function AdminReservationForm({ reservation, onSave, onCancel, on
 
     useEffect(() => {
         if (reservation) {
+            const date = new Date(reservation.date);
             setFormData({
                 user_id: reservation.user_id,
-                table_id: reservation.table_id || '',
                 guests: reservation.guests,
-                datetime: new Date(reservation.datetime).toISOString().slice(0, 16),
+                date: date.toISOString().split('T')[0],
+                time: reservation.time,
+                shift: reservation.shift,
                 status: reservation.status
             });
             setReset(false);
@@ -53,30 +55,22 @@ export default function AdminReservationForm({ reservation, onSave, onCancel, on
             }
         };
 
-        const fetchTables = async () => {
-            try {
-                const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tables`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Accept': 'application/json'
-                    }
-                });
-                if (!response.ok) throw new Error('Error al cargar mesas');
-                const data = await response.json();
-                setTables(data);
-            } catch (err) {
-                console.error('Error fetching tables:', err);
-                setError(err.message);
-            }
-        };
-
         fetchUsers();
-        fetchTables();
     }, [token]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
+
+        // Validar que la hora coincide con el turno
+        const time = formData.time;
+        const isLunchTime = formData.shift === 'lunch' && time >= '12:00' && time <= '16:00';
+        const isDinnerTime = formData.shift === 'dinner' && time >= '20:00' && time <= '23:59';
+
+        if (!isLunchTime && !isDinnerTime) {
+            setError('La hora debe coincidir con el turno seleccionado:\n- Comida: 12:00-16:00\n- Cena: 20:00-23:59');
+            return;
+        }
 
         try {
             const url = isEditing 
@@ -90,11 +84,19 @@ export default function AdminReservationForm({ reservation, onSave, onCancel, on
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify(formData)
+                body: JSON.stringify({
+                    user_id: formData.user_id,
+                    guests: parseInt(formData.guests),
+                    date: formData.date,
+                    time: formData.time,
+                    shift: formData.shift,
+                    status: formData.status
+                })
             });
 
             if (!response.ok) {
-                throw new Error(isEditing ? 'Error al actualizar la reserva' : 'Error al crear la reserva');
+                const data = await response.json();
+                throw new Error(data.message || (isEditing ? 'Error al actualizar la reserva' : 'Error al crear la reserva'));
             }
 
             onSave();
@@ -113,12 +115,22 @@ export default function AdminReservationForm({ reservation, onSave, onCancel, on
     };
 
     const handleChange = (e) => {
-        setReset(false);
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
+        
+        // Si se cambia el turno, resetear la hora para evitar valores inválidos
+        if (name === 'shift') {
+            setFormData(prev => ({
+                ...prev,
+                [name]: value,
+                time: '' // Reset time when shift changes
+            }));
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                [name]: value
+            }));
+        }
+        setReset(false);
     };
 
     if (error) {
@@ -143,22 +155,50 @@ export default function AdminReservationForm({ reservation, onSave, onCancel, on
             </div>
 
             <div className="form-group">
-                <label htmlFor="table_id">Mesa</label>
-                <select
-                    id="table_id"
-                    name="table_id"
-                    value={formData.table_id}
+                <label htmlFor="date">Fecha</label>
+                <input
+                    type="date"
+                    id="date"
+                    name="date"
+                    value={formData.date}
                     onChange={handleChange}
+                    required
+                    className="form-control"
+                    disabled={readOnly}
+                />
+            </div>
+
+            <div className="form-group">
+                <label htmlFor="shift">Turno</label>
+                <select
+                    id="shift"
+                    name="shift"
+                    value={formData.shift}
+                    onChange={handleChange}
+                    required
                     className="form-control"
                     disabled={readOnly}
                 >
-                    <option value="">Seleccionar mesa</option>
-                    {tables.map(table => (
-                        <option key={table.id} value={table.id}>
-                            {table.name} (Capacidad: {table.capacity})
-                        </option>
-                    ))}
+                    <option value="">Selecciona un turno</option>
+                    <option value="lunch">Comida (12:00-16:00)</option>
+                    <option value="dinner">Cena (20:00-23:59)</option>
                 </select>
+            </div>
+
+            <div className="form-group">
+                <label htmlFor="time">Hora</label>
+                <input
+                    type="time"
+                    id="time"
+                    name="time"
+                    value={formData.time}
+                    onChange={handleChange}
+                    required
+                    className="form-control"
+                    disabled={readOnly}
+                    min={formData.shift === 'lunch' ? '12:00' : '20:00'}
+                    max={formData.shift === 'lunch' ? '16:00' : '23:59'}
+                />
             </div>
 
             <div className="form-group">
@@ -171,20 +211,6 @@ export default function AdminReservationForm({ reservation, onSave, onCancel, on
                     onChange={handleChange}
                     required
                     min="1"
-                    className="form-control"
-                    disabled={readOnly}
-                />
-            </div>
-
-            <div className="form-group">
-                <label htmlFor="datetime">Fecha y hora</label>
-                <input
-                    type="datetime-local"
-                    id="datetime"
-                    name="datetime"
-                    value={formData.datetime}
-                    onChange={handleChange}
-                    required
                     className="form-control"
                     disabled={readOnly}
                 />
@@ -204,7 +230,8 @@ export default function AdminReservationForm({ reservation, onSave, onCancel, on
                     <option value="pending">Pendiente</option>
                     <option value="confirmed">Confirmada</option>
                     <option value="cancelled">Cancelada</option>
-                    <option value="completed">Completada</option>
+                    <option value="seated">Sentados</option>
+                    <option value="no-show">No presentados</option>
                 </select>
             </div>
 

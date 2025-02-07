@@ -37,6 +37,14 @@ export default function AdminDashboardShiftSelector({
         }
     };
 
+    const getShiftLabel = (shift) => {
+        if (!shiftStats || !shiftStats[shift]) {
+            return shift === 'lunch' ? 'Comida' : 'Cena';
+        }
+        const pax = shiftStats[shift]?.total_pax || 0;
+        return `${shift === 'lunch' ? 'Comida' : 'Cena'} (${pax})`;
+    };
+
     return (
         <div className="admin-dashboard-shift-selector">
             <Button 
@@ -66,12 +74,12 @@ export default function AdminDashboardShiftSelector({
             <Button
                 variant={selectedShift === 'lunch' ? 'primary' : 'secondary'}
                 onClick={() => onShiftChange('lunch')}
-                label={`Comida (${shiftStats?.lunch ? shiftStats.lunch.pending + shiftStats.lunch.confirmed : 0})`}
+                label={getShiftLabel('lunch')}
             />
             <Button
                 variant={selectedShift === 'dinner' ? 'primary' : 'secondary'}
                 onClick={() => onShiftChange('dinner')}
-                label={`Cena (${shiftStats?.dinner ? shiftStats.dinner.pending + shiftStats.dinner.confirmed : 0})`}
+                label={getShiftLabel('dinner')}
             />
         </div>
     );

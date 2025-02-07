@@ -20,28 +20,32 @@ export default function AdminDashboard() {
                     }
                 });
 
+                if (response.status === 404) {
+                    // No hay shifts creados para este día
+                    setShiftStats({
+                        lunch: null,
+                        dinner: null
+                    });
+                    return;
+                }
+
                 if (!response.ok) {
                     throw new Error('Error al cargar estadísticas de turnos');
                 }
 
                 const data = await response.json();
                 const stats = {
-                    lunch: data.find(shift => shift.type === 'lunch') || { pending_reservations: 0, confirmed_reservations: 0 },
-                    dinner: data.find(shift => shift.type === 'dinner') || { pending_reservations: 0, confirmed_reservations: 0 }
+                    lunch: data.find(shift => shift.type === 'lunch'),
+                    dinner: data.find(shift => shift.type === 'dinner')
                 };
 
-                setShiftStats({
-                    lunch: {
-                        pending: stats.lunch.pending_reservations,
-                        confirmed: stats.lunch.confirmed_reservations
-                    },
-                    dinner: {
-                        pending: stats.dinner.pending_reservations,
-                        confirmed: stats.dinner.confirmed_reservations
-                    }
-                });
+                setShiftStats(stats);
             } catch (error) {
                 console.error('Error fetching shift stats:', error);
+                setShiftStats({
+                    lunch: null,
+                    dinner: null
+                });
             }
         };
 
