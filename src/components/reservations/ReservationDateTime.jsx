@@ -65,6 +65,24 @@ export default function ReservationDateTime({ onDateTimeChange, initialDate, ini
     }, [selectedShift, config]);
 
     useEffect(() => {
+        if (selectedTime && config?.openingHours) {
+            // Determinar el turno basado en la hora seleccionada
+            const [hours] = selectedTime.split(':').map(Number);
+            const lunchOpen = parseInt(config.openingHours[SHIFTS.LUNCH]?.open?.split(':')[0]) || 13;
+            const lunchClose = parseInt(config.openingHours[SHIFTS.LUNCH]?.close?.split(':')[0]) || 16;
+            const dinnerOpen = parseInt(config.openingHours[SHIFTS.DINNER]?.open?.split(':')[0]) || 20;
+            const dinnerClose = parseInt(config.openingHours[SHIFTS.DINNER]?.close?.split(':')[0]) || 23;
+
+            // Actualizar el turno automáticamente según la hora
+            if (hours >= lunchOpen && hours <= lunchClose) {
+                setSelectedShift(SHIFTS.LUNCH);
+            } else if (hours >= dinnerOpen && hours <= dinnerClose) {
+                setSelectedShift(SHIFTS.DINNER);
+            }
+        }
+    }, [selectedTime, config]);
+
+    useEffect(() => {
         onDateTimeChange({
             date: selectedDate || '',
             shift: selectedShift || '',
@@ -83,7 +101,26 @@ export default function ReservationDateTime({ onDateTimeChange, initialDate, ini
     };
 
     const handleTimeChange = (e) => {
-        setSelectedTime(e.target.value);
+        const newTime = e.target.value;
+        if (!newTime) {
+            setSelectedTime('');
+            return;
+        }
+
+        // Validar que la hora corresponda con el turno
+        const [hours] = newTime.split(':').map(Number);
+        const lunchOpen = parseInt(config.openingHours[SHIFTS.LUNCH]?.open?.split(':')[0]) || 13;
+        const lunchClose = parseInt(config.openingHours[SHIFTS.LUNCH]?.close?.split(':')[0]) || 16;
+        const dinnerOpen = parseInt(config.openingHours[SHIFTS.DINNER]?.open?.split(':')[0]) || 20;
+        const dinnerClose = parseInt(config.openingHours[SHIFTS.DINNER]?.close?.split(':')[0]) || 23;
+
+        // Solo permitir horas dentro de los turnos
+        if ((hours >= lunchOpen && hours <= lunchClose) || (hours >= dinnerOpen && hours <= dinnerClose)) {
+            setSelectedTime(newTime);
+        } else {
+            alert('La hora seleccionada debe estar dentro del horario de comidas (13:00-16:00) o cenas (20:00-23:30)');
+            return;
+        }
     };
 
     const getShiftLabel = (shift) => {

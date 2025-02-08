@@ -84,6 +84,26 @@ export function DashboardProvider({ children }) {
         setSelectedShift(shift);
 
         try {
+            // 1. Cargar todas las reservas primero
+            const reservationsResponse = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/reservations`,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                }
+            );
+
+            if (!reservationsResponse.ok) {
+                throw new Error('Error loading reservations');
+            }
+
+            const allReservations = await reservationsResponse.json();
+            const reservationsForShift = allReservations.filter(r => 
+                r.date.split('T')[0] === date && r.shift === shift
+            );
+
             // 2. Cargar la información del shift
             const shiftResponse = await fetch(
                 `${import.meta.env.VITE_API_URL}/api/shifts/${date}/${shift}`,
@@ -101,12 +121,18 @@ export function DashboardProvider({ children }) {
 
             const shiftResponseData = await shiftResponse.json();
 
+            // 3. Combinar los datos
+            const reservationsById = reservationsForShift.reduce((acc, res) => ({
+                ...acc,
+                [res.id]: res
+            }), {});
+
             // 4. Actualizar el estado
-            setReservations(Object.values(shiftResponseData.reservations || {}));
+            setReservations(reservationsForShift);
             setShiftData(prev => ({
                 ...prev,
                 total_pax: shiftResponseData.total_pax || 0,
-                reservations: shiftResponseData.reservations || {},
+                reservations: reservationsById,
                 distribution: shiftResponseData.distribution || {}
             }));
 
@@ -278,6 +304,64 @@ export function DashboardProvider({ children }) {
         }
     }, [selectedReservation, selectedTables, token]);
 
+    const updateReservationStatus = async (reservationId, newStatus) => {
+        try {
+            // Obtener los datos de la reserva del shiftData
+            const currentReservation = shiftData.reservations[reservationId];
+            if (!currentReservation) {
+                throw new Error('Reserva no encontrada');
+            }
+
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/reservations/${reservationId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    date: selectedDate,
+                    time: currentReservation.time || "21:00",
+                    shift: selectedShift,
+                    guests: currentReservation.guests,
+                    status: newStatus,
+                }),
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Error al actualizar el estado de la reserva');
+            }
+
+            const updatedReservation = await response.json();
+
+            // Actualizar el estado localmente
+            setShiftData(prevData => {
+                const newData = { ...prevData };
+                if (newData.reservations[reservationId]) {
+                    newData.reservations[reservationId] = {
+                        ...newData.reservations[reservationId],
+                        status: newStatus
+                    };
+                }
+                return newData;
+            });
+
+            // También actualizar el array de reservations
+            setReservations(prevReservations => {
+                return prevReservations.map(reservation => {
+                    if (reservation.id === reservationId) {
+                        return { ...reservation, status: newStatus };
+                    }
+                    return reservation;
+                });
+            });
+
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    };
+
     const value = {
         tables,
         reservations,
@@ -289,6 +373,7 @@ export function DashboardProvider({ children }) {
         handleReservationSelect,
         toggleTableSelection,
         assignSelectedTables,
+        updateReservationStatus,
         selectedTables
     };
 
