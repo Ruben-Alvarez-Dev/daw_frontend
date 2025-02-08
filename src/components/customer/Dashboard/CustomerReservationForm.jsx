@@ -9,7 +9,8 @@ const CustomerReservationForm = ({ token, onReservationCreated }) => {
         configLoading, 
         fetchReservations,
         reservations,
-        currentDate
+        currentDate,
+        userId
     } = useRestaurantConfig(token);
     
     const [formData, setFormData] = useState({
@@ -44,18 +45,40 @@ const CustomerReservationForm = ({ token, onReservationCreated }) => {
         setSubmitting(true);
         setError(null);
 
+        // Validar y formatear los datos
+        if (!formData.date || !formData.time || !formData.guests || !formData.shift) {
+            setError('Por favor, completa todos los campos');
+            setSubmitting(false);
+            return;
+        }
+
+        // Asegurar que la fecha está en formato YYYY-MM-DD
+        const formattedDate = formData.date.split('T')[0];
+        
+        // Asegurar que la hora está en formato HH:mm:ss
+        const formattedTime = formData.time.includes(':') ? formData.time + ':00' : formData.time + ':00:00';
+        
+        // Asegurar que guests es un número
+        const guests = parseInt(formData.guests);
+        if (isNaN(guests) || guests <= 0) {
+            setError('El número de personas debe ser mayor que 0');
+            setSubmitting(false);
+            return;
+        }
+
         const reservationData = {
-            date: formData.date,
-            time: formData.time,
-            guests: parseInt(formData.guests),
+            date: formattedDate,
+            time: formattedTime,
+            guests: guests,
             shift: formData.shift,
-            status: 'pending'
+            status: 'pending',
+            user_id: userId
         };
 
-        console.log('Submitting reservation:', reservationData);
+        console.log('Submitting reservation with validated data:', reservationData);
 
         try {
-            const response = await fetch('/api/reservations', {
+            const response = await fetch('http://localhost:8000/api/reservations', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -64,8 +87,11 @@ const CustomerReservationForm = ({ token, onReservationCreated }) => {
                 body: JSON.stringify(reservationData)
             });
 
+            const responseData = await response.json();
+            console.log('Server response:', responseData);
+
             if (!response.ok) {
-                throw new Error('Error al crear la reserva');
+                throw new Error(responseData.message || 'Error al crear la reserva');
             }
 
             // Reset form after successful submission

@@ -21,6 +21,7 @@ const useRestaurantConfig = (token) => {
     const [configLoading, setConfigLoading] = useState(true);
     const [reservations, setReservations] = useState([]);
     const [currentDate, setCurrentDate] = useState(null);
+    const [userId, setUserId] = useState(null);
 
     // Fetch restaurant configuration
     useEffect(() => {
@@ -64,6 +65,23 @@ const useRestaurantConfig = (token) => {
         fetchConfig();
     }, [token]);
 
+    useEffect(() => {
+        if (token) {
+            // Decodificar el token JWT para obtener el ID del usuario
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+                const payload = JSON.parse(jsonPayload);
+                setUserId(payload.sub); // El ID del usuario está en el campo 'sub' del token
+            } catch (error) {
+                console.error('Error decoding token:', error);
+            }
+        }
+    }, [token]);
+
     // Fetch reservations for a specific date
     const fetchReservations = useCallback(async (date) => {
         if (!date || !token || date === currentDate) {
@@ -96,7 +114,8 @@ const useRestaurantConfig = (token) => {
         configLoading,
         currentDate,
         fetchReservations,
-        reservations
+        reservations,
+        userId
     };
 };
 
