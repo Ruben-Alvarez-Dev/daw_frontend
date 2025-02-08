@@ -105,14 +105,14 @@ export default function AdminDashboardReservationList({ status = 'all' }) {
                         <div className="reservation-list__content">
                             <div className="reservation-list__left">
                                 <div className="reservation-list__main-info">
-                                    <span className="reservation-list__time">{formatTime(reservation.time)}</span>
+                                    <span className="reservation-list__time">{formatTime(reservationData.time)}</span>
                                     <span className="reservation-list__user">{userName}</span>
                                 </div>
                                 <div className="reservation-list__secondary-info">
                                     <span className="reservation-list__pax">{reservationData.guests} pax</span>
                                     <div 
                                         className="reservation-list__status-container"
-                                        onMouseLeave={handleMouseLeave}
+                                        onClick={(e) => e.stopPropagation()}
                                     >
                                         <span 
                                             className={`reservation-list__status reservation-list__status--${statusClass}`}
@@ -122,10 +122,10 @@ export default function AdminDashboardReservationList({ status = 'all' }) {
                                         </span>
                                         {openStatusMenu === reservation.id && (
                                             <div className="reservation-list__status-menu">
-                                                {statusOptions.map(option => (
+                                                {statusOptions.map((option) => (
                                                     <div
                                                         key={option}
-                                                        className={`reservation-list__status-option reservation-list__status--${option}`}
+                                                        className={`reservation-list__status-menu-item reservation-list__status--${option}`}
                                                         onClick={(e) => handleStatusChange(e, reservation.id, option)}
                                                     >
                                                         {option}

@@ -131,9 +131,35 @@
     opacity: 0.8;
 }
 
+/* Colores de los estados */
+.reservation-list__status--pending {
+    background-color: #FFA500;
+    color: #000;
+}
+
+.reservation-list__status--confirmed {
+    background-color: #4CAF50;
+    color: #fff;
+}
+
+.reservation-list__status--cancelled {
+    background-color: #f44336;
+    color: #fff;
+}
+
+.reservation-list__status--seated {
+    background-color: #2196F3;
+    color: #fff;
+}
+
+.reservation-list__status--no-show {
+    background-color: #9C27B0;
+    color: #fff;
+}
+
 .reservation-list__status-menu {
     position: absolute;
-    top: 100%;
+    top: calc(100% + 4px);
     left: 0;
     background-color: #1a1a1a;
     border-radius: 4px;
@@ -141,52 +167,18 @@
     z-index: 9999;
     min-width: 120px;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    margin-top: 5px;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.2s, visibility 0.2s;
 }
 
-.reservation-list__status-container:hover .reservation-list__status-menu {
-    opacity: 1;
-    visibility: visible;
-}
-
-.reservation-list__status-option {
-    padding: 8px 16px;
+.reservation-list__status-menu-item {
+    padding: 8px 12px;
     cursor: pointer;
+    transition: background-color 0.2s;
     text-transform: uppercase;
     font-size: 0.8rem;
-    transition: background-color 0.2s;
 }
 
-.reservation-list__status-option:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
-.reservation-list__status--pending {
-    background-color: #FFA500;
-    color: black;
-}
-
-.reservation-list__status--confirmed {
-    background-color: #4CAF50;
-    color: white;
-}
-
-.reservation-list__status--cancelled {
-    background-color: #f44336;
-    color: white;
-}
-
-.reservation-list__status--seated {
-    background-color: #2196F3;
-    color: white;
-}
-
-.reservation-list__status--no-show {
-    background-color: #9C27B0;
-    color: white;
+.reservation-list__status-menu-item:hover {
+    opacity: 0.8;
 }
 
 .reservation-list__right {

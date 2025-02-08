@@ -306,13 +306,12 @@ export function DashboardProvider({ children }) {
 
     const updateReservationStatus = async (reservationId, newStatus) => {
         try {
-            // Obtener los datos de la reserva del shiftData
-            const currentReservation = shiftData.reservations[reservationId];
+            // Obtener los datos de la reserva del array de reservations
+            const currentReservation = reservations.find(r => r.id === reservationId);
             if (!currentReservation) {
                 throw new Error('Reserva no encontrada');
             }
 
-            const token = localStorage.getItem('token');
             const response = await fetch(`${import.meta.env.VITE_API_URL}/api/reservations/${reservationId}`, {
                 method: 'PUT',
                 headers: {
@@ -321,8 +320,8 @@ export function DashboardProvider({ children }) {
                 },
                 body: JSON.stringify({
                     date: selectedDate,
-                    time: currentReservation.time || "21:00",
-                    shift: selectedShift,
+                    time: currentReservation.time,
+                    shift: currentReservation.shift,
                     guests: currentReservation.guests,
                     status: newStatus,
                 }),
@@ -348,17 +347,19 @@ export function DashboardProvider({ children }) {
             });
 
             // También actualizar el array de reservations
-            setReservations(prevReservations => {
-                return prevReservations.map(reservation => {
-                    if (reservation.id === reservationId) {
-                        return { ...reservation, status: newStatus };
-                    }
-                    return reservation;
-                });
-            });
+            setReservations(prevReservations => 
+                prevReservations.map(res => 
+                    res.id === reservationId 
+                        ? { ...res, status: newStatus }
+                        : res
+                )
+            );
 
+            return true;
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Error updating reservation status:', error);
+            alert(error.message);
+            return false;
         }
     };
 
