@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDashboard } from '../../../context/DashboardContext';
-import { IoWarning } from "react-icons/io5";
+import { IoWarning, IoCheckmarkCircle } from "react-icons/io5";
 import './AdminDashboardReservationList.css';
 
 export default function AdminDashboardReservationList({ status = 'all' }) {
@@ -145,7 +145,11 @@ export default function AdminDashboardReservationList({ status = 'all' }) {
                             </div>
                         </div>
                         <div className="reservation-list__warning">
-                            <IoWarning />
+                            {assignedTables.length > 0 && reservationData.status === 'confirmed' ? (
+                                <IoCheckmarkCircle className="reservation-list__icon reservation-list__icon--check" />
+                            ) : (
+                                <IoWarning className="reservation-list__icon reservation-list__icon--warning" />
+                            )}
                         </div>
                     </div>
                 );

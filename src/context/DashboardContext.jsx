@@ -216,10 +216,14 @@ export function DashboardProvider({ children }) {
             }
             // Si la mesa está libre o asignada a otra reserva, la añadimos a la selección
             else {
-                // Verificar si la mesa ya está asignada a otra reserva
+                // Verificar si la mesa está asignada a otra reserva en este turno específico
                 if (currentAssignment) {
-                    alert('Esta mesa ya está asignada a otra reserva');
-                    return;
+                    const assignedReservation = shiftData?.reservations?.[currentAssignment];
+                    // Solo bloqueamos si la reserva está en el mismo turno
+                    if (assignedReservation?.shift === shift) {
+                        alert('Esta mesa ya está asignada a otra reserva en este turno');
+                        return;
+                    }
                 }
 
                 // Añadir o quitar la mesa de la selección
