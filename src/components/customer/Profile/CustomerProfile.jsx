@@ -1,25 +1,23 @@
 import React from 'react';
 import Card from '../../../components/common/Card/Card';
+import CustomerPersonalData from '../Dashboard/CustomerPersonalData';
+import CustomerStats from '../Dashboard/CustomerStats';
 import './CustomerProfile.css';
 
-export default function CustomerProfile() {
+const CustomerProfile = () => {
     return (
         <div className="customer-profile">
             <Card
                 header={<h3>Datos Personales</h3>}
-            >
-                <div className="profile-form">
-                    {/* Profile form will go here */}
-                </div>
-            </Card>
+                body={<CustomerPersonalData />}
+            />
 
             <Card
                 header={<h3>Estadísticas</h3>}
-            >
-                <div className="profile-stats">
-                    {/* Stats will go here */}
-                </div>
-            </Card>
+                body={<CustomerStats />}
+            />
         </div>
     );
-}
+};
+
+export default CustomerProfile;
