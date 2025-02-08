@@ -1,44 +1,106 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from './AuthContext';
 
 const DashboardContext = createContext();
 
+const DEFAULT_SHIFT_DATA = {
+    tables: {},          // id -> { id, name, capacity }
+    reservations: {},    // id -> { id, guests, status, user }
+    distribution: {},    // table_id -> reservation_id
+    total_pax: 0
+};
+
 export function DashboardProvider({ children }) {
+    const { token } = useAuth();
     const [reservations, setReservations] = useState([]);
     const [selectedReservation, setSelectedReservation] = useState(null);
-    const [selectedTables, setSelectedTables] = useState([]);
-    const [tables, setTables] = useState([]);
-    const [distribution, setDistribution] = useState({});
-    const [users, setUsers] = useState({});
-    const { token } = useAuth();
+    const [selectedDate, setSelectedDate] = useState(null);
+    const [selectedShift, setSelectedShift] = useState(null);
+    const [shiftData, setShiftData] = useState({
+        total_pax: 0,
+        tables: {},
+        reservations: {},
+        distribution: {}
+    });
 
-    const loadUserDetails = async (userId) => {
-        try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/${userId}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Accept': 'application/json'
+    // Cargar las mesas una sola vez al inicio
+    useEffect(() => {
+        const loadTables = async () => {
+            if (!token) return;
+
+            try {
+                const response = await fetch(
+                    `${import.meta.env.VITE_API_URL}/api/tables`,
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Accept': 'application/json'
+                        }
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error('Error loading tables');
                 }
-            });
 
-            if (!response.ok) {
-                throw new Error('Error al cargar los detalles del usuario');
+                const tablesData = await response.json();
+                const tablesById = tablesData.reduce((acc, table) => ({
+                    ...acc,
+                    [table.id]: table
+                }), {});
+
+                setShiftData(prev => ({
+                    ...prev,
+                    tables: tablesById
+                }));
+            } catch (error) {
+                console.error('Error loading tables:', error);
+                setShiftData(prev => ({
+                    ...prev,
+                    tables: {}
+                }));
+            }
+        };
+
+        loadTables();
+    }, [token]);
+
+    const loadReservations = useCallback(async (date, shift) => {
+        if (!token || !date || !shift) {
+            setReservations([]);
+            setShiftData(prev => ({
+                ...prev,
+                reservations: {},
+                distribution: {},
+                total_pax: 0
+            }));
+            setSelectedDate(null);
+            setSelectedShift(null);
+            return;
+        }
+
+        setSelectedDate(date);
+        setSelectedShift(shift);
+
+        try {
+            // 1. Cargar las reservas del día
+            const reservationsResponse = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/reservations/date/${date}`,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                }
+            );
+
+            if (!reservationsResponse.ok) {
+                throw new Error('Error loading reservations');
             }
 
-            const userData = await response.json();
-            setUsers(prev => ({ ...prev, [userId]: userData }));
-            return userData;
-        } catch (error) {
-            console.error('Error loading user details:', error);
-            return null;
-        }
-    };
+            const reservationsData = await reservationsResponse.json();
 
-    const createShiftIfNeeded = async (date, shift, reservationsList) => {
-        if (!reservationsList || reservationsList.length === 0) return;
-
-        try {
-            // Primero intentamos obtener el shift
+            // 2. Cargar la información del shift
             const shiftResponse = await fetch(
                 `${import.meta.env.VITE_API_URL}/api/shifts/${date}/${shift}`,
                 {
@@ -49,15 +111,67 @@ export function DashboardProvider({ children }) {
                 }
             );
 
-            // Si el shift no existe (404) y hay reservas, lo creamos
-            if (shiftResponse.status === 404) {
-                // Obtenemos los IDs de las reservas no canceladas
-                const reservationIds = reservationsList
-                    .filter(res => res.status !== 'cancelled')
-                    .map(res => res.id);
+            if (!shiftResponse.ok) {
+                throw new Error('Error loading shift data');
+            }
 
-                await fetch(
-                    `${import.meta.env.VITE_API_URL}/api/shifts/${date}/${shift}`,
+            const shiftResponseData = await shiftResponse.json();
+
+            // 3. Procesar los datos
+            const reservationsById = {};
+            reservationsData.forEach(reservation => {
+                if (reservation.shift === shift) {
+                    reservationsById[reservation.id] = reservation;
+                }
+            });
+
+            // 4. Actualizar el estado
+            setReservations(Object.values(reservationsById));
+            setShiftData(prev => ({
+                ...prev,
+                total_pax: shiftResponseData.total_pax || 0,
+                reservations: reservationsById,
+                distribution: shiftResponseData.distribution || {}
+            }));
+
+        } catch (error) {
+            console.error('Error loading data:', error);
+            setReservations([]);
+            setShiftData(prev => ({
+                ...prev,
+                reservations: {},
+                distribution: {},
+                total_pax: 0
+            }));
+        }
+    }, [token]);
+
+    const tables = useMemo(() => {
+        return Object.values(shiftData?.tables || {});
+    }, [shiftData]);
+
+    const handleReservationSelect = useCallback(async (reservationId, date, shift) => {
+        // Si ya hay una reserva seleccionada y es la misma que se clickea
+        if (selectedReservation === reservationId) {
+            setSelectedReservation(null);
+            return;
+        }
+
+        // Si no hay reserva seleccionada o es diferente, la seleccionamos
+        setSelectedReservation(reservationId);
+    }, [selectedReservation]);
+
+    const toggleTableSelection = useCallback(async (tableId, date, shift) => {
+        if (!selectedReservation) return;
+
+        try {
+            const tableKey = `table_${tableId}`;
+            const currentAssignment = shiftData?.distribution?.[tableKey];
+            
+            // Si la mesa ya está asignada a esta reserva, la desasignamos
+            if (currentAssignment && parseInt(currentAssignment) === parseInt(selectedReservation)) {
+                const response = await fetch(
+                    `${import.meta.env.VITE_API_URL}/api/shifts/${date}/${shift}/unassign`,
                     {
                         method: 'POST',
                         headers: {
@@ -66,154 +180,69 @@ export function DashboardProvider({ children }) {
                             'Accept': 'application/json'
                         },
                         body: JSON.stringify({
-                            reservations: reservationIds
+                            assignments: [{
+                                table_id: tableId,
+                                reservation_id: parseInt(selectedReservation)
+                            }]
                         })
                     }
                 );
-            }
-        } catch (error) {
-            console.error('Error creating shift:', error);
-        }
-    };
 
-    const loadReservations = async (date, shift) => {
-        try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/reservations/date/${date}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Accept': 'application/json'
+                if (!response.ok) {
+                    throw new Error('Error al desasignar mesa');
                 }
-            });
 
-            if (!response.ok) {
-                throw new Error('Error al cargar las reservas');
+                const result = await response.json();
+                setShiftData(prev => ({
+                    ...prev,
+                    distribution: result.distribution || {}
+                }));
             }
-
-            const data = await response.json();
-            const filteredReservations = data.filter(res => res.shift === shift);
-            setReservations(filteredReservations);
-
-            // Cargar detalles de usuarios que no tengamos ya cargados
-            const uniqueUserIds = [...new Set(filteredReservations.map(r => r.user_id))];
-            const missingUserIds = uniqueUserIds.filter(id => !users[id]);
-            
-            await Promise.all(missingUserIds.map(loadUserDetails));
-
-            // Crear shift si hay reservas pero no existe
-            await createShiftIfNeeded(date, shift, filteredReservations);
-        } catch (error) {
-            console.error('Error loading reservations:', error);
-        }
-    };
-
-    const loadTablesAndDistribution = async (date, shift) => {
-        try {
-            const tablesResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/tables`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Accept': 'application/json'
-                }
-            });
-
-            if (!tablesResponse.ok) {
-                throw new Error('Error al cargar las mesas');
-            }
-
-            const tablesData = await tablesResponse.json();
-            setTables(tablesData);
-
-            if (date && shift) {
-                const shiftResponse = await fetch(
-                    `${import.meta.env.VITE_API_URL}/api/shifts/${date}/${shift}`,
+            // Si la mesa está libre o asignada a otra reserva, la asignamos a esta
+            else {
+                const response = await fetch(
+                    `${import.meta.env.VITE_API_URL}/api/shifts/${date}/${shift}/assign`,
                     {
+                        method: 'POST',
                         headers: {
                             'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json',
                             'Accept': 'application/json'
-                        }
+                        },
+                        body: JSON.stringify({
+                            assignments: [{
+                                table_id: tableId,
+                                reservation_id: parseInt(selectedReservation)
+                            }]
+                        })
                     }
                 );
 
-                if (!shiftResponse.ok && shiftResponse.status !== 404) {
-                    throw new Error('Error al cargar la distribución');
+                if (!response.ok) {
+                    throw new Error('Error al asignar mesa');
                 }
 
-                if (shiftResponse.ok) {
-                    const shiftData = await shiftResponse.json();
-                    setDistribution(shiftData.distribution || {});
-                } else {
-                    setDistribution({});
-                }
+                const result = await response.json();
+                setShiftData(prev => ({
+                    ...prev,
+                    distribution: result.distribution || {}
+                }));
             }
         } catch (error) {
-            console.error('Error loading tables and distribution:', error);
+            console.error('Error toggling table assignment:', error);
         }
-    };
-
-    const handleReservationSelect = async (reservationId, date, shift) => {
-        if (selectedReservation === reservationId) {
-            if (selectedTables.length > 0) {
-                try {
-                    const response = await fetch(
-                        `${import.meta.env.VITE_API_URL}/api/shifts/${date}/${shift}/assign`,
-                        {
-                            method: 'POST',
-                            headers: {
-                                'Authorization': `Bearer ${token}`,
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                reservation_id: reservationId,
-                                tables: selectedTables
-                            })
-                        }
-                    );
-
-                    if (!response.ok) {
-                        throw new Error('Error al asignar mesas');
-                    }
-
-                    await loadTablesAndDistribution(date, shift);
-                    await loadReservations(date, shift);
-                } catch (error) {
-                    console.error('Error saving table assignments:', error);
-                }
-            }
-
-            setSelectedReservation(null);
-            setSelectedTables([]);
-        } else {
-            setSelectedReservation(reservationId);
-            const currentTables = Object.entries(distribution)
-                .filter(([_, resId]) => resId === reservationId)
-                .map(([tableId]) => tableId);
-            setSelectedTables(currentTables);
-        }
-    };
-
-    const toggleTableSelection = (tableId) => {
-        if (!selectedReservation) return;
-
-        setSelectedTables(prev => {
-            const tableIdStr = tableId.toString();
-            return prev.includes(tableIdStr)
-                ? prev.filter(id => id !== tableIdStr)
-                : [...prev, tableIdStr];
-        });
-    };
+    }, [selectedReservation, shiftData, token]);
 
     const value = {
+        tables,
         reservations,
         selectedReservation,
-        selectedTables,
-        tables,
-        distribution,
-        users,
+        selectedDate,
+        selectedShift,
+        shiftData,
         loadReservations,
-        loadTablesAndDistribution,
         handleReservationSelect,
-        toggleTableSelection,
-        setSelectedReservation
+        toggleTableSelection
     };
 
     return (

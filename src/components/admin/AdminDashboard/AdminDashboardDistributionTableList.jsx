@@ -5,36 +5,77 @@ import './AdminDashboardDistributionTableList.css';
 export default function AdminDashboardDistributionTableList() {
     const { 
         tables, 
-        distribution,
+        shiftData,
         selectedReservation,
-        selectedTables,
+        selectedDate,
+        selectedShift,
         toggleTableSelection 
     } = useDashboard();
+
+    // Si no hay mesas todavía, mostramos un estado de carga
+    if (!tables) {
+        return (
+            <div className="table-grid-container">
+                <div className="loading-message">
+                    Cargando mesas...
+                </div>
+            </div>
+        );
+    }
+
+    // Si no hay datos del turno todavía, mostramos un estado de carga
+    if (!shiftData) {
+        return (
+            <div className="table-grid-container">
+                <div className="loading-message">
+                    Cargando datos del turno...
+                </div>
+            </div>
+        );
+    }
+
+    // Función auxiliar para encontrar la reserva que tiene asignada una mesa
+    const findReservationForTable = (tableId) => {
+        const reservationId = shiftData?.distribution?.[`table_${tableId}`];
+        return reservationId ? shiftData?.reservations?.[reservationId] : null;
+    };
+
+    // Función auxiliar para comprobar si una mesa está seleccionada
+    const isTableSelected = (tableId) => {
+        if (!selectedReservation) return false;
+        return shiftData?.distribution?.[`table_${tableId}`] === parseInt(selectedReservation);
+    };
+
+    const handleTableClick = (tableId) => {
+        toggleTableSelection(tableId, selectedDate, selectedShift);
+    };
 
     return (
         <div className="table-grid-container">
             <div className="table-grid">
                 {tables.map(table => {
-                    const tableId = table.id.toString();
-                    const isAssigned = distribution[tableId] !== undefined;
-                    const isAssignedToSelected = distribution[tableId] === selectedReservation;
+                    const tableId = table.id;
+                    const assignedReservation = findReservationForTable(tableId);
+                    const isAssigned = !!assignedReservation;
+                    const isAssignedToSelected = assignedReservation?.id === parseInt(selectedReservation);
                     const isAssignedToOther = isAssigned && !isAssignedToSelected;
-                    const isSelected = selectedTables.includes(tableId);
+                    const isSelected = isTableSelected(tableId);
                     const isSelectable = selectedReservation !== null && !isAssignedToOther;
 
                     return (
                         <div
                             key={table.id}
-                            onClick={() => isSelectable && toggleTableSelection(tableId)}
+                            onClick={() => isSelectable && handleTableClick(tableId)}
                             className={`table-item ${isSelectable ? 'selectable' : ''} 
                                       ${isSelected ? 'selected' : ''} 
-                                      ${isAssignedToOther ? 'occupied' : ''}`}
+                                      ${isAssignedToSelected ? 'assigned-to-selected' : ''} 
+                                      ${isAssignedToOther ? 'assigned-to-other' : ''}`}
                         >
-                            <div className="table-number">Mesa {table.number}</div>
+                            <div className="table-name">Mesa {table.name}</div>
                             <div className="table-capacity">{table.capacity} pax</div>
-                            {isAssignedToOther && (
-                                <div className="table-reservation">
-                                    #{distribution[tableId]}
+                            {isAssigned && (
+                                <div className="table-assignment">
+                                    {assignedReservation.user?.name || `Usuario #${assignedReservation.user?.id}`}
                                 </div>
                             )}
                         </div>
@@ -43,7 +84,7 @@ export default function AdminDashboardDistributionTableList() {
             </div>
             {selectedReservation && (
                 <div className="table-instructions">
-                    {selectedTables.length > 0 
+                    {Object.entries(shiftData.distribution).some(([_, resId]) => resId === parseInt(selectedReservation))
                         ? 'Haz clic de nuevo en la reserva para guardar los cambios'
                         : 'Haz clic en las mesas para asignarlas a la reserva'}
                 </div>

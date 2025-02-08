@@ -13,38 +13,30 @@ export default function AdminDashboard() {
     useEffect(() => {
         const fetchShiftStats = async () => {
             try {
-                const response = await fetch(`${import.meta.env.VITE_API_URL}/api/shifts/${selectedDate}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Accept': 'application/json'
+                const response = await fetch(
+                    `${import.meta.env.VITE_API_URL}/api/shifts/${selectedDate}`,
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Accept': 'application/json'
+                        }
                     }
-                });
-
-                if (response.status === 404) {
-                    // No hay shifts creados para este día
-                    setShiftStats({
-                        lunch: null,
-                        dinner: null
-                    });
-                    return;
-                }
+                );
 
                 if (!response.ok) {
-                    throw new Error('Error al cargar estadísticas de turnos');
+                    throw new Error('Error al cargar los datos del turno');
                 }
 
                 const data = await response.json();
-                const stats = {
-                    lunch: data.find(shift => shift.type === 'lunch'),
-                    dinner: data.find(shift => shift.type === 'dinner')
-                };
-
-                setShiftStats(stats);
-            } catch (error) {
-                console.error('Error fetching shift stats:', error);
                 setShiftStats({
-                    lunch: null,
-                    dinner: null
+                    lunch: data.lunch,
+                    dinner: data.dinner
+                });
+            } catch (error) {
+                console.error('Error fetching stats:', error);
+                setShiftStats({
+                    lunch: { total_pax: 0, tables: {}, reservations: {}, distribution: {} },
+                    dinner: { total_pax: 0, tables: {}, reservations: {}, distribution: {} }
                 });
             }
         };

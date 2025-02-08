@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import Card from '../../common/Card/Card';
 import ShiftSelector from './AdminDashboardShiftSelector';
-import AdminDashboardReservationList from './AdminDashboardReservationList';
 import AdminDashboardDistributionTableList from './AdminDashboardDistributionTableList';
 import { useDashboard } from '../../../context/DashboardContext';
 import './AdminDashboardDistribution.css';
@@ -13,30 +12,26 @@ export default function AdminDashboardDistribution({
     onShiftChange,
     shiftStats
 }) {
-    const { loadReservations, loadTablesAndDistribution } = useDashboard();
+    const { loadReservations } = useDashboard();
 
     useEffect(() => {
         if (selectedDate && selectedShift) {
             loadReservations(selectedDate, selectedShift);
-            loadTablesAndDistribution(selectedDate, selectedShift);
         }
-    }, [selectedDate, selectedShift]);
+    }, [selectedDate, selectedShift, loadReservations]);
 
     return (
-        <>
-                <Card
-                    header={
-                        <ShiftSelector
-                            selectedDate={selectedDate}
-                            selectedShift={selectedShift}
-                            onDateChange={onDateChange}
-                            onShiftChange={onShiftChange}
-                            shiftStats={shiftStats}
-                        />
-                    }
-                    body={<AdminDashboardDistributionTableList />}
+        <Card
+            header={
+                <ShiftSelector
+                    selectedDate={selectedDate}
+                    selectedShift={selectedShift}
+                    onDateChange={onDateChange}
+                    onShiftChange={onShiftChange}
+                    shiftStats={shiftStats}
                 />
-        </>
-
+            }
+            body={<AdminDashboardDistributionTableList />}
+        />
     );
 }

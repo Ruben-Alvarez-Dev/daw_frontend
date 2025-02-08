@@ -3,11 +3,13 @@ import { useDashboard } from '../../../context/DashboardContext';
 import './AdminDashboardReservationList.css';
 
 export default function AdminDashboardReservationList({ status = 'all' }) {
-    const { reservations, selectedReservation, setSelectedReservation, users } = useDashboard();
-
-    const handleReservationClick = (reservationId) => {
-        setSelectedReservation(selectedReservation === reservationId ? null : reservationId);
-    };
+    const { 
+        reservations, 
+        selectedReservation, 
+        shiftData,
+        tables,
+        handleReservationSelect 
+    } = useDashboard();
 
     const filteredReservations = status === 'all' 
         ? reservations 
@@ -26,21 +28,41 @@ export default function AdminDashboardReservationList({ status = 'all' }) {
         return shift === 'lunch' ? 'Comida' : shift === 'dinner' ? 'Cena' : shift;
     };
 
+    const getAssignedTables = (reservationId) => {
+        if (!shiftData?.distribution) return [];
+        
+        // Buscar todas las mesas asignadas a esta reserva
+        const assignedTables = [];
+        Object.entries(shiftData.distribution).forEach(([tableKey, resId]) => {
+            if (resId === reservationId) {
+                const tableId = tableKey.replace('table_', '');
+                const table = tables.find(t => t.id === parseInt(tableId));
+                if (table) {
+                    assignedTables.push(`Mesa ${table.name}`);
+                }
+            }
+        });
+        
+        return assignedTables;
+    };
+
     return (
         <div className="admin-dashboard-reservation-list">
             {filteredReservations.map((reservation) => {
-                const tablesList = Array.isArray(reservation.tables_ids) && reservation.tables_ids.length > 0
-                    ? reservation.tables_ids.join(', ')
+                const assignedTables = getAssignedTables(reservation.id);
+                const tablesList = assignedTables.length > 0 
+                    ? assignedTables.join(', ') 
                     : 'sin asignar';
+                    
                 const statusClass = reservation.status ? reservation.status.toLowerCase() : '';
                 const isSelected = selectedReservation === reservation.id;
-                const userName = users[reservation.user_id]?.name || `Usuario #${reservation.user_id}`;
+                const userName = reservation.user?.name || `Usuario #${reservation.user?.id}`;
 
                 return (
                     <div 
                         key={reservation.id} 
                         className={`admin-dashboard-reservation-item status-${statusClass}${isSelected ? ' selected' : ''}`}
-                        onClick={() => handleReservationClick(reservation.id)}
+                        onClick={() => handleReservationSelect(reservation.id)}
                     >
                         <div className="admin-dashboard-reservation-content">
                             <div className="admin-dashboard-reservation-left">
@@ -48,19 +70,19 @@ export default function AdminDashboardReservationList({ status = 'all' }) {
                                     <span className="admin-dashboard-reservation-id">#{reservation.id}</span>
                                     <span className="admin-dashboard-reservation-pax">{reservation.guests} pax</span>
                                 </div>
-                                <div className="admin-dashboard-reservation-info">
-                                    <span className="admin-dashboard-reservation-name">{userName}</span>
-                                    <span className="admin-dashboard-reservation-date">
-                                        {formatTime(reservation.time)} - {getShiftLabel(reservation.shift)}
-                                    </span>
+                                <div className="admin-dashboard-reservation-user">{userName}</div>
+                                <div className="admin-dashboard-reservation-time">
+                                    {formatTime(reservation.time)} - {getShiftLabel(reservation.shift)}
                                 </div>
                             </div>
                             <div className="admin-dashboard-reservation-right">
-                                <span className="admin-dashboard-reservation-tables">Mesas: {tablesList}</span>
+                                <div className="admin-dashboard-reservation-tables">
+                                    Mesas: {tablesList}
+                                </div>
+                                <div className={`admin-dashboard-reservation-status status-${statusClass}`}>
+                                    {reservation.status}
+                                </div>
                             </div>
-                        </div>
-                        <div className={`admin-dashboard-reservation-status-container status-${statusClass}`}>
-                            {reservation.status}
                         </div>
                     </div>
                 );
