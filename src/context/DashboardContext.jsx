@@ -138,7 +138,12 @@ export function DashboardProvider({ children }) {
             setSelectedReservation(null);
         } else {
             setSelectedReservation(reservationId);
-            setSelectedTables([]); // Limpiar al cambiar de reserva
+            // Al seleccionar una reserva, incluir sus mesas ya asignadas en selectedTables
+            const currentAssignments = shiftData?.distribution || {};
+            const currentTables = Object.entries(currentAssignments)
+                .filter(([_, resId]) => resId === reservationId)
+                .map(([tableKey]) => parseInt(tableKey.replace('table_', '')));
+            setSelectedTables(currentTables);
         }
     };
 

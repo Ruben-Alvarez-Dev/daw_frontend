@@ -58,7 +58,7 @@ export default function AdminDashboardReservationList({ status = 'all' }) {
             selectedTables.forEach(tableId => {
                 const table = tables.find(t => t.id === tableId);
                 if (table && !assignedTables.includes(table.name)) {
-                    assignedTables.push(`${table.name} (pendiente)`);
+                    assignedTables.push(table.name);
                 }
             });
         }

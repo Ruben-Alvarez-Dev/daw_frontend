@@ -54,6 +54,11 @@ export default function AdminDashboardDistributionTableList() {
         return shiftData?.distribution?.[`table_${tableId}`] === parseInt(selectedReservation);
     };
 
+    // Función auxiliar para formatear la hora según el turno
+    const getShiftTime = (shift) => {
+        return shift === 'lunch' ? '14:00' : '21:00';
+    };
+
     const handleTableClick = (tableId) => {
         toggleTableSelection(tableId, selectedDate, selectedShift);
     };
@@ -83,12 +88,20 @@ export default function AdminDashboardDistributionTableList() {
                                       ${isAssignedToSelected ? 'assigned-to-selected' : ''} 
                                       ${isAssignedToOther ? 'assigned-to-other' : ''}`}
                         >
-                            <div className="table-capacity">{table.capacity} pax</div>
-                            <div className="table-name">mesa {table.name}</div>
-                            {isAssigned && (
-                                <div className="table-assignment">
-                                    {assignedReservation.id}
-                                </div>
+                            {isAssigned ? (
+                                <>
+                                    <div className="table-header">{table.name} ({assignedReservation.guests} pax)</div>
+                                    <div className="table-separator"></div>
+                                    <div className="table-assignment">
+                                        <div className="table-time">{getShiftTime(assignedReservation.shift)}</div>
+                                        <div className="table-user">{assignedReservation.user?.name || `Usuario #${assignedReservation.user?.id}`}</div>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="table-name">{table.name}</div>
+                                    <div className="table-capacity">{table.capacity} pax</div>
+                                </>
                             )}
                         </div>
                     );
