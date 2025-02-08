@@ -1,0 +1,32 @@
+.customer-aside {
+    background-color: #2a2a2a;
+    width: 200px;
+    height: 100%;
+    padding: 1rem;
+    box-sizing: border-box;
+    border-right: 1px solid #373737;
+}
+
+.customer-aside__nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.customer-aside__link {
+    color: #888;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.customer-aside__link:hover {
+    background-color: #373737;
+    color: #fff;
+}
+
+.customer-aside__link.active {
+    background-color: #373737;
+    color: #fff;
+}

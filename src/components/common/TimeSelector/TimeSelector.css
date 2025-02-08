@@ -1,0 +1,45 @@
+.time-selector-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.time-selector {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #444;
+    border-radius: 4px;
+    background-color: #2a2a2a;
+    color: #fff;
+    font-size: 1rem;
+}
+
+.time-selector:focus {
+    outline: none;
+    border-color: #666;
+}
+
+.time-selector:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.time-selector.error {
+    border-color: #ff4444;
+}
+
+.time-selector option {
+    background-color: #333;
+    color: white;
+}
+
+.time-info {
+    color: #888;
+    font-size: 0.9rem;
+}
+
+.no-slots-message {
+    color: #ff6b6b;
+    font-size: 0.9rem;
+    margin: 0.5rem 0;
+}

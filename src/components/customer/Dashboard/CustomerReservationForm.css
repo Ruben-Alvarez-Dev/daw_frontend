@@ -53,3 +53,10 @@
     border-radius: 4px;
     margin-top: 1rem;
 }
+
+.date-display {
+    display: block;
+    margin-top: 0.25rem;
+    color: #888;
+    font-size: 0.9rem;
+}

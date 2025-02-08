@@ -1,19 +1,18 @@
 import { useState } from 'react';
-import CustomerProfile from '../CustomerProfile';
-import CustomerReservationForm from '../CustomerReservationForm';
-import CustomerReservationList from '../CustomerReservationList';
+import CustomerDashboard from '../Dashboard/CustomerDashboard';
+import CustomerProfile from '../Profile/CustomerProfile';
 import Button from '../../common/Button/Button';
 import './CustomerLayout.css';
 
 export default function CustomerLayout() {
-    const [activeTab, setActiveTab] = useState('reservations');
+    const [activeTab, setActiveTab] = useState('dashboard');
 
     return (
         <div className="customer-layout">
-            <div className="customer-layout__tabs">
+            <div className="customer-layout__nav">
                 <Button
-                    variant={activeTab === 'reservations' ? 'primary' : 'secondary'}
-                    onClick={() => setActiveTab('reservations')}
+                    variant={activeTab === 'dashboard' ? 'primary' : 'secondary'}
+                    onClick={() => setActiveTab('dashboard')}
                     label="Mis Reservas"
                 />
                 <Button
@@ -24,14 +23,7 @@ export default function CustomerLayout() {
             </div>
 
             <div className="customer-layout__content">
-                {activeTab === 'reservations' && (
-                    <div className="customer-display">
-                        <div className="customer-content">
-                            <CustomerReservationForm />
-                            <CustomerReservationList />
-                        </div>
-                    </div>
-                )}
+                {activeTab === 'dashboard' && <CustomerDashboard />}
                 {activeTab === 'profile' && <CustomerProfile />}
             </div>
         </div>
