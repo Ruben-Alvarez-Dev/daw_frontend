@@ -83,11 +83,11 @@ export default function AdminDashboardDistributionTableList() {
                                       ${isAssignedToSelected ? 'assigned-to-selected' : ''} 
                                       ${isAssignedToOther ? 'assigned-to-other' : ''}`}
                         >
-                            <div className="table-name">Mesa {table.name}</div>
                             <div className="table-capacity">{table.capacity} pax</div>
+                            <div className="table-name">mesa {table.name}</div>
                             {isAssigned && (
                                 <div className="table-assignment">
-                                    {assignedReservation.user?.name || `Usuario #${assignedReservation.user?.id}`}
+                                    {assignedReservation.id}
                                 </div>
                             )}
                         </div>
@@ -95,20 +95,8 @@ export default function AdminDashboardDistributionTableList() {
                 })}
             </div>
             {selectedReservation && (
-                <div className="table-actions">
-                    <div className="table-instructions">
-                        {selectedTables.length > 0
-                            ? 'Haz clic en "Asignar mesas" cuando hayas terminado de seleccionar'
-                            : 'Haz clic en las mesas para seleccionarlas'}
-                    </div>
-                    {selectedTables.length > 0 && (
-                        <button 
-                            className="assign-tables-button"
-                            onClick={handleAssignTables}
-                        >
-                            Asignar mesas
-                        </button>
-                    )}
+                <div className="table-instructions">
+                    Selecciona las mesas que quieres asignar
                 </div>
             )}
         </div>

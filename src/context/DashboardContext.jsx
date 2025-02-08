@@ -126,18 +126,21 @@ export function DashboardProvider({ children }) {
         return Object.values(shiftData?.tables || {});
     }, [shiftData]);
 
-    const handleReservationSelect = useCallback((reservationId) => {
-        // Si ya hay una reserva seleccionada y es la misma que se clickea
-        if (selectedReservation === reservationId) {
-            setSelectedReservation(null);
-            setSelectedTables([]); // Limpiar mesas seleccionadas
-            return;
+    const handleReservationSelect = async (reservationId) => {
+        // Si hay mesas seleccionadas y una reserva seleccionada, asignar antes de cambiar
+        if (selectedTables.length > 0 && selectedReservation) {
+            await assignSelectedTables(selectedDate, selectedShift);
+            setSelectedTables([]); // Limpiar después de asignar
         }
 
-        // Si no hay reserva seleccionada o es diferente, la seleccionamos
-        setSelectedReservation(reservationId);
-        setSelectedTables([]); // Limpiar mesas seleccionadas al cambiar de reserva
-    }, [selectedReservation]);
+        // Si hacemos clic en la misma reserva, la deseleccionamos
+        if (selectedReservation === reservationId) {
+            setSelectedReservation(null);
+        } else {
+            setSelectedReservation(reservationId);
+            setSelectedTables([]); // Limpiar al cambiar de reserva
+        }
+    };
 
     const toggleTableSelection = useCallback(async (tableId, date, shift) => {
         if (!selectedReservation) return;

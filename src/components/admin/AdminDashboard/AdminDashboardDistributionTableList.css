@@ -1,5 +1,5 @@
 .table-grid-container {
-    padding: 20px;
+    padding: 0;
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -7,62 +7,61 @@
 
 .table-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 15px;
 }
 
 .table-item {
-    background-color: #f5f5f5;
-    border-radius: 8px;
-    padding: 15px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    padding: 10px;
     cursor: not-allowed;
     transition: all 0.2s ease;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    align-items: center;
+    text-align: center;
+    aspect-ratio: 1;
+    color: white;
 }
 
 .table-item.selectable {
     cursor: pointer;
-    background-color: #e8f4ff;
-}
-
-.table-item.selectable:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background-color: #003f79;
 }
 
 .table-item.selected {
     background-color: #2196f3;
-    color: white;
 }
 
 .table-item.assigned-to-selected {
     background-color: #4caf50;
-    color: white;
 }
 
 .table-item.assigned-to-other {
-    background-color: #f44336;
-    color: white;
+    background-color: #8B0000;
+}
+
+.table-item.selectable:hover {
+    border: 1px solid white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .table-name {
     font-weight: bold;
     font-size: 1.1em;
+    text-transform: uppercase;
 }
 
 .table-capacity {
-    font-size: 0.9em;
-    opacity: 0.8;
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 5px;
 }
 
 .table-assignment {
-    font-size: 0.8em;
-    opacity: 0.9;
-    margin-top: 4px;
-    padding-top: 4px;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 0.9em;
+    margin-top: auto;
 }
 
 .loading-message {
