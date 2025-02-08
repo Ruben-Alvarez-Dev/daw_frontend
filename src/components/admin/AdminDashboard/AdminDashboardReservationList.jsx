@@ -8,7 +8,11 @@ export default function AdminDashboardReservationList({ status = 'all' }) {
         selectedReservation, 
         shiftData,
         tables,
-        handleReservationSelect 
+        handleReservationSelect,
+        selectedTables,
+        assignSelectedTables,
+        selectedDate,
+        selectedShift
     } = useDashboard();
 
     const filteredReservations = status === 'all' 
@@ -29,21 +33,42 @@ export default function AdminDashboardReservationList({ status = 'all' }) {
     };
 
     const getAssignedTables = (reservationId) => {
-        if (!shiftData?.distribution) return [];
-        
-        // Buscar todas las mesas asignadas a esta reserva
         const assignedTables = [];
-        Object.entries(shiftData.distribution).forEach(([tableKey, resId]) => {
-            if (resId === reservationId) {
-                const tableId = tableKey.replace('table_', '');
-                const table = tables.find(t => t.id === parseInt(tableId));
-                if (table) {
-                    assignedTables.push(`Mesa ${table.name}`);
+        
+        // Primero añadir las mesas ya asignadas
+        if (shiftData?.distribution) {
+            Object.entries(shiftData.distribution).forEach(([tableKey, resId]) => {
+                if (resId === reservationId) {
+                    const tableId = tableKey.replace('table_', '');
+                    const table = tables.find(t => t.id === parseInt(tableId));
+                    if (table) {
+                        assignedTables.push(`Mesa ${table.name}`);
+                    }
                 }
-            }
-        });
+            });
+        }
+        
+        // Si esta es la reserva seleccionada, añadir también las mesas seleccionadas temporalmente
+        if (selectedReservation === reservationId && selectedTables.length > 0) {
+            selectedTables.forEach(tableId => {
+                const table = tables.find(t => t.id === tableId);
+                if (table && !assignedTables.includes(`Mesa ${table.name}`)) {
+                    assignedTables.push(`Mesa ${table.name} (pendiente)`);
+                }
+            });
+        }
         
         return assignedTables;
+    };
+
+    const handleReservationClick = async (reservationId) => {
+        // Si hay mesas seleccionadas y vamos a deseleccionar la reserva actual
+        if (selectedReservation === reservationId && selectedTables.length > 0) {
+            const success = await assignSelectedTables(selectedDate, selectedShift);
+            if (!success) return; // Si la asignación falla, no deseleccionamos la reserva
+        }
+        // Proceder con la selección/deselección de la reserva
+        handleReservationSelect(reservationId);
     };
 
     return (
@@ -62,7 +87,7 @@ export default function AdminDashboardReservationList({ status = 'all' }) {
                     <div 
                         key={reservation.id} 
                         className={`admin-dashboard-reservation-item status-${statusClass}${isSelected ? ' selected' : ''}`}
-                        onClick={() => handleReservationSelect(reservation.id)}
+                        onClick={() => handleReservationClick(reservation.id)}
                     >
                         <div className="admin-dashboard-reservation-content">
                             <div className="admin-dashboard-reservation-left">

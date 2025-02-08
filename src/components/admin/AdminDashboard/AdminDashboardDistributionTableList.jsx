@@ -9,7 +9,10 @@ export default function AdminDashboardDistributionTableList() {
         selectedReservation,
         selectedDate,
         selectedShift,
-        toggleTableSelection 
+        toggleTableSelection,
+        selectedTables,
+        assignSelectedTables,
+        handleReservationSelect
     } = useDashboard();
 
     // Si no hay mesas todavía, mostramos un estado de carga
@@ -40,14 +43,23 @@ export default function AdminDashboardDistributionTableList() {
         return reservationId ? shiftData?.reservations?.[reservationId] : null;
     };
 
-    // Función auxiliar para comprobar si una mesa está seleccionada
+    // Función auxiliar para comprobar si una mesa está seleccionada temporalmente
     const isTableSelected = (tableId) => {
+        return selectedTables.includes(tableId);
+    };
+
+    // Función auxiliar para comprobar si una mesa está asignada a la reserva actual
+    const isTableAssigned = (tableId) => {
         if (!selectedReservation) return false;
         return shiftData?.distribution?.[`table_${tableId}`] === parseInt(selectedReservation);
     };
 
     const handleTableClick = (tableId) => {
         toggleTableSelection(tableId, selectedDate, selectedShift);
+    };
+
+    const handleAssignTables = async () => {
+        await assignSelectedTables(selectedDate, selectedShift);
     };
 
     return (
@@ -57,7 +69,7 @@ export default function AdminDashboardDistributionTableList() {
                     const tableId = table.id;
                     const assignedReservation = findReservationForTable(tableId);
                     const isAssigned = !!assignedReservation;
-                    const isAssignedToSelected = assignedReservation?.id === parseInt(selectedReservation);
+                    const isAssignedToSelected = isTableAssigned(tableId);
                     const isAssignedToOther = isAssigned && !isAssignedToSelected;
                     const isSelected = isTableSelected(tableId);
                     const isSelectable = selectedReservation !== null && !isAssignedToOther;
@@ -83,10 +95,20 @@ export default function AdminDashboardDistributionTableList() {
                 })}
             </div>
             {selectedReservation && (
-                <div className="table-instructions">
-                    {Object.entries(shiftData.distribution).some(([_, resId]) => resId === parseInt(selectedReservation))
-                        ? 'Haz clic de nuevo en la reserva para guardar los cambios'
-                        : 'Haz clic en las mesas para asignarlas a la reserva'}
+                <div className="table-actions">
+                    <div className="table-instructions">
+                        {selectedTables.length > 0
+                            ? 'Haz clic en "Asignar mesas" cuando hayas terminado de seleccionar'
+                            : 'Haz clic en las mesas para seleccionarlas'}
+                    </div>
+                    {selectedTables.length > 0 && (
+                        <button 
+                            className="assign-tables-button"
+                            onClick={handleAssignTables}
+                        >
+                            Asignar mesas
+                        </button>
+                    )}
                 </div>
             )}
         </div>
