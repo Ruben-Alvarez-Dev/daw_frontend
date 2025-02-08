@@ -20,12 +20,17 @@ export default function AdminDashboardReservationList({ status = 'all' }) {
         : reservations.filter(r => r.status === status);
 
     if (!filteredReservations.length) {
-        return <div className="admin-dashboard-reservation-empty">No hay reservas que mostrar</div>;
+        return <div className="reservation-list__empty">No hay reservas que mostrar</div>;
     }
 
     const formatTime = (timeStr) => {
         if (!timeStr) return '';
-        return timeStr.substring(0, 5); // Solo toma HH:MM
+        // Asegurarnos de que tenemos un string válido de tiempo
+        const timeParts = timeStr.split(':');
+        if (timeParts.length >= 2) {
+            return `${timeParts[0]}:${timeParts[1]}`;
+        }
+        return timeStr;
     };
 
     const getShiftLabel = (shift) => {
@@ -42,7 +47,7 @@ export default function AdminDashboardReservationList({ status = 'all' }) {
                     const tableId = tableKey.replace('table_', '');
                     const table = tables.find(t => t.id === parseInt(tableId));
                     if (table) {
-                        assignedTables.push(`Mesa ${table.name}`);
+                        assignedTables.push(table.name);
                     }
                 }
             });
@@ -52,8 +57,8 @@ export default function AdminDashboardReservationList({ status = 'all' }) {
         if (selectedReservation === reservationId && selectedTables.length > 0) {
             selectedTables.forEach(tableId => {
                 const table = tables.find(t => t.id === tableId);
-                if (table && !assignedTables.includes(`Mesa ${table.name}`)) {
-                    assignedTables.push(`Mesa ${table.name} (pendiente)`);
+                if (table && !assignedTables.includes(table.name)) {
+                    assignedTables.push(`${table.name} (pendiente)`);
                 }
             });
         }
@@ -61,51 +66,39 @@ export default function AdminDashboardReservationList({ status = 'all' }) {
         return assignedTables;
     };
 
-    const handleReservationClick = async (reservationId) => {
-        // Si hay mesas seleccionadas y vamos a deseleccionar la reserva actual
-        if (selectedReservation === reservationId && selectedTables.length > 0) {
-            const success = await assignSelectedTables(selectedDate, selectedShift);
-            if (!success) return; // Si la asignación falla, no deseleccionamos la reserva
-        }
-        // Proceder con la selección/deselección de la reserva
-        handleReservationSelect(reservationId);
-    };
-
     return (
-        <div className="admin-dashboard-reservation-list">
+        <div className="reservation-list">
             {filteredReservations.map((reservation) => {
                 const assignedTables = getAssignedTables(reservation.id);
-                const tablesList = assignedTables.length > 0 
-                    ? assignedTables.join(', ') 
-                    : 'sin asignar';
-                    
                 const statusClass = reservation.status ? reservation.status.toLowerCase() : '';
                 const isSelected = selectedReservation === reservation.id;
-                const userName = reservation.user?.name || `Usuario #${reservation.user?.id}`;
+                const reservationData = shiftData.reservations[reservation.id] || reservation;
+                const userName = reservationData.user?.name || `Usuario #${reservationData.user?.id}`;
 
                 return (
                     <div 
                         key={reservation.id} 
-                        className={`admin-dashboard-reservation-item status-${statusClass}${isSelected ? ' selected' : ''}`}
-                        onClick={() => handleReservationClick(reservation.id)}
+                        className={`reservation-list__item reservation-list__item--${statusClass}${isSelected ? ' reservation-list__item--selected' : ''}`}
+                        onClick={() => handleReservationSelect(reservation.id)}
                     >
-                        <div className="admin-dashboard-reservation-content">
-                            <div className="admin-dashboard-reservation-left">
-                                <div className="admin-dashboard-reservation-header">
-                                    <span className="admin-dashboard-reservation-id">#{reservation.id}</span>
-                                    <span className="admin-dashboard-reservation-pax">{reservation.guests} pax</span>
+                        <div className="reservation-list__content">
+                            <div className="reservation-list__left">
+                                <div className="reservation-list__main-info">
+                                    <span className="reservation-list__time">{reservation.shift === 'lunch' ? '14:00' : '21:00'}</span>
+                                    <span className="reservation-list__user">{userName}</span>
                                 </div>
-                                <div className="admin-dashboard-reservation-user">{userName}</div>
-                                <div className="admin-dashboard-reservation-time">
-                                    {formatTime(reservation.time)} - {getShiftLabel(reservation.shift)}
+                                <div className="reservation-list__secondary-info">
+                                    <span className="reservation-list__pax">{reservationData.guests} pax</span>
+                                    <span className={`reservation-list__status reservation-list__status--${statusClass}`}>
+                                        {reservationData.status}
+                                    </span>
                                 </div>
                             </div>
-                            <div className="admin-dashboard-reservation-right">
-                                <div className="admin-dashboard-reservation-tables">
-                                    Mesas: {tablesList}
-                                </div>
-                                <div className={`admin-dashboard-reservation-status status-${statusClass}`}>
-                                    {reservation.status}
+                            <div className="reservation-list__right">
+                                <div className="reservation-list__tables">
+                                    {assignedTables.map((table, index) => (
+                                        <span key={index} className="reservation-list__table">{table}</span>
+                                    ))}
                                 </div>
                             </div>
                         </div>
