@@ -11,17 +11,19 @@ const useShiftAvailability = (config, reservations = [], selectedDate, shift) =>
 
         // Asegurar que tenemos el número de mesas simultáneas
         const simultaneousTables = config.simultaneousTables;
+        const timeInterval = config.timeInterval || 15;
         if (typeof simultaneousTables !== 'number') {
             console.error('Invalid simultaneousTables:', simultaneousTables);
             return [];
         }
 
-        const timeSlots = generateTimeOptions(shift);
+        const timeSlots = generateTimeOptions(shift, timeInterval);
 
         console.log('Calculating availability for:', {
             date: selectedDate,
             shift,
             simultaneousTables,
+            timeInterval,
             reservationsCount: reservations.length
         });
 
