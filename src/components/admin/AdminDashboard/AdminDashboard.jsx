@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import AdminDashboardReservations from './AdminDashboardReservations';
 import AdminDashboardDistribution from './AdminDashboardDistribution';
+import AdminDashboardTools from './AdminDashboardTools';
 import './AdminDashboard.css';
 
 export default function AdminDashboard() {
@@ -54,6 +55,7 @@ export default function AdminDashboard() {
                 onShiftChange={setSelectedShift}
                 shiftStats={shiftStats}
             />
+            <AdminDashboardTools />
         </div>
     );
 }

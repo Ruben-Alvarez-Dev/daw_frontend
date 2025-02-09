@@ -137,13 +137,13 @@ export default function AdminDashboardReservationList({ status = 'all' }) {
                             <div className="reservation-list__right">
                                 {assignedTables.map((table, index) => (
                                     <span key={table} className="reservation-list__table">
-                                        {`mesa ${table}`}{index < assignedTables.length - 1 ? ', ' : ''}
+                                        {table}{index < assignedTables.length - 1 ? ', ' : ''}
                                     </span>
                                 ))}
                             </div>
                         </div>
                         <div className="reservation-list__warning">
-                            {assignedTables.length > 0 && reservationData.status === 'confirmed' ? (
+                            {assignedTables.length > 0 ? (
                                 <IoCheckmarkCircle className="reservation-list__icon reservation-list__icon--check" />
                             ) : (
                                 <IoWarning className="reservation-list__icon reservation-list__icon--warning" />

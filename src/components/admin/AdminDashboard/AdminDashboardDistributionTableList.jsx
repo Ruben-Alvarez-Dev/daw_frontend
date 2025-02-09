@@ -96,7 +96,7 @@ export default function AdminDashboardDistributionTableList() {
                         >
                             {isAssigned ? (
                                 <>
-                                    <div className="table-header">{table.name} ({assignedReservation.guests} pax)</div>
+                                    <div className="table-header">{table.name} ({assignedReservation.guests})</div>
                                     <div className="table-separator"></div>
                                     <div className="table-assignment">
                                         <div className="table-time">{getShiftTime(assignedReservation.shift)}</div>
