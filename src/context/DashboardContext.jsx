@@ -24,6 +24,7 @@ export function DashboardProvider({ children }) {
         reservations: [],
         distribution: {}
     });
+    const [hoveredReservation, setHoveredReservation] = useState(null);
 
     // Cargar las mesas una sola vez al inicio
     useEffect(() => {
@@ -327,17 +328,15 @@ export function DashboardProvider({ children }) {
     const value = {
         tables: Object.values(shiftData?.tables || {}),
         reservations,
-        setReservations,
+        shiftData,
         selectedReservation,
-        setSelectedReservation,
+        selectedTables,
+        hoveredReservation,
+        setHoveredReservation,
         selectedDate,
         setSelectedDate,
         selectedShift,
         setSelectedShift,
-        shiftData,
-        setShiftData,
-        selectedTables,
-        setSelectedTables,
         loadReservations,
         token,
         handleReservationSelect,

@@ -7,15 +7,16 @@ export default function AdminDashboardReservationList({ status = 'all' }) {
     const [openStatusMenu, setOpenStatusMenu] = useState(null);
     const { 
         reservations, 
-        selectedReservation, 
         shiftData,
-        tables,
+        selectedReservation,
         handleReservationSelect,
-        selectedTables,
-        assignSelectedTables,
         selectedDate,
         selectedShift,
-        updateReservationStatus
+        updateReservationStatus,
+        hoveredReservation,
+        tables,
+        selectedTables,
+        assignSelectedTables
     } = useDashboard();
 
     const formatTime = (time) => {
@@ -43,7 +44,7 @@ export default function AdminDashboardReservationList({ status = 'all' }) {
         // Primero añadir las mesas ya asignadas
         if (shiftData?.distribution) {
             Object.entries(shiftData.distribution).forEach(([tableKey, resId]) => {
-                if (resId === reservationId) {
+                if (parseInt(resId) === parseInt(reservationId)) {
                     const tableId = tableKey.replace('table_', '');
                     const table = tables.find(t => t.id === parseInt(tableId));
                     if (table) {
@@ -67,12 +68,8 @@ export default function AdminDashboardReservationList({ status = 'all' }) {
     };
 
     const handleStatusClick = (e, reservationId) => {
-        e.stopPropagation(); // Evitar que se seleccione la reserva
-        if (openStatusMenu === reservationId) {
-            setOpenStatusMenu(null);
-        } else {
-            setOpenStatusMenu(reservationId);
-        }
+        e.stopPropagation();
+        setOpenStatusMenu(openStatusMenu === reservationId ? null : reservationId);
     };
 
     const handleMouseLeave = () => {
@@ -80,9 +77,9 @@ export default function AdminDashboardReservationList({ status = 'all' }) {
     };
 
     const handleStatusChange = async (e, reservationId, newStatus) => {
-        e.stopPropagation(); // Evitar que se seleccione la reserva
+        e.stopPropagation();
         await updateReservationStatus(reservationId, newStatus);
-        setOpenStatusMenu(null); // Cerrar el menú
+        setOpenStatusMenu(null);
     };
 
     return (
@@ -92,19 +89,19 @@ export default function AdminDashboardReservationList({ status = 'all' }) {
                 const reservationData = shiftData?.reservations[reservation.id] || reservation;
                 const statusClass = reservationData.status ? reservationData.status.toLowerCase() : '';
                 const isSelected = selectedReservation === reservation.id;
-                const userName = reservationData.user?.name || `Usuario #${reservationData.user?.id}`;
+                const isHighlighted = hoveredReservation && parseInt(hoveredReservation) === parseInt(reservation.id);
 
                 return (
                     <div 
                         key={reservation.id} 
-                        className={`reservation-list__item reservation-list__item--${statusClass}${isSelected ? ' reservation-list__item--selected' : ''}`}
+                        className={`reservation-list__item reservation-list__item--${statusClass}${isSelected ? ' reservation-list__item--selected' : ''}${isHighlighted ? ' reservation-list__item--highlighted' : ''}`}
                         onClick={() => handleReservationSelect(reservation.id)}
                     >
                         <div className="reservation-list__content">
                             <div className="reservation-list__left">
                                 <div className="reservation-list__main-info">
                                     <span className="reservation-list__time">{formatTime(reservationData.time)}</span>
-                                    <span className="reservation-list__user">{userName}</span>
+                                    <span className="reservation-list__user">{reservationData.user?.name || `Usuario #${reservationData.user?.id}`}</span>
                                 </div>
                                 <div className="reservation-list__secondary-info">
                                     <span className="reservation-list__pax">{reservationData.guests} pax</span>

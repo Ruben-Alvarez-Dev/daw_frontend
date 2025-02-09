@@ -12,7 +12,9 @@ export default function AdminDashboardDistributionTableList() {
         toggleTableSelection,
         selectedTables,
         assignSelectedTables,
-        handleReservationSelect
+        handleReservationSelect,
+        hoveredReservation,
+        setHoveredReservation
     } = useDashboard();
 
     // Si no hay mesas todavía, mostramos un estado de carga
@@ -41,11 +43,20 @@ export default function AdminDashboardDistributionTableList() {
     const findReservationForTable = (tableId) => {
         const reservationId = shiftData?.distribution?.[`table_${tableId}`];
         if (!reservationId) return null;
-        
-        // Buscar la reserva en el array de reservas
         return Object.values(shiftData?.reservations || {}).find(
             res => res.id === parseInt(reservationId)
         );
+    };
+
+    const handleTableHover = (tableId) => {
+        const reservationId = shiftData?.distribution?.[`table_${tableId}`];
+        if (reservationId) {
+            setHoveredReservation(parseInt(reservationId));
+        }
+    };
+
+    const handleTableLeave = () => {
+        setHoveredReservation(null);
     };
 
     // Función auxiliar para comprobar si una mesa está seleccionada temporalmente
@@ -60,13 +71,10 @@ export default function AdminDashboardDistributionTableList() {
         return assignedId ? parseInt(assignedId) === parseInt(selectedReservation) : false;
     };
 
-    // Función auxiliar para formatear la hora según el turno
-    const getShiftTime = (shift) => {
-        return shift === 'lunch' ? '14:00' : '21:00';
-    };
-
     const handleTableClick = (tableId) => {
-        toggleTableSelection(tableId, selectedDate, selectedShift);
+        if (selectedReservation) {
+            toggleTableSelection(tableId, selectedDate, selectedShift);
+        }
     };
 
     const handleAssignTables = async () => {
@@ -76,30 +84,29 @@ export default function AdminDashboardDistributionTableList() {
     return (
         <div className="table-grid-container">
             <div className="table-grid">
-                {tables.map(table => {
-                    const tableId = table.id;
-                    const assignedReservation = findReservationForTable(tableId);
+                {tables.map((table) => {
+                    const assignedReservation = findReservationForTable(table.id);
                     const isAssigned = !!assignedReservation;
-                    const isAssignedToSelected = isTableAssigned(tableId);
+                    const isAssignedToSelected = isTableAssigned(table.id);
                     const isAssignedToOther = isAssigned && !isAssignedToSelected;
-                    const isSelected = isTableSelected(tableId);
+                    const isSelected = isTableSelected(table.id);
                     const isSelectable = selectedReservation !== null && !isAssignedToOther;
+                    const isHighlighted = hoveredReservation && assignedReservation?.id === hoveredReservation;
 
                     return (
                         <div
                             key={table.id}
-                            onClick={() => isSelectable && handleTableClick(tableId)}
-                            className={`table-item ${isSelectable ? 'selectable' : ''} 
-                                      ${isSelected ? 'selected' : ''} 
-                                      ${isAssignedToSelected ? 'assigned-to-selected' : ''} 
-                                      ${isAssignedToOther ? 'assigned-to-other' : ''}`}
+                            className={`table-item${isSelectable ? ' selectable' : ''}${isSelected ? ' selected' : ''}${isHighlighted ? ' table-item--highlighted' : ''}${isAssignedToSelected ? ' assigned-to-selected' : ''}${isAssignedToOther ? ' assigned-to-other' : ''}`}
+                            onClick={() => isSelectable && handleTableClick(table.id)}
+                            onMouseEnter={() => handleTableHover(table.id)}
+                            onMouseLeave={handleTableLeave}
                         >
                             {isAssigned ? (
                                 <>
                                     <div className="table-header">{table.name} ({assignedReservation.guests})</div>
                                     <div className="table-separator"></div>
                                     <div className="table-assignment">
-                                        <div className="table-time">{getShiftTime(assignedReservation.shift)}</div>
+                                        <div className="table-time">{assignedReservation.time}</div>
                                         <div className="table-user">{assignedReservation.user?.name || `Usuario #${assignedReservation.user?.id}`}</div>
                                     </div>
                                 </>

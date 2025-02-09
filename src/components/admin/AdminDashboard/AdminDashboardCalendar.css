@@ -1,0 +1,118 @@
+.calendar {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: #333;
+    border-radius: 8px;
+}
+
+.calendar__nav {
+    padding: 0.5rem;
+    background: #444;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.calendar__month {
+    font-size: 1rem;
+    font-weight: bold;
+    color: white;
+    text-transform: capitalize;
+}
+
+.calendar__nav-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.calendar__nav-button {
+    padding: 0.25rem 0.75rem;
+    border: none;
+    background: #555;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.calendar__nav-button:hover {
+    background: #666;
+}
+
+.calendar__table {
+    border-collapse: collapse;
+    width: 100%;
+    height: calc(100% - 3rem);
+    background: white;
+}
+
+.calendar__table thead th {
+    height: 2rem;
+    padding: 0;
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: white;
+    background: #333;
+    text-align: center;
+}
+
+.calendar__table tbody {
+    height: calc(100% - 2rem);
+}
+
+.calendar__table tbody tr {
+    height: calc(100% / 6);
+}
+
+.calendar__table td {
+    border: 1px solid #444;
+    padding: 0.25rem;
+    background: white;
+    vertical-align: middle;
+}
+
+.calendar__day-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+}
+
+.calendar__day-number {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.calendar__capacity {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.calendar__capacity-circle {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.8rem;
+    color: #333;
+}
+
+.calendar__capacity-circle--high {
+    background-color: #90EE90;
+}
+
+.calendar__capacity-circle--medium {
+    background-color: #FFE169;
+}
+
+.calendar__capacity-circle--low {
+    background-color: #FFB6C1;
+}
