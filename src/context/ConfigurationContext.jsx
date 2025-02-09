@@ -19,9 +19,7 @@ export function ConfigurationProvider({ children }) {
     const [error, setError] = useState(null);
 
     const loadConfig = useCallback(async () => {
-        console.log('loadConfig called with token:', token);
         if (!token) {
-            console.log('No token available, skipping loadConfig');
             return;
         }
         
@@ -29,13 +27,11 @@ export function ConfigurationProvider({ children }) {
         setError(null);
         
         try {
-            console.log('Fetching config from:', `${API_URL}/api/config`);
             const response = await fetch(`${API_URL}/api/config`, {
                 headers: getHeaders(token)
             });
 
             const data = await handleResponse(response);
-            console.log('Config loaded:', data);
             setConfig(data);
         } catch (err) {
             console.error('Error loading configuration:', err);
@@ -98,15 +94,12 @@ export function ConfigurationProvider({ children }) {
         }
     };
 
-    // Log when provider is rendered
-    console.log('ConfigurationProvider rendered with token:', token);
-
     const value = {
         config,
+        updateConfig,
         loading,
         error,
         loadConfig,
-        updateConfig,
         restoreDefaults
     };
 

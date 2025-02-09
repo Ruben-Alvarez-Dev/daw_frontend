@@ -40,7 +40,12 @@ export default function AdminDashboardDistributionTableList() {
     // Función auxiliar para encontrar la reserva que tiene asignada una mesa
     const findReservationForTable = (tableId) => {
         const reservationId = shiftData?.distribution?.[`table_${tableId}`];
-        return reservationId ? shiftData?.reservations?.[reservationId] : null;
+        if (!reservationId) return null;
+        
+        // Buscar la reserva en el array de reservas
+        return Object.values(shiftData?.reservations || {}).find(
+            res => res.id === parseInt(reservationId)
+        );
     };
 
     // Función auxiliar para comprobar si una mesa está seleccionada temporalmente
@@ -51,7 +56,8 @@ export default function AdminDashboardDistributionTableList() {
     // Función auxiliar para comprobar si una mesa está asignada a la reserva actual
     const isTableAssigned = (tableId) => {
         if (!selectedReservation) return false;
-        return shiftData?.distribution?.[`table_${tableId}`] === parseInt(selectedReservation);
+        const assignedId = shiftData?.distribution?.[`table_${tableId}`];
+        return assignedId ? parseInt(assignedId) === parseInt(selectedReservation) : false;
     };
 
     // Función auxiliar para formatear la hora según el turno

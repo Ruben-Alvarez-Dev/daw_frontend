@@ -89,9 +89,7 @@ export default function AdminDashboardReservationList({ status = 'all' }) {
         <div className="reservation-list">
             {filteredReservations.map((reservation) => {
                 const assignedTables = getAssignedTables(reservation.id);
-                const reservationData = shiftData.reservations[reservation.id] || reservation;
-                console.log('Reservation data:', reservationData);
-                console.log('Original time:', reservationData.time);
+                const reservationData = shiftData?.reservations[reservation.id] || reservation;
                 const statusClass = reservationData.status ? reservationData.status.toLowerCase() : '';
                 const isSelected = selectedReservation === reservation.id;
                 const userName = reservationData.user?.name || `Usuario #${reservationData.user?.id}`;
@@ -121,11 +119,11 @@ export default function AdminDashboardReservationList({ status = 'all' }) {
                                             {reservationData.status}
                                         </span>
                                         {openStatusMenu === reservation.id && (
-                                            <div className="reservation-list__status-menu">
-                                                {statusOptions.map((option) => (
+                                            <div className="reservation-list__status-menu" onMouseLeave={handleMouseLeave}>
+                                                {statusOptions.map(option => (
                                                     <div
                                                         key={option}
-                                                        className={`reservation-list__status-menu-item reservation-list__status--${option}`}
+                                                        className={`reservation-list__status-menu-item reservation-list__status-menu-item--${option}`}
                                                         onClick={(e) => handleStatusChange(e, reservation.id, option)}
                                                     >
                                                         {option}
@@ -137,11 +135,11 @@ export default function AdminDashboardReservationList({ status = 'all' }) {
                                 </div>
                             </div>
                             <div className="reservation-list__right">
-                                <div className="reservation-list__tables">
-                                    {assignedTables.map((table, index) => (
-                                        <span key={index} className="reservation-list__table">{table}</span>
-                                    ))}
-                                </div>
+                                {assignedTables.map((table, index) => (
+                                    <span key={table} className="reservation-list__table">
+                                        {`mesa ${table}`}{index < assignedTables.length - 1 ? ', ' : ''}
+                                    </span>
+                                ))}
                             </div>
                         </div>
                         <div className="reservation-list__warning">

@@ -1,11 +1,12 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useAuth } from './AuthContext';
+import dayjs from 'dayjs';
 
 const DashboardContext = createContext();
 
 const DEFAULT_SHIFT_DATA = {
     tables: {},          // id -> { id, name, capacity }
-    reservations: {},    // id -> { id, guests, status, user }
+    reservations: [],    // array de reservas
     distribution: {},    // table_id -> reservation_id
     total_pax: 0
 };
@@ -14,15 +15,15 @@ export function DashboardProvider({ children }) {
     const { token } = useAuth();
     const [reservations, setReservations] = useState([]);
     const [selectedReservation, setSelectedReservation] = useState(null);
+    const [selectedTables, setSelectedTables] = useState([]);
     const [selectedDate, setSelectedDate] = useState(null);
     const [selectedShift, setSelectedShift] = useState(null);
     const [shiftData, setShiftData] = useState({
         total_pax: 0,
         tables: {},
-        reservations: {},
+        reservations: [],
         distribution: {}
     });
-    const [selectedTables, setSelectedTables] = useState([]);
 
     // Cargar las mesas una sola vez al inicio
     useEffect(() => {
@@ -71,7 +72,7 @@ export function DashboardProvider({ children }) {
             setReservations([]);
             setShiftData(prev => ({
                 ...prev,
-                reservations: {},
+                reservations: [],
                 distribution: {},
                 total_pax: 0
             }));
@@ -84,27 +85,7 @@ export function DashboardProvider({ children }) {
         setSelectedShift(shift);
 
         try {
-            // 1. Cargar todas las reservas primero
-            const reservationsResponse = await fetch(
-                `${import.meta.env.VITE_API_URL}/api/reservations`,
-                {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Accept': 'application/json'
-                    }
-                }
-            );
-
-            if (!reservationsResponse.ok) {
-                throw new Error('Error loading reservations');
-            }
-
-            const allReservations = await reservationsResponse.json();
-            const reservationsForShift = allReservations.filter(r => 
-                r.date.split('T')[0] === date && r.shift === shift
-            );
-
-            // 2. Cargar la información del shift
+            // Cargar la información del shift
             const shiftResponse = await fetch(
                 `${import.meta.env.VITE_API_URL}/api/shifts/${date}/${shift}`,
                 {
@@ -121,18 +102,12 @@ export function DashboardProvider({ children }) {
 
             const shiftResponseData = await shiftResponse.json();
 
-            // 3. Combinar los datos
-            const reservationsById = reservationsForShift.reduce((acc, res) => ({
-                ...acc,
-                [res.id]: res
-            }), {});
-
-            // 4. Actualizar el estado
-            setReservations(reservationsForShift);
+            // Actualizar el estado con los datos del turno
+            setReservations(Object.values(shiftResponseData.reservations || {}));
             setShiftData(prev => ({
                 ...prev,
                 total_pax: shiftResponseData.total_pax || 0,
-                reservations: reservationsById,
+                reservations: shiftResponseData.reservations || {},
                 distribution: shiftResponseData.distribution || {}
             }));
 
@@ -141,16 +116,12 @@ export function DashboardProvider({ children }) {
             setReservations([]);
             setShiftData(prev => ({
                 ...prev,
-                reservations: {},
+                reservations: [],
                 distribution: {},
                 total_pax: 0
             }));
         }
     }, [token]);
-
-    const tables = useMemo(() => {
-        return Object.values(shiftData?.tables || {});
-    }, [shiftData]);
 
     const handleReservationSelect = async (reservationId) => {
         // Si hay mesas seleccionadas y una reserva seleccionada, asignar antes de cambiar
@@ -246,21 +217,6 @@ export function DashboardProvider({ children }) {
         if (!selectedReservation || selectedTables.length === 0) return false;
 
         try {
-            // Primero cargar los datos actuales del turno para tener la info más reciente
-            const shiftResponse = await fetch(
-                `${import.meta.env.VITE_API_URL}/api/shifts/${date}/${shift}`,
-                {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Accept': 'application/json'
-                    }
-                }
-            );
-
-            if (!shiftResponse.ok) {
-                throw new Error('Error al cargar datos del turno');
-            }
-
             // Asignar las mesas seleccionadas
             const response = await fetch(
                 `${import.meta.env.VITE_API_URL}/api/shifts/${date}/${shift}/assign`,
@@ -320,10 +276,11 @@ export function DashboardProvider({ children }) {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
                 },
                 body: JSON.stringify({
-                    date: selectedDate,
+                    date: currentReservation.date,
                     time: currentReservation.time,
                     shift: currentReservation.shift,
                     guests: currentReservation.guests,
@@ -368,18 +325,25 @@ export function DashboardProvider({ children }) {
     };
 
     const value = {
-        tables,
+        tables: Object.values(shiftData?.tables || {}),
         reservations,
+        setReservations,
         selectedReservation,
+        setSelectedReservation,
         selectedDate,
+        setSelectedDate,
         selectedShift,
+        setSelectedShift,
         shiftData,
+        setShiftData,
+        selectedTables,
+        setSelectedTables,
         loadReservations,
+        token,
         handleReservationSelect,
         toggleTableSelection,
         assignSelectedTables,
-        updateReservationStatus,
-        selectedTables
+        updateReservationStatus
     };
 
     return (
