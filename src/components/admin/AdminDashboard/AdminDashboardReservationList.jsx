@@ -14,9 +14,8 @@ export default function AdminDashboardReservationList({ status = 'all' }) {
         selectedShift,
         updateReservationStatus,
         hoveredReservation,
-        tables,
         selectedTables,
-        assignSelectedTables
+        assignTables
     } = useDashboard();
 
     const formatTime = (time) => {
@@ -26,17 +25,16 @@ export default function AdminDashboardReservationList({ status = 'all' }) {
 
     const statusOptions = ['pending', 'confirmed', 'cancelled', 'seated', 'no-show'];
 
+    // Obtener las reservas del día y turno seleccionados
+    const currentReservations = selectedDate && selectedShift && reservations[selectedDate]?.[selectedShift] || [];
+    
     const filteredReservations = status === 'all' 
-        ? reservations 
-        : reservations.filter(r => r.status === status);
+        ? currentReservations 
+        : currentReservations.filter(r => r.status === status);
 
     if (!filteredReservations.length) {
         return <div className="reservation-list__empty">No hay reservas que mostrar</div>;
     }
-
-    const getShiftLabel = (shift) => {
-        return shift === 'lunch' ? 'Comida' : shift === 'dinner' ? 'Cena' : shift;
-    };
 
     const getAssignedTables = (reservationId) => {
         const assignedTables = [];
@@ -46,7 +44,7 @@ export default function AdminDashboardReservationList({ status = 'all' }) {
             Object.entries(shiftData.distribution).forEach(([tableKey, resId]) => {
                 if (parseInt(resId) === parseInt(reservationId)) {
                     const tableId = tableKey.replace('table_', '');
-                    const table = tables.find(t => t.id === parseInt(tableId));
+                    const table = Object.values(shiftData.tables).find(t => t.id === parseInt(tableId));
                     if (table) {
                         assignedTables.push(table.name);
                     }
@@ -57,7 +55,7 @@ export default function AdminDashboardReservationList({ status = 'all' }) {
         // Si esta es la reserva seleccionada, añadir también las mesas seleccionadas temporalmente
         if (selectedReservation === reservationId && selectedTables.length > 0) {
             selectedTables.forEach(tableId => {
-                const table = tables.find(t => t.id === tableId);
+                const table = Object.values(shiftData.tables).find(t => t.id === tableId);
                 if (table && !assignedTables.includes(table.name)) {
                     assignedTables.push(table.name);
                 }
@@ -86,8 +84,7 @@ export default function AdminDashboardReservationList({ status = 'all' }) {
         <div className="reservation-list">
             {filteredReservations.map((reservation) => {
                 const assignedTables = getAssignedTables(reservation.id);
-                const reservationData = shiftData?.reservations[reservation.id] || reservation;
-                const statusClass = reservationData.status ? reservationData.status.toLowerCase() : '';
+                const statusClass = reservation.status ? reservation.status.toLowerCase() : '';
                 const isSelected = selectedReservation === reservation.id;
                 const isHighlighted = hoveredReservation && parseInt(hoveredReservation) === parseInt(reservation.id);
 
@@ -97,55 +94,54 @@ export default function AdminDashboardReservationList({ status = 'all' }) {
                         className={`reservation-list__item reservation-list__item--${statusClass}${isSelected ? ' reservation-list__item--selected' : ''}${isHighlighted ? ' reservation-list__item--highlighted' : ''}`}
                         onClick={() => handleReservationSelect(reservation.id)}
                     >
-                        <div className="reservation-list__content">
-                            <div className="reservation-list__left">
-                                <div className="reservation-list__main-info">
-                                    <span className="reservation-list__time">{formatTime(reservationData.time)}</span>
-                                    <span className="reservation-list__user">{reservationData.user?.name || `Usuario #${reservationData.user?.id}`}</span>
-                                </div>
-                                <div className="reservation-list__secondary-info">
-                                    <span className="reservation-list__pax">{reservationData.guests} pax</span>
-                                    <div 
-                                        className="reservation-list__status-container"
-                                        onClick={(e) => e.stopPropagation()}
-                                    >
-                                        <span 
-                                            className={`reservation-list__status reservation-list__status--${statusClass}`}
-                                            onClick={(e) => handleStatusClick(e, reservation.id)}
-                                        >
-                                            {reservationData.status}
-                                        </span>
-                                        {openStatusMenu === reservation.id && (
-                                            <div className="reservation-list__status-menu" onMouseLeave={handleMouseLeave}>
-                                                {statusOptions.map(option => (
-                                                    <div
-                                                        key={option}
-                                                        className={`reservation-list__status-menu-item reservation-list__status-menu-item--${option}`}
-                                                        onClick={(e) => handleStatusChange(e, reservation.id, option)}
-                                                    >
-                                                        {option}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="reservation-list__right">
-                                {assignedTables.map((table, index) => (
-                                    <span key={table} className="reservation-list__table">
-                                        {table}{index < assignedTables.length - 1 ? ', ' : ''}
-                                    </span>
-                                ))}
-                            </div>
+                        <div className="reservation-list__time">
+                            {formatTime(reservation.time)}
                         </div>
-                        <div className="reservation-list__warning">
-                            {assignedTables.length > 0 ? (
-                                <IoCheckmarkCircle className="reservation-list__icon reservation-list__icon--check" />
-                            ) : (
-                                <IoWarning className="reservation-list__icon reservation-list__icon--warning" />
+                        <div className="reservation-list__info">
+                            <div className="reservation-list__guests">
+                                {reservation.guests} pax
+                            </div>
+                            {assignedTables.length > 0 && (
+                                <div className="reservation-list__tables">
+                                    {assignedTables.join(', ')}
+                                </div>
                             )}
                         </div>
+                        <div 
+                            className="reservation-list__status"
+                            onClick={(e) => handleStatusClick(e, reservation.id)}
+                        >
+                            <span className={`status-badge status-badge--${statusClass}`}>
+                                {reservation.status}
+                            </span>
+                            {openStatusMenu === reservation.id && (
+                                <div 
+                                    className="status-menu"
+                                    onMouseLeave={handleMouseLeave}
+                                >
+                                    {statusOptions.map((status) => (
+                                        <div
+                                            key={status}
+                                            className="status-menu__item"
+                                            onClick={(e) => handleStatusChange(e, reservation.id, status)}
+                                        >
+                                            {status}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                        {isSelected && selectedTables.length > 0 && (
+                            <button 
+                                className="reservation-list__assign-btn"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    assignTables();
+                                }}
+                            >
+                                <IoCheckmarkCircle />
+                            </button>
+                        )}
                     </div>
                 );
             })}

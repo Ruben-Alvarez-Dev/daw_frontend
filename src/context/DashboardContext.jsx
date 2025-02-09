@@ -16,8 +16,13 @@ export function DashboardProvider({ children }) {
     const [reservations, setReservations] = useState([]);
     const [selectedReservation, setSelectedReservation] = useState(null);
     const [selectedTables, setSelectedTables] = useState([]);
-    const [selectedDate, setSelectedDate] = useState(null);
-    const [selectedShift, setSelectedShift] = useState(null);
+    const [selectedDate, setSelectedDate] = useState(() => {
+        return dayjs().format('YYYY-MM-DD');
+    });
+    const [selectedShift, setSelectedShift] = useState(() => {
+        const hour = dayjs().hour();
+        return hour >= 16 ? 'dinner' : 'lunch';
+    });
     const [shiftData, setShiftData] = useState({
         total_pax: 0,
         tables: {},
@@ -265,6 +270,50 @@ export function DashboardProvider({ children }) {
         }
     }, [selectedReservation, selectedTables, token]);
 
+    const unassignTables = useCallback(async (tableIds) => {
+        if (!selectedDate || !selectedShift) return false;
+
+        try {
+            const response = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/shifts/${selectedDate}/${selectedShift}/unassign`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        table_ids: tableIds
+                    })
+                }
+            );
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Error al desasignar mesas');
+            }
+
+            const result = await response.json();
+            
+            // Actualizar el estado con los nuevos datos
+            setShiftData(prev => ({
+                ...prev,
+                distribution: result.distribution || {},
+                reservations: result.reservations || {},
+                total_pax: result.total_pax || prev.total_pax
+            }));
+
+            // Actualizar las reservaciones con los nuevos datos
+            setReservations(Object.values(result.reservations || {}));
+            return true;
+        } catch (error) {
+            console.error('Error unassigning tables:', error);
+            alert(error.message);
+            return false;
+        }
+    }, [selectedDate, selectedShift, token]);
+
     const updateReservationStatus = async (reservationId, newStatus) => {
         try {
             // Obtener los datos de la reserva del array de reservations
@@ -325,28 +374,83 @@ export function DashboardProvider({ children }) {
         }
     };
 
+    const loadMonthReservations = useCallback(async (startDate, endDate) => {
+        if (!token || !startDate || !endDate) return;
+
+        try {
+            const response = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/reservations/month?start_date=${startDate}&end_date=${endDate}`,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error('Error loading month reservations');
+            }
+
+            const data = await response.json();
+            setReservations(data);
+        } catch (error) {
+            console.error('Error loading month reservations:', error);
+            setReservations({});
+        }
+    }, [token]);
+
+    // Cargar las reservaciones del mes cuando cambia el mes
+    useEffect(() => {
+        const currentDate = dayjs(selectedDate || dayjs());
+        loadMonthReservations(
+            currentDate.format('YYYY-MM-DD'),
+            currentDate.endOf('month').format('YYYY-MM-DD')
+        );
+    }, [selectedDate, loadMonthReservations]);
+
     const value = {
-        tables: Object.values(shiftData?.tables || {}),
-        reservations,
-        shiftData,
-        selectedReservation,
-        selectedTables,
-        hoveredReservation,
-        setHoveredReservation,
         selectedDate,
         setSelectedDate,
         selectedShift,
         setSelectedShift,
+        selectedTables,
+        setSelectedTables,
+        selectedReservation,
+        setSelectedReservation,
+        hoveredReservation,
+        setHoveredReservation,
+        shiftData,
         loadReservations,
-        token,
+        loadMonthReservations,
+        reservations,
+        assignTables: assignSelectedTables,
+        unassignTables,
         handleReservationSelect,
-        toggleTableSelection,
-        assignSelectedTables,
         updateReservationStatus
     };
 
     return (
-        <DashboardContext.Provider value={value}>
+        <DashboardContext.Provider value={{
+            selectedDate,
+            setSelectedDate,
+            selectedShift,
+            setSelectedShift,
+            selectedTables,
+            setSelectedTables,
+            selectedReservation,
+            setSelectedReservation,
+            hoveredReservation,
+            setHoveredReservation,
+            shiftData,
+            loadReservations,
+            loadMonthReservations,
+            reservations,
+            assignTables: assignSelectedTables,
+            unassignTables,
+            handleReservationSelect,
+            updateReservationStatus
+        }}>
             {children}
         </DashboardContext.Provider>
     );

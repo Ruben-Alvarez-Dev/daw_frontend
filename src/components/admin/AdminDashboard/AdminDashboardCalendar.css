@@ -5,18 +5,20 @@
     flex-direction: column;
     background: #333;
     border-radius: 8px;
+    overflow: hidden;
 }
 
 .calendar__nav {
-    padding: 0.5rem;
+    padding: 0.35rem;
     background: #444;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    min-height: 2rem;
 }
 
 .calendar__month {
-    font-size: 1rem;
+    font-size: 0.85rem;
     font-weight: bold;
     color: white;
     text-transform: capitalize;
@@ -24,95 +26,168 @@
 
 .calendar__nav-buttons {
     display: flex;
-    gap: 0.5rem;
+    gap: 0.25rem;
 }
 
 .calendar__nav-button {
-    padding: 0.25rem 0.75rem;
+    padding: 0.1rem 0.4rem;
     border: none;
     background: #555;
     color: white;
     border-radius: 4px;
     cursor: pointer;
     font-weight: bold;
-    font-size: 0.9rem;
+    font-size: 0.75rem;
 }
 
 .calendar__nav-button:hover {
     background: #666;
 }
 
+.calendar__table-container {
+    flex: 1;
+    overflow: auto;
+    display: grid;
+}
+
 .calendar__table {
     border-collapse: collapse;
     width: 100%;
-    height: calc(100% - 3rem);
+    height: 100%;
     background: white;
+    table-layout: fixed;
 }
 
 .calendar__table thead th {
-    height: 2rem;
-    padding: 0;
-    font-size: 0.9rem;
+    padding: 0.35rem;
+    font-size: 0.85rem;
     font-weight: bold;
     color: white;
     background: #333;
     text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 1;
 }
 
 .calendar__table tbody {
-    height: calc(100% - 2rem);
+    height: 100%;
 }
 
-.calendar__table tbody tr {
+.calendar__table tr {
     height: calc(100% / 6);
 }
 
 .calendar__table td {
     border: 1px solid #444;
-    padding: 0.25rem;
+    padding: 0;
     background: white;
-    vertical-align: middle;
+    position: relative;
+    cursor: pointer;
+    height: 3.25rem;
 }
 
 .calendar__day-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 0.15rem;
+    gap: 0.6rem;
 }
 
 .calendar__day-number {
     font-size: 1.1rem;
     font-weight: bold;
     color: #333;
+    line-height: 1;
+    margin-bottom: 0.1rem;
 }
 
 .calendar__capacity {
     display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
+    flex-direction: row;
+    gap: 0.2rem;
+    justify-content: center;
+    align-items: center;
+    padding: 0.1rem;
 }
 
 .calendar__capacity-circle {
-    width: 24px;
-    height: 24px;
+    width: 1.5rem;
+    height: 1.5rem;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 0.75rem;
     font-weight: bold;
-    font-size: 0.8rem;
     color: #333;
+    border: 1.5px solid #333;
 }
 
 .calendar__capacity-circle--high {
-    background-color: #90EE90;
+    background: #90EE90;
+    border-color: #006400;
 }
 
 .calendar__capacity-circle--medium {
-    background-color: #FFE169;
+    background: #FFD700;
+    border-color: #B8860B;
 }
 
 .calendar__capacity-circle--low {
-    background-color: #FFB6C1;
+    background: #FFA07A;
+    border-color: #B22222;
+}
+
+.calendar__capacity-circle--full {
+    background-color: transparent;
+    position: relative;
+}
+
+.calendar__capacity-circle--full::after {
+    content: "✕";
+    position: absolute;
+    color: #ff4444;
+    font-weight: bold;
+}
+
+.calendar__capacity-x {
+    width: 1.5rem;
+    height: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #ff4444;
+}
+
+.calendar__day--full {
+    position: relative;
+}
+
+.calendar__day--full::after {
+    content: "✕";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2rem;
+    color: #ff4444;
+    font-weight: bold;
+    z-index: 1;
+}
+
+.calendar__day--disabled {
+    background: #f5f5f5;
+    cursor: not-allowed;
+}
+
+.calendar__day--selected {
+    background: rgba(0, 123, 255, 0.1);
+}
+
+.calendar__day--full .calendar__day-content {
+    opacity: 0.3;
 }

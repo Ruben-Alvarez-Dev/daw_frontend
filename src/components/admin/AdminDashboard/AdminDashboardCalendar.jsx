@@ -1,38 +1,63 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useDashboard } from '../../../context/DashboardContext';
+import dayjs from 'dayjs';
 import './AdminDashboardCalendar.css';
 
 export default function AdminDashboardCalendar() {
-    const { 
-        selectedDate,
-        setSelectedDate,
-        setSelectedShift,
-        reservations,
-        tables
-    } = useDashboard();
+    const { shiftData, selectedDate, setSelectedDate, setSelectedShift, loadMonthReservations, reservations } = useDashboard();
+    const [currentMonth, setCurrentMonth] = useState(() => dayjs().format('YYYY-MM'));
 
-    const [currentMonth, setCurrentMonth] = useState(() => {
-        const date = new Date(selectedDate);
-        return new Date(date.getFullYear(), date.getMonth(), 1);
-    });
+    // Calcular la capacidad total una sola vez cuando cambian las mesas
+    const totalCapacity = useMemo(() => {
+        return Object.values(shiftData.tables)
+            .reduce((sum, table) => sum + table.capacity, 0);
+    }, [shiftData.tables]);
 
-    const totalCapacity = tables.reduce((acc, table) => acc + table.capacity, 0);
+    // Preparar un mapa de reservas por día/turno para acceso rápido
+    const reservationsMap = useMemo(() => {
+        const map = {};
+        // Usar las reservas del mes
+        Object.entries(reservations).forEach(([date, shifts]) => {
+            map[date] = shifts;
+        });
+        return map;
+    }, [reservations]);
 
-    const getCapacityStatus = (available, total) => {
-        const percentage = (available / total) * 100;
-        if (percentage > 50) return 'high';
-        if (percentage > 25) return 'medium';
-        return 'low';
+    const calculateAvailability = useCallback((date, shift) => {
+        const dayReservations = reservationsMap[date]?.[shift] || [];
+        const reservedSeats = dayReservations.reduce((sum, res) => sum + res.guests, 0);
+        return {
+            available: totalCapacity - reservedSeats,
+            total: totalCapacity
+        };
+    }, [reservationsMap, totalCapacity]);
+
+    const getCapacityColor = useCallback((seats, total) => {
+        if (seats <= 0) return 'full';
+        if (seats === total) return 'high';
+        if (seats < total * 0.25) return 'low';
+        return 'medium';
+    }, []);
+
+    const isDayFull = useCallback((date) => {
+        const lunch = calculateAvailability(date, 'lunch');
+        const dinner = calculateAvailability(date, 'dinner');
+        return lunch.available <= 0 && dinner.available <= 0;
+    }, [calculateAvailability]);
+
+    // Cargar datos cuando cambia el mes
+    useEffect(() => {
+        const startDate = dayjs(currentMonth).startOf('month').format('YYYY-MM-DD');
+        const endDate = dayjs(currentMonth).endOf('month').format('YYYY-MM-DD');
+        loadMonthReservations(startDate, endDate);
+    }, [currentMonth, loadMonthReservations]);
+
+    const handlePrevMonth = () => {
+        setCurrentMonth(prev => dayjs(prev).subtract(1, 'month').format('YYYY-MM'));
     };
 
-    const getAvailableSeats = (date, shift) => {
-        const shiftReservations = reservations.filter(r => 
-            r.date === date && 
-            r.shift === shift && 
-            r.status !== 'cancelled'
-        );
-        const occupiedSeats = shiftReservations.reduce((acc, r) => acc + r.guests, 0);
-        return totalCapacity - occupiedSeats;
+    const handleNextMonth = () => {
+        setCurrentMonth(prev => dayjs(prev).add(1, 'month').format('YYYY-MM'));
     };
 
     const handleDayClick = (date) => {
@@ -40,129 +65,117 @@ export default function AdminDashboardCalendar() {
         setSelectedShift('lunch');
     };
 
-    const changeMonth = (delta) => {
-        setCurrentMonth(prevMonth => {
-            const newMonth = new Date(prevMonth);
-            newMonth.setMonth(newMonth.getMonth() + delta);
-            return newMonth;
-        });
-    };
-
-    const formatMonth = (date) => {
-        return date.toLocaleString('es-ES', { month: 'long', year: 'numeric' })
-            .replace(/^\w/, c => c.toUpperCase());
-    };
-
-    const renderCalendarDays = () => {
-        const days = [];
-        const firstDay = new Date(currentMonth);
-        const lastDay = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
-
-        // Ajustar para que la semana empiece en lunes
-        let startDay = firstDay.getDay();
-        if (startDay === 0) startDay = 7;
-        startDay -= 1;
-
-        // Añadir celdas vacías para los días antes del primer día del mes
-        for (let i = 0; i < startDay; i++) {
-            days.push(<td key={`empty-start-${i}`} />);
+    const renderCapacityIndicator = (seats, total) => {
+        const status = getCapacityColor(seats, total);
+        if (status === 'full') {
+            return <div className="calendar__capacity-x">✕</div>;
         }
+        return (
+            <div className={`calendar__capacity-circle calendar__capacity-circle--${status}`}>
+                {seats}
+            </div>
+        );
+    };
 
-        // Añadir los días del mes
-        for (let date = 1; date <= lastDay.getDate(); date++) {
-            const currentDate = new Date(firstDay.getFullYear(), firstDay.getMonth(), date);
-            const dateStr = currentDate.toISOString().split('T')[0];
-            const lunchSeats = getAvailableSeats(dateStr, 'lunch');
-            const dinnerSeats = getAvailableSeats(dateStr, 'dinner');
-            
-            const lunchStatus = getCapacityStatus(lunchSeats, totalCapacity);
-            const dinnerStatus = getCapacityStatus(dinnerSeats, totalCapacity);
-            
-            days.push(
-                <td 
-                    key={date} 
-                    onClick={() => handleDayClick(dateStr)}
-                >
-                    <div className="calendar__day-content">
-                        <div className="calendar__day-number">{date}</div>
-                        <div className="calendar__capacity">
-                            <div className={`calendar__capacity-circle calendar__capacity-circle--${lunchStatus}`}>
-                                {lunchSeats}
-                            </div>
-                            <div className={`calendar__capacity-circle calendar__capacity-circle--${dinnerStatus}`}>
-                                {dinnerSeats}
-                            </div>
-                        </div>
-                    </div>
-                </td>
+    const renderDayContent = (date, dateStr) => {
+        const lunch = calculateAvailability(dateStr, 'lunch');
+        const dinner = calculateAvailability(dateStr, 'dinner');
+        
+        if (isDayFull(dateStr)) {
+            return (
+                <div className="calendar__day-content">
+                    <div className="calendar__day-number">{date}</div>
+                </div>
             );
         }
 
-        // Añadir celdas vacías al final si es necesario
-        const totalDays = days.length;
-        const remainingCells = 7 - (totalDays % 7);
-        if (remainingCells < 7) {
-            for (let i = 0; i < remainingCells; i++) {
-                days.push(<td key={`empty-end-${i}`} />);
+        return (
+            <div className="calendar__day-content">
+                <div className="calendar__day-number">{date}</div>
+                <div className="calendar__capacity">
+                    {renderCapacityIndicator(lunch.available, lunch.total)}
+                    {renderCapacityIndicator(dinner.available, dinner.total)}
+                </div>
+            </div>
+        );
+    };
+
+    const renderCalendar = () => {
+        const firstDay = dayjs(currentMonth).startOf('month');
+        const daysInMonth = firstDay.daysInMonth();
+        const startWeekday = firstDay.day();
+        const weeks = [];
+        let days = [];
+
+        // Días vacíos antes del primer día del mes
+        for (let i = 0; i < startWeekday; i++) {
+            days.push(<td key={`empty-${i}`}></td>);
+        }
+
+        // Días del mes
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateStr = dayjs(currentMonth).date(day).format('YYYY-MM-DD');
+            const isSelected = dateStr === selectedDate;
+            const isFull = isDayFull(dateStr);
+
+            days.push(
+                <td 
+                    key={day}
+                    onClick={() => handleDayClick(dateStr)}
+                    className={`${isFull ? 'calendar__day--full' : ''} ${isSelected ? 'calendar__day--selected' : ''}`}
+                >
+                    {renderDayContent(day, dateStr)}
+                </td>
+            );
+
+            if ((startWeekday + day) % 7 === 0 || day === daysInMonth) {
+                weeks.push(<tr key={day}>{days}</tr>);
+                days = [];
             }
         }
 
-        // Organizar los días en filas
-        const rows = [];
-        let cells = [];
-        
-        days.forEach((day, i) => {
-            cells.push(day);
-            if ((i + 1) % 7 === 0) {
-                rows.push(<tr key={i}>{cells}</tr>);
-                cells = [];
-            }
-        });
-        
-        if (cells.length > 0) {
-            rows.push(<tr key={days.length}>{cells}</tr>);
+        // Rellenar la última semana si es necesario
+        while (days.length > 0 && days.length < 7) {
+            days.push(<td key={`empty-end-${days.length}`}></td>);
+        }
+        if (days.length > 0) {
+            weeks.push(<tr key="last">{days}</tr>);
         }
 
-        return rows;
+        return weeks;
     };
 
     return (
         <div className="calendar">
             <div className="calendar__nav">
-                <div className="calendar__nav-buttons">
-                    <button 
-                        className="calendar__nav-button"
-                        onClick={() => changeMonth(-1)}
-                    >
-                        Anterior
-                    </button>
-                    <button 
-                        className="calendar__nav-button"
-                        onClick={() => changeMonth(1)}
-                    >
-                        Siguiente
-                    </button>
-                </div>
-                <div className="calendar__month">
-                    {formatMonth(currentMonth)}
-                </div>
+                <button className="calendar__nav-button" onClick={handlePrevMonth}>
+                    &lt;
+                </button>
+                <span className="calendar__month">
+                    {dayjs(currentMonth).format('MMMM [De] YYYY')}
+                </span>
+                <button className="calendar__nav-button" onClick={handleNextMonth}>
+                    &gt;
+                </button>
             </div>
-            <table className="calendar__table">
-                <thead>
-                    <tr>
-                        <th>Lun</th>
-                        <th>Mar</th>
-                        <th>Mie</th>
-                        <th>Jue</th>
-                        <th>Vie</th>
-                        <th>Sab</th>
-                        <th>Dom</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {renderCalendarDays()}
-                </tbody>
-            </table>
+            <div className="calendar__table-container">
+                <table className="calendar__table">
+                    <thead>
+                        <tr>
+                            <th>Lun</th>
+                            <th>Mar</th>
+                            <th>Mie</th>
+                            <th>Jue</th>
+                            <th>Vie</th>
+                            <th>Sab</th>
+                            <th>Dom</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {renderCalendar()}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 }
